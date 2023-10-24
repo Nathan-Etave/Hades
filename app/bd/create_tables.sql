@@ -51,8 +51,10 @@ create table POMPIER(
     prenomPompier varchar(255),
     emailPompier varchar(255),
     mdpPompier varchar(255),
-    photoPompier int,
-    primary key (idPompier)
+    photoPompier longblob,
+    idRole int,
+    primary key (idPompier),
+    constraint FKpompier_rolePompier foreign key (idRole) references ROLE_POMPIER(idRole)
 )ENGINE=InnoDB;
 
 create table DATE(
