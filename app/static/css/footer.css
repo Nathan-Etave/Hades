@@ -1,0 +1,33 @@
+footer {
+    background: #004F8A;
+}
+
+.footer_texte, .footer_lien {
+    color : #FFFFFF;
+    font-weight: 400;
+    text-decoration:none;
+}
+.footer_texte{
+    text-align: center;
+}
+
+.footer_lien:hover {
+    text-decoration : underline;
+}
+.footer_div{
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    margin: 0;
+}
+
+@media only screen and (max-width: 600px) {
+    .footer_div{
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        transition: 1.5s;
+    }
+    .footer_texte, .footer_lien {
+        font-size: 0.5rem;
+        transition: 1.5s;
+    }
+}
