@@ -118,8 +118,10 @@ create table A_NOTIFICATION(
     constraint FKnotif_notif foreign key (idNotification) references NOTIFICATION(idNotification)
 )ENGINE=InnoDB;
 
-
-
-
-
-
+create table HISTORIQUE(
+    nouvelleVersion int,
+    ancienVersion int,
+    primary key (nouvelleVersion, ancienVersion),
+    constraint FKnouvelleVersion_fichier foreign key (nouvelleVersion) references FICHIER(idFichier),
+    constraint FKancienVersion_fichier foreign key (ancienVersion) references FICHIER(idFichier)
+)ENGINE=InnoDB;
