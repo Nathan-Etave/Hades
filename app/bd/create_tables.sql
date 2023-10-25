@@ -1,3 +1,8 @@
+create table TAG(
+    nomTag varchar(255),
+    primary key (nomTag)
+)ENGINE=InnoDB;
+
 create table ETAT_FICHIER(
     idEtatFichier int,
     nomEtatFichier varchar(255),
@@ -12,12 +17,12 @@ create table CATEGORIE(
 )ENGINE=InnoDB;
 
 create table SOUS_CATEGORIE(
-    idSousCategorie int,
-    nomSousCategorie varchar(255),
-    idCategorie int,
-    primary key (idSousCategorie),
-    constraint FKsous_categorie_categorie foreign key (idCategorie) references CATEGORIE(idCategorie)
-
+    categorieParent int,
+    categorieEnfant int,
+    primary key (categorieEnfant, categorieParent),
+    constraint FKcategorieEnfant_categorie foreign key (categorieEnfant) references CATEGORIE(idCategorie),
+    constraint FKcategorieParent_categorie foreign key (categorieParent) references CATEGORIE(idCategorie)
+    
 )ENGINE=InnoDB;
 
 create table FICHIER(
@@ -25,17 +30,9 @@ create table FICHIER(
     nomFichier varchar(255),
     leFichier longblob,
     extensionfichier varchar(255),
-    idSousCategorie int,
-    primary key (idFichier),
-    constraint FKfichier_sousCategorie foreign key (idSousCategorie) references SOUS_CATEGORIE(idSousCategorie)
-)ENGINE=InnoDB;
-
-create table EST_ETAT(
-    idFichier int,
     idEtatFichier int,
-    primary key (idFichier, idEtatFichier),
-    constraint FKest_etat_fichier foreign key (idFichier) references FICHIER(idFichier),
-    constraint FKest_etat_etat foreign key (idEtatFichier) references ETAT_FICHIER(idEtatFichier)
+    primary key (idFichier),
+    constraint FKfichier_etat foreign key (idEtatFichier) references ETAT_FICHIER(idEtatFichier)
 )ENGINE=InnoDB;
 
 create table ROLE_POMPIER(
@@ -91,8 +88,35 @@ create table SIGNALEMENT(
     constraint FKsignalement_pompier foreign key (idPompier) references POMPIER(idPompier)
 )ENGINE=InnoDB;
 
+create table EST_CAT(
+    idCategorie int,
+    idFichier int,
+    primary key (idCategorie, idFichier),
+    constraint FKest_Categorie foreign key (idCategorie) references CATEGORIE(idCategorie),
+    constraint FKest_cat_fichier foreign key (idFichier) references FICHIER (idFichier)
+)ENGINE=InnoDB;
 
+create table A_TAG(
+    nomTag varchar(255),
+    idFichier int,
+    primary key (nomTag,idFichier),
+    constraint FKTag foreign key (nomTag) references TAG(nomTag),
+    constraint FKtag_fic foreign key (idFichier) references FICHIER(idFichier)
+)ENGINE=InnoDB;
 
+create table NOTIFICATION(
+    idNotification int,
+    texteNotification varchar(255),
+    primary key (idNotification)
+)ENGINE=InnoDB;
+
+create table A_NOTIFICATION(
+    idNotification int,
+    idPompier int,
+    primary key (idNotification, idPompier),
+    constraint FKnotif_pompier foreign key (idPompier) references POMPIER(idPompier),
+    constraint FKnotif_notif foreign key (idNotification) references NOTIFICATION(idNotification)
+)ENGINE=InnoDB;
 
 
 
