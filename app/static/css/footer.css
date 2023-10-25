@@ -1,7 +1,6 @@
 footer {
     background: #004F8A;
 }
-
 .footer_texte, .footer_lien {
     color : #FFFFFF;
     font-weight: 400;
@@ -10,7 +9,6 @@ footer {
 .footer_texte{
     text-align: center;
 }
-
 .footer_lien:hover {
     text-decoration : underline;
 }
@@ -19,8 +17,7 @@ footer {
     padding-bottom: 2rem;
     margin: 0;
 }
-
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 1000px) {
     .footer_div{
         padding-top: 0.2rem;
         padding-bottom: 0.2rem;
