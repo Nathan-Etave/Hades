@@ -1,21 +1,54 @@
--- INSERT INTO FICHIER (idFichier, nomFichier, leFichier, extensionfichier, idSousCategorie)VALUES
---     (1, 'mon_fichier.pdf', null, 'pdf', 1);
+INSERT INTO TAG(nomTag) VALUE
+    ('Route'),
+    ('Voiture'),
+    ('Moto'),
+    ('Feu'),
+    ('Avion'),
+    ('Train'),
+    ('Bateau'),
+    ('Maison'),
+    ('Forêt'),
+    ('Poubelle'),
+    ('Cheminée'),
+    ('Brousse'),
+    ('Cave'),
+    ('Toiture'),
+    ('Bombe'),
+    ('Arme'),
+    ('Tsunami'),
+    ('Virus'),
+    ('Épidémie'),
+    ('Virale'),
+    ('Sauvage'),
+    ('Domestique'),
+    ('Serpent'),
+    ('Animaux'),
+    ('Terrorisme'),
+    ('Noyade'),
+    ('Gave'),
+    ('Inondation');
 
+INSERT INTO ETAT_FICHIER (idEtatFichier, nomEtatFichier, descriptionEtatFichier) VALUES
+    (1, 'Ancienne version', 'Ancienne version du fichier'),
+    (2, 'Nouvelle version', 'Nouvelle version du fichier'),
+    (3, 'Non classifié', 'Le fichier est non classifié');
 
+INSERT INTO FICHIER (idFichier, nomFichier, leFichier, extensionfichier, idEtatFichier) VALUES
+    (1, 'mon_fichier.pdf', null, 'pdf', 1),
+    (2, 'mon_fichier2.pdf', null, 'pdf', 2),
+    (3, 'mon_fichier3.pdf', null, 'pdf', 3),
+    (4, 'mon_fichier4.pdf', null, 'pdf', 2),
+    (5, 'mon_fichier5.pdf', null, 'pdf', 1),
+    (6, 'mon_fichier6.pdf', null, 'pdf', 3),
+    (7, 'mon_fichier7.pdf', null, 'pdf', 2),
+    (8, 'mon_fichier8.pdf', null, 'pdf', 2),
+    (9, 'mon_fichier9.pdf', null, 'pdf', 3),
+    (10, 'mon_fichier10.pdf', null, 'pdf', 1);
 
-
--- INSERT INTO TAG(nomTag) VALUE
-
-
--- INSERT INTO A_TAG(nomTag, idFichier) VALUES
-
--- INSERT INTO NOTIFICATION(idNotification, texteNotification) VALUES
-
--- INSERT INTO A_NOTIFICATION(idNotification, idPompier) VALUES
-
--- INSERT INTO HISTORIQUE(nouvelleVersion, ancienVersion) VALUES
-
--- INSERT INTO EST_CAT(idCategorie, idFichier) VALUES
+INSERT INTO NOTIFICATION(idNotification, texteNotification) VALUES
+    (1,'Un article favoris à été modifié'),
+    (2,'Un article favoris à été supprimé'),
+    (3,'Un utilisateur à signaler un document');
 
 
 INSERT INTO CATEGORIE (idCategorie, nomCategorie) VALUES
@@ -71,23 +104,6 @@ INSERT INTO POMPIER (idPompier, nomPompier, prenomPompier, emailPompier, mdpPomp
     (4, 'Dubois', 'Jacques', 'jacques.dubois@gmail.com', '123456', null, 4),
     (5, 'Lefebvre', 'Pierre', 'pierre.lefebvre@gmail.com', '123456', null, 5);
 
-
-INSERT INTO FICHIER (idFichier, nomFichier, leFichier, extensionfichier, idEtatFichier) VALUES
-    (1, 'mon_fichier.pdf', null, 'pdf', 1),
-    (2, 'mon_fichier2.pdf', null, 'pdf', 2),
-    (3, 'mon_fichier3.pdf', null, 'pdf', 3),
-    (4, 'mon_fichier4.pdf', null, 'pdf', 2),
-    (5, 'mon_fichier5.pdf', null, 'pdf', 1),
-    (6, 'mon_fichier6.pdf', null, 'pdf', 3),
-    (7, 'mon_fichier7.pdf', null, 'pdf', 2),
-    (8, 'mon_fichier8.pdf', null, 'pdf', 2),
-    (9, 'mon_fichier9.pdf', null, 'pdf', 3),
-    (10, 'mon_fichier10.pdf', null, 'pdf', 1);
-
-INSERT INTO ETAT_FICHIER (idEtatFichier, nomEtatFichier, descriptionEtatFichier) VALUES
-    (1, 'Ancienne version', 'Ancienne version du fichier'),
-    (2, 'Nouvelle version', 'Nouvelle version du fichier'),
-    (3, 'Non classifié', 'Le fichier est non classifié');
 
 INSERT INTO SIGNALEMENT (idFichier, idPompier, descriptionSignalement) VALUES
     (1, 1, 'Titre incompatible avec le contenu du fichier.'),
@@ -150,3 +166,66 @@ INSERT INTO SOUS_CATEGORIE(categorieParent, categorieEnfant) VALUES
     (1, 16),
     (1, 17),
     (1, 18);
+
+INSERT INTO A_NOTIFICATION(idNotification, idPompier) VALUES
+    (1,1),
+    (2,2),
+    (3,1),
+    (3,2),
+    (3,3),
+    (3,4),
+    (3,5);
+
+
+INSERT INTO HISTORIQUE(nouvelleVersion, ancienVersion) VALUES
+    (1,2),
+    (2,3),
+    (3,4),
+    (4,5),
+    (5,1),
+    (6,7),
+    (8,9),
+    (8,10);
+
+INSERT INTO EST_CAT(idCategorie, idFichier) VALUES
+    (1,1),
+    (2,1),
+    (2,2),
+    (2,3),
+    (10,4),
+    (20,5),
+    (30,6),
+    (32,7),
+    (33,8),
+    (34,9),
+    (35,10);
+
+INSERT INTO A_TAG(nomTag, idFichier) VALUES
+    ('Route', 2),
+    ('Voiture', 2),
+    ('Moto', 2),
+    ('Feu', 5),
+    ('Avion', 3),
+    ('Train', 3),
+    ('Bateau', 3),
+    ('Maison', 5),
+    ('Forêt', 1),
+    ('Poubelle', 5),
+    ('Cheminée', 5),
+    ('Brousse', 5),
+    ('Cave', 5),
+    ('Toiture', 5),
+    ('Bombe', 3),
+    ('Arme', 3),
+    ('Tsunami', 6),
+    ('Virus', 7),
+    ('Épidémie', 9),
+    ('Virale', 9),
+    ('Sauvage', 1),
+    ('Domestique', 1),
+    ('Serpent', 1),
+    ('Animaux', 1),
+    ('Terrorisme', 3),
+    ('Noyade', 6),
+    ('Gave', 5),
+    ('Inondation', 6);
