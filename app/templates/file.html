@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/file.css') }}" />
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/file.js') }}"></script>
+        <title>{{ fichier.nom }}</title>
+    </head>
+    <body>
+        {% include "components/header.html" %}
+        {% include "components/bottomHeader.html" %}
+        <main>
+            <h2>{{ fichier.nom }} ({{ fichier.id }})</h2>
+            <object data="data:application/pdf;base64,{{ fichier.data }}" type="application/pdf"></object>
+            <ul>
+                <button id="download">Télécharger</button>
+                <button id="add_to_multiview">Ajouter à la MultiVue</button>
+                <button id="add_to_favourites">Ajouter aux favoris</button>
+                <button id="report">Signaler</button>
+            </ul>
+        </main>
+        <div class="report_popup">
+            <h4>Signaler {{ fichier.nom }}</h4>
+            <form role="form" method="post" action="javascript:void(0);">
+                <textarea name="message" placeholder="Raison du signalement" id ="message"></textarea>
+                <input type="button" value="Annuler" id ="cancel_report"/>
+                <input type="submit" value="Envoyer" id="send_report"/>
+            </form>
+        </div>
+    </body>
+</html>
