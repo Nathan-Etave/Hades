@@ -12,14 +12,14 @@
             {% include "components/headerLogin.html" %}
             {% include "components/bottomHeader.html" %}
             <main>
-                <form method:"POST" class="page_connexion" action="connexion">
+                <form method="POST" class="page_connexion" action="connexion">
                 <div class="email">
                     <p>Email</p>
-                    <input type="text" name="email" id="email" placeholder="Email">
+                    {{ form.mail(size=50) }}
                 </div>
                 <div class="password">
                     <p>Mot de passe</p>
-                    <input type="password" name="password" id="password" placeholder="Mot de passe">
+                   {{ form.mdp(size=50) }}
                 </div>
                 <div class="connexion">
                     <input type="submit" value="Connexion">
