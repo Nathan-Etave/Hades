@@ -1,3 +1,8 @@
+body {
+	margin: 0;
+	overflow: hidden;
+}
+
 .categorie{
     color: #ffffff;
 	background-color: #004F8A;
@@ -8,6 +13,12 @@
 	margin-bottom: 1rem;
 	margin-top: 1rem;
 	margin-right: 1rem;
+	border: solid #004F8A;
+}
+
+.categorie:hover {
+	color: #004F8A;
+	background-color: #ffffff;
 }
 
 #sec_categorie {
@@ -15,14 +26,16 @@
 	flex-wrap: wrap;
     margin-top: 1rem;
     margin-bottom: 1rem;
+	overflow-y: scroll;
+	height: 15vh;
 }
 
 #title_fav h2 {
     color: #ffffff;
 	background-color: #004F8A;
     text-align: center;
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+    padding-top: 1.3rem;
+    padding-bottom: 1.3rem;
 }
 
 .fichier {
@@ -35,7 +48,7 @@
 	text-decoration: none;
 	color: black;
     flex-basis: 100%;
-	margin-top: 1rem;
+	margin-top: 1.2rem;
 	margin-left: 1rem;
 	font-weight: bold;
 }
@@ -45,12 +58,13 @@
 }
 
 #bouton_telechargement {
-	margin-top: 1rem;
+	margin-top: 0.4rem;
 	margin-right: 1rem;
 }
 
 .fichier p {
 	margin-right: 2rem;
+	margin-top: 1.2rem;
 }
 
 #scroller {
@@ -58,8 +72,13 @@
 	height: 48vh;
 }
 
-.slide {
+.slide:hover {
 	animation: slide-right 0.5s cubic-bezier(1,-0.43, 0.68, 0.57) infinite alternate both;
+}
+
+.svg_home {
+	width: 3rem;
+	height: 3rem;
 }
 
 @keyframes slide-right {
@@ -78,17 +97,17 @@
     }
 
 	#bouton_fichier{
-		font-size: 2.5rem;
+		font-size: 2rem;
 		margin-top: 1.5rem;
 	}
 
 	.fichier p {
-		font-size: 2.5rem;
+		font-size: 2rem;
 		margin-top: 1.5rem;
 	}
 
 	#scroller {
-		height: 60vh;
+		height: 70vh;
 	}
 
 	.svg_home {
@@ -131,5 +150,10 @@
 
 	#bouton_telechargement {
 		margin-top: 1rem;
+	}
+
+	#title_fav h2 {
+		padding-top: 1rem;
+		padding-bottom: 1rem;
 	}
 }
