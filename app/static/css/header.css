@@ -25,17 +25,25 @@ rect {
 	margin-left: 1rem;
 }
 li:not(:last-child) a {
-	color: #ffffff;
+	color: #FFFFFF;
 	background-color: #004F8A;
 	border-radius: 5rem;
 	text-decoration: none;
 	font-size: 1.5rem;
 	padding: 0.1rem 3rem 0.1rem 3rem;
+	border-style: solid;
+	border-color: #004F8A;
 }
+li:not(:last-child) a:hover {
+	color: #004F8A;
+	background-color: #FFFFFF;
+}
+
 .nav_item {
 	display: flex;
 	list-style-type: none;
 	gap: 2rem;
+	align-items: center;
 }
 .logo_notification {
 	height: 2.5rem;
@@ -62,7 +70,7 @@ li:not(:last-child) a {
 	position: fixed;
 	z-index: 1;
 	top: 10rem;
-	left: 100%;
+	left: 1000%;
 	background-color: #EA4E4E;
 	padding-top: 60px;
 	transition: left 0.5s ease;
