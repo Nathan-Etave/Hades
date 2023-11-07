@@ -13,22 +13,23 @@
             <nav class="navbar">
                 <ul class="nav_item">
                     <li>
-                        <a href="#">Favoris</a>
+                        <a href="{{ url_for('search', favoris=True) }}">Favoris</a>
                     </li>
                     <li>
-                        <a href="#">Récemment Consultés</a>
+                        <a href="{{ url_for('search', recent=True) }}">Récemment Consultés</a>
                     </li>
                     <li>
-                        <a href="#">Recherche Avancée</a>
+                        <a href="{{ url_for('search', advanced_search=True) }}">Recherche Avancée</a>
                     </li>
                     <li>
-                        <a href="#">MultiVue</a>
+                        <a href="{{ url_for('multivue') }}">MultiVue</a>
                     </li>
                     <li>
-                        <a href="#">Profil</a>
+                        <a href="{{ url_for('user') }}">Profil</a>
                     </li>
                     <li>
-                        <a href="#" aria-label="Notifications">
+                        <a href="{{ url_for('notifications') }}" aria-label="Notifications">
+                            <span class="notification_enabler" style="display: none;">{{ notification_enabled }}</span>
                             <svg class="logo_notification" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <style>
                                     @keyframes notify {
@@ -75,7 +76,7 @@
             <navbar>
                 <ul class="notification_burger_container">
                     <li>
-                        <a href="#" aria-label="Notifications">
+                        <a href="{{ url_for('notifications') }}" aria-label="Notifications">
                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <style>
                                     @keyframes notify {
@@ -119,24 +120,24 @@
                         <div id="sidenav" class="sidenav">
                             <ul>
                                 <li>
-                                    <a href="#">Favoris</a>
+                                    <a href="{{ url_for('search', favoris=True) }}">Favoris</a>
                                 </li>
                                 <li>
-                                    <a href="#">Récemment Consultés</a>
+                                    <a href="{{ url_for('search', recent=True) }}">Récemment Consultés</a>
                                 </li>
                                 <li>
-                                    <a href="#">Recherche Avancée</a>
+                                    <a href="{{ url_for('search', advanced_search=True) }}">Recherche Avancée</a>
                                 </li>
                                 <li>
-                                    <a href="#">MultiVue</a>
+                                    <a href="{{ url_for('multivue') }}">MultiVue</a>
                                 </li>
                                 <li>
-                                    <a href="#">Profil</a>
+                                    <a href="{{ url_for('user') }}">Profil</a>
                                 </li>
                             </ul>
                         </div>
                         <div id="button">
-                            <a href="#">
+                            <a href="javascript:void(0);">
                                 <span class="logo_burger">
                                     <span></span>
                                     <span></span>
