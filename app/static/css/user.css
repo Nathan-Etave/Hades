@@ -1,0 +1,44 @@
+.info1 li, .info2 li{
+    background-color: #004F8A;
+	list-style-type: none;
+    color: #FFFFFF;
+    border-radius: 20px;
+    padding: 10px;
+    padding-left: 20px;
+    margin: 10px;
+}
+
+.modifier{
+    text-align: center;
+    color: #FFFFFF;
+    background-color: #EA4E4E;
+    border-radius: 5rem;
+    font-size: 1.5rem;
+    padding: 0.1rem 3rem 0.1rem 3rem;
+}
+
+
+object{
+    border-radius: 100%;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+
+}
+
+.info {
+    display: flex;
+}
+
+.bouton {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.info1{
+    width: 75%;
+}
+ul {
+    padding: 0;
+}

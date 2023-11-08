@@ -1,0 +1,41 @@
+{% extends "baseUser.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+{% endblock %}
+{% block content %}
+
+
+<h1> Modifier l'Utilisateur : {{ user.nom }}</h1>
+<div class="info">
+    <ul class="info1">
+        <li>
+            <p>Identifiant : {{ user.id }}</p>
+        </li>
+        <li>
+            <p>{{ form.prenom.label }} : {{ form.prenom(size=50) }}</p>
+        </li>
+        <li>
+            <p>{{ form.nom.label }} : {{ form.nom(size=50) }}</p>
+        </li>
+        <li>
+            {{ form.photo.label }} : {{ form.photo(size=50) }}
+        </li>
+    </ul>
+    
+    <object data="data:image/jpeg;base64,{{ user.photo }}" type="image/jpeg"></object>
+</div>
+<ul class="info2">
+    <li>
+        <p>{{ form.mail.label }} : {{ form.mail(size=50) }}</p>
+    </li>
+    <li>
+        <p>{{ form.telephone.label }} : {{ form.telephone(size=50) }}</p>
+    </li>
+    <li>
+        <p>{{ form.mdp.label }} : {{ form.mdp(size=50) }}</p>
+    </li>
+</ul>
+<div class="bouton">
+    <input class="modifier" type="button" value="Valider" onclick="location.href='{{ url_for('user') }}'" class="btn btn-primary btn_modif_auteur">
+</div>
+{% endblock %}
