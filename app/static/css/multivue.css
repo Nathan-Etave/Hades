@@ -24,13 +24,13 @@
     border-color: #FFFFFF;
 }
 
-.not_selected>button:hover{
+.not_selected>a:hover{
     background-color: #004F8A;
     color: #FFFFFF;
     border-color: #FFFFFF;
 }
 
-.not_selected>button{
+.not_selected>a{
     flex-grow: 1;
     text-align: center;
     padding: 10px;
@@ -38,6 +38,7 @@
     border: none;
     background-color: #FFFFFF;
     color: #004F8A;
+    text-decoration: none;
 }
 
 @media only screen and (max-width: 1000px) {
@@ -51,7 +52,7 @@
     }
 }
 
-.is_selected>button{
+.is_selected>a{
     flex-grow: 1;
     text-align: center;
     padding: 10px;
@@ -60,8 +61,9 @@
     background-color: #004F8A;
     color: #FFFFFF;
     border-color: #FFFFFF;
+    text-decoration: none;
 }
 
-.tabs_multivue>li>button{
+.tabs_multivue>li>a{
     white-space: nowrap;
 }
