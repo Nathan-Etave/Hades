@@ -28,6 +28,7 @@ body {
     margin-bottom: 1rem;
 	overflow-y: scroll;
 	height: 15vh;
+	justify-content: center;
 }
 
 #title_fav h2 {
@@ -140,7 +141,7 @@ body {
 	}
 
 	#scroller {
-		height: 50vh;
+		height: 45vh;
 	}
 
 	.svg_home {
