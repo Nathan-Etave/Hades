@@ -61,3 +61,7 @@
     color: #FFFFFF;
     border-color: #FFFFFF;
 }
+
+.tabs_multivue>li>button{
+    white-space: nowrap;
+}
