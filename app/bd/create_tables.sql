@@ -107,15 +107,21 @@ create table A_TAG(
 create table NOTIFICATION(
     idNotification int,
     texteNotification varchar(255),
+    typeChange varchar(255),
+    raisonNotification varchar(255),
     primary key (idNotification)
 )ENGINE=InnoDB;
 
 create table A_NOTIFICATION(
     idNotification int,
     idPompier int,
-    primary key (idNotification, idPompier),
+    idFichier int,
+    idDate int,
+    primary key (idNotification, idPompier, idFichier, idDate),
     constraint FKnotif_pompier foreign key (idPompier) references POMPIER(idPompier),
-    constraint FKnotif_notif foreign key (idNotification) references NOTIFICATION(idNotification)
+    constraint FKnotif_notif foreign key (idNotification) references NOTIFICATION(idNotification),
+    constraint FKnotif_fichier foreign key (idFichier) references FICHIER(idFichier),
+    constraint FKnotif_date foreign key (idDate) references DATE(idDate)
 )ENGINE=InnoDB;
 
 create table HISTORIQUE(
