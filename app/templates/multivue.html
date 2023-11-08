@@ -22,13 +22,9 @@
                     <ul class="tabs_multivue">
                         {% for index in range(0,len)%}
                             {% if index == index_selected %}
-                                <li class="is_selected">
-                                    <span class="index" style="display: none;">{{ index }}</span>
-                                    <button>{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</button></li>
+                                <li class="is_selected"><a href="{{ url_for('multivue', file_index=index)}}">{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</a></li>
                             {% else %}
-                                <li class="not_selected">
-                                    <span class="index" style="display: none;">{{ index }}</span>
-                                    <button class="file">{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</button></li>
+                                <li class="not_selected"><a href="{{ url_for('multivue', file_index=index)}}">{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</a></li>
                             {% endif %}
                         {% endfor %}
                     </ul>                        
@@ -37,7 +33,7 @@
                     </object>
                 </div>
                 <ul class="file_options">
-                    <li><h2>{{index_selected}}.  {{ liste_fichiers[index_selected].nom }} ({{ liste_fichiers[index_selected].id }})</h2></li>
+                    <li><h2>({{ liste_fichiers[index_selected].id }})</h2></li>
                     <li><button id="download">Télécharger</button></li>
                     <li><button id="add_to_multiview">Supprimer de la MultiVue</button></li>
                     <li><button id="add_to_favourites">Ajouter aux favoris</button></li>
