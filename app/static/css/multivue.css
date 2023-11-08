@@ -3,7 +3,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: scroll;
-    width: 85vw;
+    width: 80vw;
     padding-left: 0;
     border-radius: 5rem;
 }
@@ -66,4 +66,8 @@
 
 .tabs_multivue>li>a{
     white-space: nowrap;
+}
+
+h2{
+    display: none;
 }
