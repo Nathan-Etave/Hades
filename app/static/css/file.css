@@ -4,6 +4,9 @@ body {
 	min-height: 100vh;
 	overflow: hidden;
 }
+.file_object {
+	width: 80vw;
+}
 .report_popup {
 	display: none;
 }
@@ -88,6 +91,9 @@ h2 {
 	font-size: 1.5rem;
 	padding: 0.1rem 3rem 0.1rem 3rem;
 }
+.remove_from_multiview, .remove_from_favourites{
+	display: none;
+}
 @media only screen and (max-width: 1000px) {
 	.file_container {
 		flex-direction: column;
@@ -100,22 +106,25 @@ h2 {
 		justify-content: center;
 	}
 	.file_options li:not(:last-child) button {
-		padding: 1rem;
+		padding: 0.5rem;
 	}
 	.file_options li:last-child button {
-		padding: 1rem;
+		padding: 0.5rem;
 	}
 	.report_popup {
 		width: 90%;
 	}
+	.file_object {
+		width: unset;
+	}
 }
 @media only screen and (max-width: 535px) {
 	.file_options li:not(:last-child) button {
-		padding: 0.05rem 0.3rem 0.05rem 0.3rem;
+		padding: 0.05rem 0.06rem 0.05rem 0.06rem;
 		font-size: 0.5rem;
 	}
 	.file_options li:last-child button {
-		padding: 0.05rem 0.3rem 0.05rem 0.3rem;
+		padding: 0.05rem 0.06rem 0.05rem 0.06rem;
 		font-size: 0.5rem;
 	}
 	.report_form_button input {
@@ -124,5 +133,8 @@ h2 {
 	}
 	.report_popup {
 		width: 90%;
+	}
+	.file_object {
+		width: unset;
 	}
 }
