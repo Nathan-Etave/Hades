@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        {% block css %}{% endblock %}
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
         <title>Profil</title>
     </head>
