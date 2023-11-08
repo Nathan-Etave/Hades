@@ -6,13 +6,14 @@
             <link rel="stylesheet" href="{{ url_for('static',filename='css/connexion.css')}}">
             <link rel="stylesheet" href="{{ url_for('static',filename='css/header.css')}}">
             <link rel="stylesheet" href="{{ url_for('static',filename='css/bottomHeader.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/mediaBottomHeader.css')}}">
             <title>Connexion</title>
         </head>
         <body> 
             {% include "components/headerLogin.html" %}
             {% include "components/bottomHeader.html" %}
             <main>
-                <form method="POST" class="page_connexion" action="login">
+                <form method="POST" class="page_connexion" action="home">
                 <div class="email">
                     <p>Email</p>
                     {{ form.mail(size=50) }}
