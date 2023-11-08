@@ -12,7 +12,7 @@
                 <p>Prénom : {{ user.prenom }}</p>
             </li>
             <li>
-                <p>Nom : {{ user.nom }}</p>
+                <p>{{ user.nom }} : {{ user.nom }}</p>
             </li>       
         </ul>
         <object data="data:image/jpeg;base64,{{ user.photo }}" type="image/jpeg"></object>
@@ -31,7 +31,6 @@
     <div class="bouton">
         <input class="modifier" type="button" value="Modifier les informations" onclick="location.href='{{ url_for('edit_user', id=user.id) }}'" class="btn btn-primary btn_modif_auteur">
     </div>
-
     <script>
         var motDePasseElement = document.getElementById('mot-de-passe');
         motDePasseElement.textContent = '*'.repeat(motDePasseElement.textContent.length);
