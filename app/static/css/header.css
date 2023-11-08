@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
+p, h1, h2, h3, h4, h5, h6, a, li, ul, ol, button, input, textarea {
+	font-family: 'Poppins', sans-serif;
+}
 header {
     width: 100%;
 	height: 10rem;
@@ -10,10 +15,6 @@ header {
 	width: 100%;
 	height: 0.5rem;
 	fill: #EA4E4E;
-}
-
-.search_icon {
-	fill: #000000;
 }
 
 .header_container {
@@ -29,7 +30,7 @@ header {
 	height: 6.5rem;
 	margin-left: 1rem;
 }
-li:not(:last-child) a {
+.nav_item>li:not(:last-child)>a,.sidenav>ul>li>a{
 	color: #FFFFFF;
 	background-color: #004F8A;
 	border-radius: 5rem;
@@ -39,7 +40,7 @@ li:not(:last-child) a {
 	border-style: solid;
 	border-color: #004F8A;
 }
-li:not(:last-child) a:hover {
+.nav_item>li:not(:last-child)>a:hover,.sidenav>ul>li>a:hover{
 	color: #004F8A;
 	background-color: #FFFFFF;
 }
