@@ -8,7 +8,7 @@ body{
     background: #004F8A;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 8rem;
+    margin-top: 2rem;
     flex-basis: 33.33333333333333%;
     margin-left: 35%;
     border-radius: 5rem;
@@ -60,10 +60,10 @@ body{
 body{
     margin: 0%;
 }
-
+/* 
 .h1_bottomHeadSearchBar{
     text-align: center;
-}
+} */
 
 
 @media only screen and (max-width: 1000px) {
@@ -90,7 +90,7 @@ body{
         border: none;
         border-radius: 2rem;
         padding: 0.5rem;
-        width: 50%;
+        width: 75%;
         height: 50%;
         border-radius: 5rem;
         font-size: 200%;
@@ -130,7 +130,7 @@ body{
             border: none;
             border-radius: 2rem;
             padding: 0.5rem;
-            width: 30%;
+            width: 75%;
             height: 20%;
             border-radius: 5rem;
             font-size: 100%;
