@@ -131,3 +131,11 @@ create table HISTORIQUE(
     constraint FKnouvelleVersion_fichier foreign key (nouvelleVersion) references FICHIER(idFichier),
     constraint FKancienVersion_fichier foreign key (ancienVersion) references FICHIER(idFichier)
 )ENGINE=InnoDB;
+
+create table A_ACCES(
+    idCategorie int,
+    idRole int,
+    primary key (idCategorie, idRole),
+    constraint FKacces_categorie foreign key (idCategorie) references CATEGORIE(idCategorie),
+    constraint FKacces_role foreign key (idRole) references ROLE_POMPIER(idRole)
+)ENGINE=InnoDB;
