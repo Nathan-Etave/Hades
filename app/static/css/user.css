@@ -1,16 +1,14 @@
 body {
 	margin: 0;
-	overflow: hidden;
+    overflow: hidden;
 }
-
-.info1 li, .info2 li{
+.info1 li, .info2 li, form{
     background-color: #004F8A;
 	list-style-type: none;
     color: #FFFFFF;
     border-radius: 20px;
     padding: 10px;
-    padding-left: 20px;
-    margin: 10px;
+    margin: 5px;
 }
 
 .modifier{
@@ -46,4 +44,34 @@ object{
 }
 ul {
     padding: 0;
+}
+
+@media only screen and (max-width: 1000px) {
+    .info {
+        flex-direction: column;
+        font-size: 2rem;
+    }
+    .info1{
+        width: 100%;
+    }
+    .info2{
+        width: 100%;
+        font-size: 2rem;
+    }
+    .bouton {
+        margin-top: 1rem;
+    }
+    .modifier{
+        font-size: 1rem;
+        padding: 0.1rem 1rem 0.1rem 1rem;
+        font-size: 3rem;
+    }
+    object{
+        width: 50%;
+        height: 50%;
+    }
+    input, form{
+        font-size: 2rem;
+
+    }
 }
