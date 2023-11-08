@@ -8,7 +8,7 @@
     border-radius: 5rem;
 }
 
-.tabs_multivue>li{
+.not_selected,.is_selected{
     border-style: solid;
     border-color: #004F8A;
     display: flex;
@@ -20,21 +20,21 @@
     border: 1px solid #004F8A;
 }
 
-.tabs_multivue>li:hover{
+.not_selected:hover,.is_selected{
     border-color: #FFFFFF;
 }
 
-.tabs_multivue button:hover{
+.not_selected>button:hover{
     background-color: #004F8A;
     color: #FFFFFF;
     border-color: #FFFFFF;
 }
 
-.tabs_multivue button{
+.not_selected>button{
     flex-grow: 1;
     text-align: center;
     padding: 10px;
-    cursor: all-scroll;
+    cursor: pointer;
     border: none;
     background-color: #FFFFFF;
     color: #004F8A;
@@ -49,4 +49,15 @@
         width: 95vw;
         padding-left: 0;
     }
+}
+
+.is_selected>button{
+    flex-grow: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    background-color: #004F8A;
+    color: #FFFFFF;
+    border-color: #FFFFFF;
 }
