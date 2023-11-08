@@ -7,15 +7,15 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeaderSearchBar.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
-        <title>Search</title>
+        <title>Recherche : {{ nom_page }}</title>
     </head>
     {% include "components/header.html" %}
     {% include "components/bottomHeaderSearchBar.html" %}
     <section id="bandeau_recherche">
-        <h2>Vous êtes ici</h2>
-        <a href="#">
+        <h2>{{ nb_fichiers }}  résultat(s)</h2>
+        <button id="bouton_recherche_avance">
             <svg id="svg_search" version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-3.2 -3.2 70.40 70.40" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000" stroke="#000000" stroke-width="1.472"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <circle fill="#004F8A" cx="32" cy="32" r="4"></circle> <path fill="#004F8A" d="M32,0C14.328,0,0,14.328,0,32s14.328,32,32,32s32-14.328,32-32S49.672,0,32,0z M40,40l-22,6l6-22l22-6 L40,40z"></path> </g> </g></svg>
-        </a>
+        </button>
     </section>
     <section id="scroller">
         {% for fichier in liste_fichiers %}

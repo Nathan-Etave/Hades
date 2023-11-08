@@ -62,9 +62,12 @@ body {
     margin-left: 1rem;
 }
 
-#bandeau_recherche a {
+#bandeau_recherche button {
     margin-top: 0.5rem;
     margin-right: 2rem;
+    border: none;
+    background-color: #FFFFFF;
+    cursor: pointer;
 }
 
 @keyframes slide-right {
@@ -104,7 +107,51 @@ body {
         font-size: 2rem;
     }
 
-    #bandeau_recherche a {
-        font-size: 2rem;
+    #bandeau_recherche button {
+        margin-top: 0.5rem;
+    }
+
+    #svg_search {
+        width: 4rem;
+        height: 4rem;
+    }
+}
+
+@media only screen and (max-width: 535px) {
+	#bouton_fichier{
+		font-size: 1rem;
+		margin-top: 1rem;
+	}
+
+	.fichier p {
+		font-size: 1rem;
+		margin-top: 1rem;
+	}
+
+	#scroller {
+		height: 67vh;
+	}
+
+	.svg_telechargement {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	#bouton_telechargement {
+		margin-top: 1rem;
+	}
+    
+    #bandeau_recherche h2 {
+        font-size: 1rem;
+    }
+
+    #bandeau_recherche button {
+        margin-top: 0.2rem;
+        margin-right: 1rem;
+    }
+
+    #svg_search {
+        width: 2rem;
+        height: 2rem;
     }
 }
