@@ -11,8 +11,8 @@ metadata = Base.metadata
 class CATEGORIE(Base):
     __tablename__ = 'CATEGORIE'
 
-    id = mapped_column(INTEGER(11), primary_key=True)
-    nom = mapped_column(String(255))
+    idCategorie = mapped_column(INTEGER(11), primary_key=True)
+    nomCategorie = mapped_column(String(255))
 
     ROLE_POMPIER: Mapped['ROLEPOMPIER'] = relationship('ROLEPOMPIER', secondary='A_ACCES', back_populates='CATEGORIE_')
     CATEGORIE: Mapped['CATEGORIE'] = relationship('CATEGORIE', secondary='SOUS_CATEGORIE', primaryjoin=lambda: CATEGORIE.idCategorie == table_SOUS_CATEGORIE.c.categorieEnfant, secondaryjoin=lambda: CATEGORIE.idCategorie == table_SOUS_CATEGORIE.c.categorieParent, back_populates='CATEGORIE_')
@@ -44,9 +44,9 @@ class NOTIFICATION(Base):
     __tablename__ = 'NOTIFICATION'
 
     idNotification = mapped_column(INTEGER(11), primary_key=True)
-    precision = mapped_column(String(255))
-    typechangement = mapped_column(String(255))
-    raison = mapped_column(String(255))
+    texteNotification = mapped_column(String(255))
+    typeChange = mapped_column(String(255))
+    raisonNotification = mapped_column(String(255))
 
     A_NOTIFICATION: Mapped[List['ANOTIFICATION']] = relationship('ANOTIFICATION', uselist=True, back_populates='NOTIFICATION_')
 
@@ -87,20 +87,19 @@ class FICHIER(Base):
         Index('FKfichier_etat', 'idEtatFichier')
     )
 
-    id = mapped_column(INTEGER(11), primary_key=True)
-    nom = mapped_column(String(255))
+    idFichier = mapped_column(INTEGER(11), primary_key=True)
+    nomFichier = mapped_column(String(255))
     data = mapped_column(BLOB)
-    extension = mapped_column(String(255))
+    extensionFichier = mapped_column(String(255))
     idEtatFichier = mapped_column(INTEGER(11))
     @property
     def taille(self):
-        if len(self.leFichier) < 10**6:
-            return str(round(len(self.leFichier)/10**3, 2)) + " ko"
-        elif len(self.leFichier) < 10**9:
-            return str(round(len(self.leFichier)/10**6, 2)) + " Mo"
+        if len(self.data) < 10**6:
+            return str(round(len(self.data)/10**3, 2)) + " ko"
+        elif len(self.data) < 10**9:
+            return str(round(len(self.data)/10**6, 2)) + " Mo"
         else:
-            return str(round(len(self.leFichier)/10**9, 2)) + " Go"
-    
+            return str(round(len(self.data)/10**9, 2)) + " Go"
 
     CATEGORIE_: Mapped['CATEGORIE'] = relationship('CATEGORIE', secondary='EST_CATEGORIE', back_populates='FICHIER')
     ETAT_FICHIER: Mapped[Optional['ETATFICHIER']] = relationship('ETATFICHIER', back_populates='FICHIER')
@@ -120,13 +119,13 @@ class POMPIER(Base):
         Index('FKpompier_rolePompier', 'idRole')
     )
 
-    id = mapped_column(INTEGER(11), primary_key=True)
-    nom = mapped_column(String(255))
-    prenom = mapped_column(String(255))
-    mail = mapped_column(String(255))
-    telephone = mapped_column(String(255))
-    mdp = mapped_column(String(255))
-    photo = mapped_column(BLOB)
+    idPompier = mapped_column(INTEGER(11), primary_key=True)
+    nomPompier = mapped_column(String(255))
+    prenomPompier = mapped_column(String(255))
+    emailPompier = mapped_column(String(255))
+    telephonePompier = mapped_column(String(255))
+    mdpPompier = mapped_column(String(255))
+    photoPompier = mapped_column(BLOB)
     idRole = mapped_column(INTEGER(11))
 
     FICHIER_: Mapped['FICHIER'] = relationship('FICHIER', secondary='FAVORI', back_populates='POMPIER')
