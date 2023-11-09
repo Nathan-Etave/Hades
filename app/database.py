@@ -2,7 +2,6 @@ from app import app, db
 from app.models import (TAG, ETATFICHIER, FICHIER, NOTIFICATION, CATEGORIE, ROLEPOMPIER, POMPIER, SIGNALEMENT,
                         DATE, ACONSULTE, ANOTIFICATION, table_FAVORI, table_SOUS_CATEGORIE, table_EST_CATEGORIE,
                         table_HISTORIQUE, table_A_TAG, table_A_ACCES)
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import csv
@@ -43,7 +42,7 @@ def init_database():
         reader = csv.reader(f)
         next(reader)
         for row in reader:
-            fichier = FICHIER(nomFichier=row[1], leFichier=bytes(row[2], 'utf-8'), extensionFichier=row[3], idEtatFichier=row[4])
+            fichier = FICHIER(nomFichier=row[1], data=bytes(row[2], 'utf-8'), extensionFichier=row[3], idEtatFichier=row[4])
             db.session.add(fichier)
     db.session.commit()
 
@@ -75,7 +74,7 @@ def init_database():
         reader = csv.reader(f)
         next(reader)
         for row in reader:
-            pompier = POMPIER(nomPompier=row[1], prenomPompier=row[2], emailPompier=row[3], mdpPompier=row[4], photoPompier=bytes(row[5], 'utf-8'), idRole=row[6])
+            pompier = POMPIER(nomPompier=row[1], prenomPompier=row[2], emailPompier=row[3], telephonePompier=row[4], mdpPompier=row[5], photoPompier=bytes(row[6], 'utf-8'), idRole=row[7])
             db.session.add(pompier)
     db.session.commit()
 
