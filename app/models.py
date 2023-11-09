@@ -92,6 +92,14 @@ class FICHIER(Base):
     data = mapped_column(BLOB)
     extension = mapped_column(String(255))
     idEtatFichier = mapped_column(INTEGER(11))
+    @property
+    def taille(self):
+        if len(self.leFichier) < 10**6:
+            return str(round(len(self.leFichier)/10**3, 2)) + " ko"
+        elif len(self.leFichier) < 10**9:
+            return str(round(len(self.leFichier)/10**6, 2)) + " Mo"
+        else:
+            return str(round(len(self.leFichier)/10**9, 2)) + " Go"
     
 
     CATEGORIE_: Mapped['CATEGORIE'] = relationship('CATEGORIE', secondary='EST_CATEGORIE', back_populates='FICHIER')
