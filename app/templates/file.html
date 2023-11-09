@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/file.css') }}" />
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/file.js') }}"></script>
+        <title>{{ fichier.nom }}</title>
+</head>
+<body>
+    {% include "components/header.html" %}
+    {% include "components/bottomHeader.html" %}
+    <main class="main_container">
+        <div class="file_container">
+            <div class="file_header">
+                <h2>{{ fichier.nom }} ({{ fichier.id }})</h2>
+                <object class="file_object" data="data:application/pdf;base64,{{ fichier.data }}" type="application/pdf">
+                    <p>Impossible d'afficher le fichier</p>
+                </object>
+            </div>
+            <ul class="file_options">
+                <li><button id="download">Télécharger</button></li>
+                <li><button id="add_to_multiview">Ajouter à la MultiVue</button></li>
+                <li class="remove_from_multiview"><button id="remove_from_multiview">Supprimer de la MultiVue</button></li>
+                <li><button id="add_to_favourites">Ajouter aux favoris</button></li>
+                <li class="remove_from_favourites"><button id="remove_from_favourites">Supprimer des favoris</button></li>
+                <li><button id="report">Signaler</button></li>
+            </ul>
+        </div>
+    </main>
+    <div class="report_popup">
+        <h4>Signaler : {{ fichier.nom }}</h4>
+        <form class="report_form" role="form" method="post" action="javascript:void(0);">
+            <textarea name="message" placeholder="Raison du signalement" id ="message" rows="20" cols="50"></textarea>
+            <div class="report_form_button">
+                <input type="button" value="Annuler" id ="cancel_report"/>
+                <input type="submit" value="Envoyer" id="send_report"/>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

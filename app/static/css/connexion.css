@@ -1,0 +1,149 @@
+main{
+    display:flex;
+    justify-content: center;
+}
+body{
+    overflow: hidden;
+}
+.page_connexion {
+    background: #004F8A;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    flex-basis: calc(100%/3);
+    border-radius: 5rem;
+}
+.email>p, .password>p {
+    color: white;
+    font-size: 200%;
+
+}
+.email>input, .password>input {
+    border: none;
+    border-radius: 2rem;
+    padding: 0.5rem;
+    width: 50%;
+}
+.connexion>input {
+    margin-top: 0%;
+    font-size: 150%;
+    background: white;
+    border: none;
+    border-radius: 2rem;
+    padding-top: 0%;
+    color:  #004F8A;
+    cursor: pointer;
+    padding:1rem;
+}
+
+
+.connexion>input:hover {
+    color: rgb(253, 0, 0);
+    transition: 0.5s;
+}
+
+.email, .password,.connexion{
+    padding-right: 0rem;
+    flex-basis: 100%;
+    text-align: center;
+  
+}
+.connexion{
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+    margin-left: 1rem;
+}
+
+    
+   
+body{
+    margin: 0%;
+}
+
+
+
+@media only screen and (max-width: 1000px) {
+    .connexion>button{
+        margin-right: 0rem;}
+        
+        main{
+            flex-grow: 1;
+        }
+        .page_connexion {
+            flex-basis: 100%;
+            border-radius: 0%;
+            margin-left: 0%;
+            padding-bottom: 30%;
+            margin-bottom: 0%;
+            padding-bottom: 150%;
+    }
+    .email>p, .password>p {
+        color: white;
+        font-size: 400%;
+    
+    }
+    .email>input, .password>input {
+        border: none;
+        border-radius: 2rem;
+        padding: 0.5rem;
+        width: 75%;
+        height: 50%;
+        border-radius: 5rem;
+        font-size: 200%;
+    }
+    .email, .password,.connexion{
+        margin-top: 10rem;
+    }
+    .connexion>input {
+        width: 47%;
+        height: 47%;
+        margin-top: 30%;
+        font-size: 300%;
+        border-radius: 5rem;
+    }
+}
+    @media only screen and (max-width: 535px) {
+        .connexion>button{
+            margin-right: 0rem;}
+            
+            main{
+                flex-grow: 1;
+            }
+            .page_connexion {
+                flex-basis: 100%;
+                border-radius: 0%;
+                margin-left: 0%;
+                padding-bottom: 0%;
+                margin-bottom: 0%;
+                margin-top: 1rem;
+        }
+        .email>p, .password>p {
+            color: white;
+            font-size: 200%;
+        
+        }
+        .email>input, .password>input {
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem;
+            width: 75%;
+            height: 20%;
+            border-radius: 5rem;
+            font-size: 100%;
+            margin-top:1rem
+        }
+        .email, .password,.connexion{
+            margin-top: 0rem;
+        }
+        .connexion>input {
+            width: 40%;
+            height: 40%;
+            margin-top: 32%;
+            font-size: 100%;
+            border-radius: 5rem;
+            margin-right: 1rem;
+        }
+    
+    }
+
+
