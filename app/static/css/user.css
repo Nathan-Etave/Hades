@@ -1,6 +1,11 @@
 body {
 	margin: 0;
 }
+
+.info1,.info2{
+    padding: 0;
+}
+
 .info1 li, .info2 li, form{
     background-color: #004F8A;
 	list-style-type: none;
@@ -41,10 +46,6 @@ object{
 .info1{
     width: 75%;
 }
-ul {
-    padding: 0;
-}
-
 @media only screen and (max-width: 1000px) {
     .info {
         flex-direction: column;
