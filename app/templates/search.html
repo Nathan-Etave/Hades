@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeaderSearchBar.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/search.js') }}"></script>
         <title>Recherche : {{ nom_page }}</title>
     </head>
     {% include "components/header.html" %}
@@ -31,4 +32,43 @@
             </div>
         {% endfor %}
     </section>
+    <div class="advanced_search_popup">
+        <h4>Recherche avancée</h4>
+        <div class="categorie_search">
+            <h5>Catégorie</h5>
+            <div class="advanced_categorie_search">
+                <button id="categorie_button">{{ categorie.nom }}</button>
+                <div>
+                    <select name="sous_categorie" id="sous_categorie">
+                        <option value="all">Toutes</option>
+                        {% for sous_categorie in liste_sous_categories %}
+                            <option value="{{ sous_categorie.id }}">{{ sous_categorie.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="extension_search">
+            <h5>Extension</h5>
+            <div class="advanced_extension_search">
+                <select name="extension" id="extension">
+                    <option value="all">Toutes</option>
+                    {% for extension in liste_extensions %}
+                        <option value="{{ extension }}">{{ extension }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="favoris_search">
+            <h5>Favoris</h5>
+            <input type="checkbox" name="favoris" id="favoris">
+            <label for="favoris">Oui/Non</label>
+        </div>
+        <div class="date_search">
+            <h5>Récemment consultés</h5>
+            <input type="checkbox" name="date" id="date">
+            <label for="date">Oui/Non</label>
+        </div>
+        <button id="valider_recherche_avance">Valider</button>
+    </div>
 </html>
