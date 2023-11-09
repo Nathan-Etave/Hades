@@ -1,6 +1,5 @@
 body {
 	margin: 0;
-    overflow: hidden;
 }
 .info1 li, .info2 li, form{
     background-color: #004F8A;
@@ -72,6 +71,16 @@ ul {
     }
     input, form{
         font-size: 2rem;
+
+    }
+    @media only screen and (max-width: 535px) {
+        p,input,label,form{
+            font-size: 1rem;
+            
+        }
+        .modifier{
+            font-size: 1.5rem;
+        }
 
     }
 }
