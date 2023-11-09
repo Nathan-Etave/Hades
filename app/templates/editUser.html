@@ -1,0 +1,52 @@
+{% extends "baseUser.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<title>{{user.nom}} {{user.prenom}}</title>
+{% endblock %}
+{% block content %}
+<div class="info">
+    <ul class="info1">
+        <li>
+            <form role="form" method="POST" action ="">
+                Identifiant : {{ user.id }}
+            </form>
+        </li>
+        <li>
+            <form role="form" method="POST" action ="">
+                {{ form.prenom.label }} : {{ form.prenom}}
+            </form>
+        </li>
+        <li>
+            <form role="form" method="POST" action ="">
+                {{ form.nom.label }} : {{ form.nom}}
+            </form>
+        </li>
+        <li>
+            <form role="form" method="POST" action ="">
+                {{ form.photo.label }} : {{ form.photo}}
+            </form>
+        </li>
+    </ul>
+    <object data="data:image/jpeg;base64,{{ user.photo }}" type="image/jpeg"></object>
+</div>
+<ul class="info2">
+    <li>
+        <form role="form" method="POST" action ="">
+            {{ form.mail.label }} : {{ form.mail}}
+        </form>
+    </li>
+    <li>
+        <form role="form" method="POST" action ="">
+            {{ form.telephone.label }} : {{ form.telephone}}
+        </form>
+    </li>
+    <li>
+        <form role="form" method="POST" action ="">
+            {{ form.mdp.label }} : {{ form.mdp}}
+        </form>
+    </li>
+</ul>
+<div class="bouton">
+    <input class="modifier" type="button" value="Valider" onclick="location.href='{{ url_for('user') }}'">
+</div>
+{% endblock %}
