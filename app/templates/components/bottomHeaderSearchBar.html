@@ -1,10 +1,9 @@
 <div class="div_bottomHeadSearchBar">
     <div class="div_textBottomHeadSearchBar">
-        <p class="p_bottomHeadSearchBar">Vous êtes ici: #</p>
-        <h1 class="h1_bottomHeadSearchBar">#</h1>
+        <h1 class="h1_bottomHeadSearchBar">{{ nom_page }}</h1>
     </div>
-    <form class="barreHeadSearchBar" role="search" method="POST" action="#">
-        <input type="search" name="search" placeholder="Rechercher dans #" aria-label="Rechercher dans #">
+    <form class="barreHeadSearchBar" role="search" method="POST" action="{{ url_for('search') }}">
+        <input type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
         <button type="submit" name="submit-search">
             <svg class="search_icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"><style>@keyframes flipping{0%{transform:rotate3d(1,1,0,0deg)}to{transform:rotate3d(1,1,0,180deg)}}</style><g style="animation:flipping 1.5s cubic-bezier(.96,-.2,0,1.29) both infinite alternate-reverse"><path fill="#FFFFFF" fill-rule="evenodd" d="M5.71 11.025a5.25 5.25 0 1010.5 0 5.25 5.25 0 00-10.5 0zm5.25-7a7 7 0 100 14 7 7 0 000-14z" clip-rule="evenodd"/><rect width="1.839" height="3.677" x="16.139" y="17.375" fill="#FFFFFF" rx=".2" transform="rotate(-45 16.14 17.375)"/></g></svg>
         </button>

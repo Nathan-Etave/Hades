@@ -1,0 +1,38 @@
+{% extends "baseUser.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+{% endblock %}
+{% block content %}
+    <div class="info">
+        <ul class="info1">
+            <li>
+                <p>Identifiant : {{ user.id }}</p>
+            </li>
+            <li>
+                <p>Prénom : {{ user.prenom }}</p>
+            </li>
+            <li>
+                <p>Nom : {{user.nom}}</p>
+            </li>       
+        </ul>
+        <object data="data:image/jpeg;base64,{{ user.photo }}" type="image/jpeg"></object>
+    </div>
+    <ul class="info2">
+        <li>
+            <p>Email : {{ user.mail }}</p>
+        </li>
+        <li>
+            <p>Téléphone : {{ user.telephone }}</p>
+        </li>          
+        <li>
+            <p>Mot de Passe : <span id="mot-de-passe">{{ user.mdp }}</span></p>
+        </li>
+    </ul>
+    <div class="bouton">
+        <input class="modifier" type="button" value="Modifier les informations" onclick="location.href='{{ url_for('editUser', id=user.id) }}'">
+    </div>
+    <script>
+        var motDePasseElement = document.getElementById('mot-de-passe');
+        motDePasseElement.textContent = '*'.repeat(motDePasseElement.textContent.length);
+    </script>
+{% endblock %}

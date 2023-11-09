@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeaderSearchBar.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}" />
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/search.js') }}"></script>
+        <title>Recherche : {{ nom_page }}</title>
+    </head>
+    {% include "components/header.html" %}
+    {% include "components/bottomHeaderSearchBar.html" %}
+    <section id="bandeau_recherche">
+        <h2>{{ nb_fichiers }}  résultat(s)</h2>
+        <button id="bouton_recherche_avance">
+            <svg id="svg_search" version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-3.2 -3.2 70.40 70.40" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000" stroke="#000000" stroke-width="1.472"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <circle fill="#004F8A" cx="32" cy="32" r="4"></circle> <path fill="#004F8A" d="M32,0C14.328,0,0,14.328,0,32s14.328,32,32,32s32-14.328,32-32S49.672,0,32,0z M40,40l-22,6l6-22l22-6 L40,40z"></path> </g> </g></svg>
+        </button>
+    </section>
+    <section id="scroller">
+        {% for fichier in liste_fichiers %}
+            <div class="fichier">
+                <a href="{{url_for('file', id=fichier.id)}}" id="bouton_fichier">{{ fichier.nom }}</a>
+                <p>{{ fichier.taille }}</p>
+                <a href="#" id="bouton_telechargement">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="svg_telechargement">
+                        <circle cx="12" cy="12" r="8" stroke="#0A0A30" stroke-width="1.5"/>
+                        <path class="slide" fill="#265BFF" d="M12.75 8.75a.75.75 0 00-1.5 0h1.5zm-1.5 6a.75.75 0 001.5 0h-1.5zm-1.22-2.53a.75.75 0 10-1.06 1.06l1.06-1.06zM12 15.25l-.53.53a.75.75 0 001.06 0l-.53-.53zm3.03-1.97a.75.75 0 10-1.06-1.06l1.06 1.06zm-3.78-4.53v6h1.5v-6h-1.5zm-2.28 4.53l2.5 2.5 1.06-1.06-2.5-2.5-1.06 1.06zm3.56 2.5l2.5-2.5-1.06-1.06-2.5 2.5 1.06 1.06z"/>
+                    </svg>
+                </a>
+            </div>
+        {% endfor %}
+    </section>
+    <div class="advanced_search_popup">
+        <h4>Recherche avancée</h4>
+        <div class="categorie_search">
+            <h5>Catégorie</h5>
+            <div class="advanced_categorie_search">
+                <button id="categorie_button">{{ categorie.nom }}</button>
+                <div>
+                    <select name="sous_categorie" id="sous_categorie">
+                        <option value="all">Toutes</option>
+                        {% for sous_categorie in liste_sous_categories %}
+                            <option value="{{ sous_categorie.id }}">{{ sous_categorie.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="extension_search">
+            <h5>Extension</h5>
+            <div class="advanced_extension_search">
+                <select name="extension" id="extension">
+                    <option value="all">Toutes</option>
+                    {% for extension in liste_extensions %}
+                        <option value="{{ extension }}">{{ extension }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="favoris_search">
+            <h5>Favoris</h5>
+            <input type="checkbox" name="favoris" id="favoris">
+            <label for="favoris">Oui/Non</label>
+        </div>
+        <div class="date_search">
+            <h5>Récemment consultés</h5>
+            <input type="checkbox" name="date" id="date">
+            <label for="date">Oui/Non</label>
+        </div>
+        <button id="valider_recherche_avance">Valider</button>
+    </div>
+</html>
