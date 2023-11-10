@@ -4,6 +4,7 @@ from sqlalchemy import Column, Date, ForeignKeyConstraint, Index, String, Table
 from sqlalchemy.dialects.mysql import INTEGER, BLOB
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
+from flask_login import UserMixin
 
 Base = db.Model
 metadata = Base.metadata
@@ -112,7 +113,7 @@ class FICHIER(Base):
     SIGNALEMENT: Mapped[List['SIGNALEMENT']] = relationship('SIGNALEMENT', uselist=True, back_populates='FICHIER_')
 
 
-class POMPIER(Base):
+class POMPIER(Base, UserMixin):
     __tablename__ = 'POMPIER'
     __table_args__ = (
         ForeignKeyConstraint(['idRole'], ['ROLE_POMPIER.idRole'], name='FKpompier_rolePompier'),
@@ -122,11 +123,14 @@ class POMPIER(Base):
     idPompier = mapped_column(INTEGER(11), primary_key=True)
     nomPompier = mapped_column(String(255))
     prenomPompier = mapped_column(String(255))
-    emailPompier = mapped_column(String(255))
+    emailPompier = mapped_column(String(255), nullable=False)
     telephonePompier = mapped_column(String(255))
-    mdpPompier = mapped_column(String(255))
+    mdpPompier = mapped_column(String(80), nullable=False)
     photoPompier = mapped_column(BLOB)
     idRole = mapped_column(INTEGER(11))
+
+    def get_id(self):
+        return self.idPompier
 
     FICHIER_: Mapped['FICHIER'] = relationship('FICHIER', secondary='FAVORI', back_populates='POMPIER')
     ROLE_POMPIER: Mapped[Optional['ROLEPOMPIER']] = relationship('ROLEPOMPIER', back_populates='POMPIER')
