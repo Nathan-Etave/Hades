@@ -1,5 +1,5 @@
 from app import db
-from app.models import CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION, SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG
+from app.models import CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION, SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_A_CATEGORIE
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from unidecode import unidecode
@@ -126,3 +126,14 @@ def get_file_by_tag(search_term):
 
 def get_all_files():
     return FICHIER.query.all()
+
+def get_file_by_categorie(id_categorie):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_files = session.query(table_A_CATEGORIE).filter_by(idCategorie=id_categorie).all()
+    files = []
+    while all_files:
+        file = all_files.pop(0)
+        files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
+    session.close()
+    return files
