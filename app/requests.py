@@ -43,15 +43,15 @@ def add_to_user_favourites(id_user, idFile):
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.execute(table_FAVORI.insert().values(idFichier=idFile, idPompier=id_user))
-    session.close()
     session.commit()
+    session.close()
 
 def remove_from_user_favourites(id_user, idFile):
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.execute(table_FAVORI.delete().where(table_FAVORI.c.idFichier == idFile).where(table_FAVORI.c.idPompier == id_user))
-    session.close()
     session.commit()
+    session.close()
 
 def add_administrator_signalement(id_file, id_user, description):
     db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, descriptionSignalement=description))
@@ -79,11 +79,14 @@ def remove_from_user_notification(id_notification, id_fichier, idd_date, id_user
     db.session.commit()
 
 def get_file_order_by_date(id_user):
-    all_file = ACONSULTE.query.filter_by(idPompier=id_user).join(DATE).order_by(DATE.laDate).all()
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_file = session.query(ACONSULTE).filter_by(idPompier=id_user).join(DATE).order_by(DATE.laDate).all()
     files = []
     while all_file :
         file = all_file.pop(0)
-        files.append(FICHIER.query.filter_by(idFichier=file.idFichier).first())
+        files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
+    session.close()
     return files
 
 def update_user(id_user, prenom, nom, mail, telephone, mdp):
