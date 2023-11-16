@@ -6,7 +6,7 @@ from io import BytesIO
 from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
-                          update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files)
+                          update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history)
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
 import base64
@@ -211,3 +211,10 @@ def editUser():
 def notifications():
     notif = get_user_notifications(current_user.get_id())
     return render_template('notifications.html', nom_page="Notification(s)", liste_notifications=notif, notification_enabled=user_has_notifications(current_user.get_id()))
+
+@app.route('/history')
+@login_required
+def history():
+    id_file = request.args.get('id_fichier', type=int, default='')
+    history_list = get_file_history(id_file)
+    return render_template('history.html', nom_page=f"Historique de {get_file_by_id(id_file).nomFichier}", liste_fichiers=history_list, notification_enabled=user_has_notifications(current_user.get_id()))
