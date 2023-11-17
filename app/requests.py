@@ -1,5 +1,7 @@
 from app import db
-from app.models import CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION, SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE
+from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
+                        SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
+                        table_HISTORIQUE)
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from unidecode import unidecode
@@ -39,24 +41,24 @@ def get_file_by_id(id):
 def user_has_notifications(id_user):
     return ANOTIFICATION.query.filter_by(idPompier=id_user).first() is not None
 
-def add_to_user_favourites(id_user, idFile):
+def add_to_user_favourites(id_user, id_file):
     Session = sessionmaker(bind=db.engine)
     session = Session()
-    session.execute(table_FAVORI.insert().values(idFichier=idFile, idPompier=id_user))
+    session.execute(table_FAVORI.insert().values(idFichier=id_file, idPompier=id_user))
     session.commit()
     session.close()
 
-def remove_from_user_favourites(id_user, idFile):
+def remove_from_user_favourites(id_user, id_file):
     Session = sessionmaker(bind=db.engine)
     session = Session()
-    session.execute(table_FAVORI.delete().where(table_FAVORI.c.idFichier == idFile).where(table_FAVORI.c.idPompier == id_user))
+    session.execute(table_FAVORI.delete().where(table_FAVORI.c.idFichier == id_file).where(table_FAVORI.c.idPompier == id_user))
     session.commit()
     session.close()
 
 def add_administrator_signalement(id_file, id_user, description):
     db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, descriptionSignalement=description))
     db.session.commit()
-    file = FICHIER.query.filter_by(idFichier=idFile).first()
+    file = FICHIER.query.filter_by(idFichier=id_file).first()
     all_administrators = POMPIER.query.filter_by(idRole=1).all()
     while all_administrators:
         administrator = all_administrators.pop(0)
@@ -126,6 +128,16 @@ def get_file_by_tag(search_term):
 
 def get_all_files():
     return FICHIER.query.all()
+
+def get_file_history(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    history = []
+    while session.query(table_HISTORIQUE).filter_by(nouvelleVersion=id_file).first() is not None:
+        id_file = session.query(table_HISTORIQUE).filter_by(nouvelleVersion=id_file).first().ancienneVersion
+        history.append(FICHIER.query.filter_by(idFichier=id_file).first())
+    session.close()
+    return history
 
 def get_file_by_categorie_unique(id_categorie):
     Session = sessionmaker(bind=db.engine)
