@@ -1,5 +1,7 @@
 from app import db
-from app.models import CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION, SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_HISTORIQUE
+from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
+                        SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
+                        table_HISTORIQUE)
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from unidecode import unidecode
@@ -136,3 +138,35 @@ def get_file_history(id_file):
         history.append(FICHIER.query.filter_by(idFichier=id_file).first())
     session.close()
     return history
+
+def get_file_by_categorie_unique(id_categorie):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=id_categorie).all()
+    files = []
+    while all_files:
+        file = all_files.pop(0)
+        files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
+    session.close()
+    return set(files)
+
+def get_liste_sous_categorie(id_categorie) :
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_sous_categories = session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=id_categorie).all()
+    sous_categories = set()
+    while all_sous_categories:
+        sous_categorie = all_sous_categories.pop(0)
+        sous_categories.add(session.query(CATEGORIE).filter_by(idCategorie=sous_categorie.categorieEnfant).first())
+    session.close()
+    for sous_categorie in sous_categories:
+        sous_categories = sous_categories | get_liste_sous_categorie(sous_categorie.idCategorie)
+    return sous_categories
+
+def get_file_by_categorie(id_categorie) :
+    res = set()
+    res = res | get_file_by_categorie_unique(id_categorie)
+    sous_categories = get_liste_sous_categorie(id_categorie)
+    for id_cat in sous_categories:
+        res = res | get_file_by_categorie_unique(id_cat.idCategorie)
+    return list(res)
