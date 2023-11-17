@@ -6,7 +6,7 @@ from io import BytesIO
 from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
-                          update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files)
+                          update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_by_categorie)
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
 import base64
@@ -79,8 +79,10 @@ def search():
             liste_fichiers_favourites_sort = get_user_favourites_file(current_user.get_id())
         if advanced_sort :
             liste_fichiers_advanced_sort = get_all_files()
+        if categorie_id :
+            liste_fichiers_categorie_sort = get_file_by_categorie(categorie_id)
         counter_list = [collections.Counter(liste_fichiers_recent_sort), collections.Counter(liste_fichiers_favourites_sort),
-                        collections.Counter(liste_fichiers_search_term), collections.Counter(liste_fichiers_advanced_sort)]
+                        collections.Counter(liste_fichiers_search_term), collections.Counter(liste_fichiers_advanced_sort), collections.Counter(liste_fichiers_categorie_sort)]
         counter_list = [counter for counter in counter_list if counter]
         if len(counter_list) == 0:
             liste_fichiers = []
