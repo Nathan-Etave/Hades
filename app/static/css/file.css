@@ -94,6 +94,44 @@ h2 {
 .remove_from_multiview, .remove_from_favourites{
 	display: none;
 }
+
+.tags_info {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+}
+
+.tags_info h3 {
+	color: #FFFFFF;
+	margin-bottom: unset;
+}
+
+.tags_container {
+	display: flex;
+	flex-wrap: wrap;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+	overflow-y: scroll;
+	height: 10vh;
+	justify-content: center;
+	color: #FFFFFF;
+}
+
+.tags_list {
+	list-style-type: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: space-around;
+}
+
+.tags_list li {
+	color: #004F8A;
+	background-color: #FFFFFF;
+	border-radius: 5rem;
+	padding: 0.1rem 2rem 0.1rem 2rem;
+}
+
 @media only screen and (max-width: 1000px) {
 	.file_container {
 		flex-direction: column;

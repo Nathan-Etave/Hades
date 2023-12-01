@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}" />  
+        <script type="module" src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <title>Notification(s)</title>
+    </head>
+<body>
+{% include 'components/header.html' %}
+{% include 'components/bottomHeader.html' %}
+<div class="container">
+    <ul class="notif">
+        {% for notification,fichier,date in liste_notifications %}
+            <li class="notification">
+                <span class="file_id" style="display: none;">{{ fichier.idFichier }}</span>
+                <span class="notification_id" style="display: none;">{{ notification.idNotification }}</span>
+                <span class="date_id" style="display: none;">{{ date.idDate }}</span>
+                <div class="texte">
+                    <h3>{{ notification.typeChange }} de {{ fichier.nomFichier }} ({{ fichier.idFichier }}) le {{ date.laDate }}.</h3>
+                    <p>{{ notification.texteNotification }}</p>
+                    <h4> Raison : </h4>
+                    <p>{{ notification.raisonNotification }}</p>
+                </div >
+                <bouton class="supprimer" type="button" id="delete_user_notification">X</bouton>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+<body>
+</html>

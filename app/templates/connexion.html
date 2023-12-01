@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
     <html lang="fr">
         <head>
             <meta charset="utf-8">
@@ -13,7 +13,8 @@
             {% include "components/headerLogin.html" %}
             {% include "components/bottomHeader.html" %}
             <main>
-                <form method="POST" class="page_connexion" action="home">
+                <form method="POST" class="page_connexion" action="">
+                    {{ form.hidden_tag() }}
                 <div class="email">
                     <p>Email</p>
                     {{ form.mail(size=50) }}
@@ -23,7 +24,7 @@
                    {{ form.mdp(size=50) }}
                 </div>
                 <div class="connexion">
-                    <input type="submit" value="Connexion">
+                    {{ form.submit }}
                 </div>
             </form>
             </main>

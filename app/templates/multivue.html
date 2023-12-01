@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/multivue.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
         <script type="module" src="{{ url_for('static', filename='js/file.js') }}"></script>
-        <title>MultiVue ({{fichier_selected.nom}})</title>
+        <title>MultiVue ({{fichier_selected.nomFichier}})</title>
     </head>
     <body>
         {% include "components/header.html" %}
@@ -19,20 +19,25 @@
             <div class="file_container">
                 <div class="file_header">
                     <ul class="tabs_multivue">
-                        {% for index in range(0,len)%}
-                            {% if liste_fichiers[index].id == index_selected %}
-                                <li class="is_selected"><a href="{{ url_for('multivue', file_index=liste_fichiers[index].id)}}">{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</a></li>
+                        {% for index in range(0,liste_fichiers|length)%}
+                            {% if liste_fichiers[index].idFichier == index_selected %}
+                                <li class="is_selected"><a href="{{ url_for('multivue', file_index=liste_fichiers[index].idFichier)}}">{{ liste_fichiers[index].nomFichier }} ({{ liste_fichiers[index].idFichier }})</a></li>
                             {% else %}
-                                <li class="not_selected"><a href="{{ url_for('multivue', file_index=liste_fichiers[index].id)}}">{{ liste_fichiers[index].nom }} ({{ liste_fichiers[index].id }})</a></li>
+                                <li class="not_selected"><a href="{{ url_for('multivue', file_index=liste_fichiers[index].idFichier)}}">{{ liste_fichiers[index].nomFichier }} ({{ liste_fichiers[index].idFichier }})</a></li>
                             {% endif %}
                         {% endfor %}
-                    </ul>                        
-                    <object class="file_object" data="data:application/pdf;base64,{{ fichier_selected.data }}" type="application/pdf">
+                    </ul>       
+                    {% if fichier_selected %}                 
+                        <object class="file_object" data="data:application/pdf;base64,{{ fichier_selected.data.decode('utf-8') }}" type="application/pdf">
+                    {% else %}
+                        <object class="file_object" data="data:application/pdf;base64," type="application/pdf">
+                    {% endif %}
                         <p>Impossible d'afficher le fichier</p>
                     </object>
                 </div>
                 <ul class="file_options">
                     <li><h2>({{ index_selected }})</h2></li>
+                    <li><button onclick="window.location.href='{{ url_for('history', id_fichier=index_selected) }}';">Historique</button></li>
                     <li><button id="download">Télécharger</button></li>
                     <li><button id="add_to_multiview"><span>Ajouter à la MultiVue</span></button></li>
                     <li class="remove_from_multiview"><button id="remove_from_multiview" ><span>Supprimer de la MultiVue</span></button></li>
@@ -43,7 +48,7 @@
             </div>
         </main>
         <div class="report_popup">
-            <h4>Signaler : {{ fichier_selected.nom }}</h4>
+            <h4>Signaler : {{ fichier_selected.nomFichier }}</h4>
             <form class="report_form" role="form" method="post" action="javascript:void(0);">
                 <textarea name="message" placeholder="Raison du signalement" id ="message" rows="20" cols="50"></textarea>
                 <div class="report_form_button">
