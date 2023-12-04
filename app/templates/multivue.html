@@ -35,16 +35,28 @@
                         <p>Impossible d'afficher le fichier</p>
                     </object>
                 </div>
-                <ul class="file_options">
-                    <li><h2>({{ index_selected }})</h2></li>
-                    <li><button onclick="window.location.href='{{ url_for('history', id_fichier=index_selected) }}';">Historique</button></li>
-                    <li><button id="download">Télécharger</button></li>
-                    <li><button id="add_to_multiview"><span>Ajouter à la MultiVue</span></button></li>
-                    <li class="remove_from_multiview"><button id="remove_from_multiview" ><span>Supprimer de la MultiVue</span></button></li>
-                    <li><button id="add_to_favourites">Ajouter aux favoris</button></li>
-                    <li class="remove_from_favourites"><button id="remove_from_favourites">Supprimer des favoris</button></li>
-                    <li><button id="report">Signaler</button></li>
-                </ul>
+                <div class="file_info">
+                    <div class="tags_info">
+                        <h3>Tag(s) de recherche :</h3>
+                        <div class="tags_container">
+                            <ul class="tags_list">
+                                {% for tag in liste_tags %}
+                                    <li>{{ tag.nomTag }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <ul class="file_options">
+                        <li><h2>({{ index_selected }})</h2></li>
+                        <li><button onclick="window.location.href='{{ url_for('history', id_fichier=index_selected) }}';">Historique</button></li>
+                        <li><button id="download">Télécharger</button></li>
+                        <li><button id="add_to_multiview"><span>Ajouter à la MultiVue</span></button></li>
+                        <li class="remove_from_multiview"><button id="remove_from_multiview" ><span>Supprimer de la MultiVue</span></button></li>
+                        <li><button id="add_to_favourites">Ajouter aux favoris</button></li>
+                        <li class="remove_from_favourites"><button id="remove_from_favourites">Supprimer des favoris</button></li>
+                        <li><button id="report">Signaler</button></li>
+                    </ul>
+                </div>
             </div>
         </main>
         <div class="report_popup">

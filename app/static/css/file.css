@@ -22,7 +22,6 @@ h2 {
 .file_container {
 	display: flex;
 	justify-content: center;
-	align-items: flex-end;
 	margin: 1rem 1rem 0 1rem;
 }
 .file_options {
@@ -48,6 +47,17 @@ h2 {
 	font-size: 1.5rem;
 	padding: 0.1rem 3rem 0.1rem 3rem;
 }
+
+.file_options li:not(:last-child) button:hover {
+	color: #FFFFFF;
+	background-color: #004F8A;
+}
+
+.file_options li:last-child button:hover {
+	color: #EA4E4E;
+	background-color: #FFFFFF;
+}
+
 .file_header {
 	display: flex;
 	flex-direction: column;
@@ -91,6 +101,7 @@ h2 {
 	font-size: 1.5rem;
 	padding: 0.1rem 3rem 0.1rem 3rem;
 }
+
 .remove_from_multiview, .remove_from_favourites{
 	display: none;
 }
@@ -123,6 +134,7 @@ h2 {
 	flex-wrap: wrap;
 	gap: 1rem;
 	justify-content: space-around;
+	align-items: center;
 }
 
 .tags_list li {
@@ -154,6 +166,9 @@ h2 {
 	}
 	.file_object {
 		width: unset;
+	}
+	.tags_info {
+		display: none;
 	}
 }
 @media only screen and (max-width: 535px) {
