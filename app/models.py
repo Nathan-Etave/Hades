@@ -96,11 +96,11 @@ class FICHIER(Base):
     @property
     def taille(self):
         if len(self.data) < 10**6:
-            return str(round(len(self.data)/10**3, 2)) + " ko"
+            return str(round(len(self.data)/10**3, 2)) + "\u00A0ko"
         elif len(self.data) < 10**9:
-            return str(round(len(self.data)/10**6, 2)) + " Mo"
+            return str(round(len(self.data)/10**6, 2)) + "\u00A0Mo"
         else:
-            return str(round(len(self.data)/10**9, 2)) + " Go"
+            return str(round(len(self.data)/10**9, 2)) + "\u00A0Go"
 
     CATEGORIE_: Mapped['CATEGORIE'] = relationship('CATEGORIE', secondary='EST_CATEGORIE', back_populates='FICHIER')
     ETAT_FICHIER: Mapped[Optional['ETATFICHIER']] = relationship('ETATFICHIER', back_populates='FICHIER')
