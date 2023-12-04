@@ -170,3 +170,14 @@ def get_file_by_categorie(id_categorie) :
     for id_cat in sous_categories:
         res = res | get_file_by_categorie_unique(id_cat.idCategorie)
     return list(res)
+
+def get_file_tags(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_tags = session.query(table_A_TAG).filter_by(idFichier=id_file).all()
+    tags = []
+    while all_tags:
+        tag = all_tags.pop(0)
+        tags.append(TAG.query.filter_by(nomTag=tag.nomTag).first())
+    session.close()
+    return tags
