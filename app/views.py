@@ -7,7 +7,7 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
-                          get_file_by_categorie)
+                          get_file_by_categorie, get_file_tags)
 
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
@@ -99,7 +99,7 @@ def search():
 @app.route('/file')
 @login_required
 def file():
-    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')), notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')), liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')), notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/add_to_multiview', methods=['POST'])
 @login_required
@@ -186,6 +186,7 @@ def multivue():
                         nom_page="MultiVue",
                         liste_fichiers=liste_fich,
                         index_selected=file_index,
+                        liste_tags=get_file_tags(fichier_selected.idFichier if fichier_selected else None),
                         fichier_selected=fichier_selected, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/user')
