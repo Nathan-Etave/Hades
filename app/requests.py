@@ -181,3 +181,42 @@ def get_file_tags(id_file):
         tags.append(TAG.query.filter_by(nomTag=tag.nomTag).first())
     session.close()
     return tags
+
+def get_category_tree(category_id=None):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    if category_id is None:
+        categories = session.query(CATEGORIE).filter(CATEGORIE.idCategorie.notin_(
+            session.query(table_SOUS_CATEGORIE.c.categorieEnfant))).all()
+    else:
+        subcategories = session.query(CATEGORIE).filter(CATEGORIE.idCategorie.in_(
+            session.query(table_SOUS_CATEGORIE.c.categorieEnfant).filter_by(categorieParent=category_id))).all()
+        categories = subcategories
+    session.close()
+    category_tree = []
+    for category in categories:
+        subcategories = get_liste_sous_categorie(category.idCategorie)
+        if subcategories:
+            subcategory_tree = get_category_tree(category.idCategorie)
+        else:
+            subcategory_tree = []
+        category_tree.append([category, subcategory_tree])
+    return category_tree
+
+def add_file_to_database(file, filename, extension, tags, categories, id_etat):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    file = FICHIER(nomFichier=filename, data=file, extensionFichier=extension, idEtatFichier=id_etat)
+    session.add(file)
+    session.commit()
+    for tag in tags:
+        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
+        if not is_tag_exists:
+            new_tag = TAG(nomTag=tag)
+            session.add(new_tag)
+            session.commit()
+        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=file.idFichier))
+    for categorie in categories:
+        session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=file.idFichier))
+    session.commit()
+    session.close()
