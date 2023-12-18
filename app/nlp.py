@@ -1,12 +1,14 @@
+import fitz
 from spacy.lang.fr.stop_words import STOP_WORDS as fr_stop
 from spacy.lang.en.stop_words import STOP_WORDS as en_stop
 from spacy.util import compile_infix_regex
 from spacy import load
 from unidecode import unidecode
-import fitz
 from docx import Document
 from pptx import Presentation
 from pandas import read_excel
+from concurrent.futures import ThreadPoolExecutor
+from collections import Counter
 
 def process_pdf(pdf_file):
     """Permet de traiter un fichier PDF et de retourner une liste de mots clés.
@@ -66,6 +68,19 @@ def process_presentation(presentation_file):
                 text += shape.text
     return process_nlp(text)
 
+def process_txt(txt_file):
+    """Permet de traiter un fichier TXT et de retourner une liste de mots clés.
+
+    Args:
+        txt_file (str): Le chemin vers le fichier TXT.
+
+    Returns:
+        list: La liste des mots clés.
+    """
+    with open(txt_file, 'r', encoding='utf-8') as file:
+        text = file.read()
+    return process_nlp(text)
+
 def process_nlp(text, batch_size=100000):
     """Permet de traiter un texte et de retourner une liste de mots clés.
 
@@ -101,11 +116,14 @@ def process_nlp(text, batch_size=100000):
                 and not token.pos_ == 'ADV'
                 and not token.lemma_.lower() in stop_words
                 and token.lemma_.isalnum()]
+    
+    def process_batch(batch):
+        return Counter(clean(batch))
 
     batches = [text[i:i + batch_size] for i in range(0, len(text), batch_size)]
     word_frequencies = {}
-    for batch in batches:
-        for word in clean(batch):
-            word_frequencies[word] = word_frequencies.get(word, 0) + 1
+    with ThreadPoolExecutor() as executor:
+        for batch in executor.map(process_batch, batches):
+            word_frequencies.update(batch)
     word_frequencies = sorted(word_frequencies.items(), key=lambda x: x[1], reverse=True)
     return [word for word, frequency in word_frequencies if frequency > 1]
