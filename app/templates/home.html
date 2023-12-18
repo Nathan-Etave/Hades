@@ -14,7 +14,7 @@
     <body>
         <section id="sec_categorie">
             {% for categorie in liste_categories %}
-                <a href="{{url_for('search', id=categorie.id)}}" class = "categorie">{{ categorie.nom }}</a>
+                <a href="{{url_for('search', categorie=categorie.idCategorie)}}" class = "categorie">{{ categorie.nomCategorie }}</a>
             {% endfor %}
         </section>
         <div id="title_fav">
@@ -23,7 +23,7 @@
         <section id="scroller">
             {% for fichier in liste_fichiers %}
                 <div class="fichier">
-                    <a href="{{url_for('file', id=fichier.id)}}" id="bouton_fichier">{{ fichier.nom }}</a>
+                    <a href="{{url_for('file', id_fichier=fichier.idFichier)}}" id="bouton_fichier">{{ fichier.nomFichier }}</a>
                     <p>{{ fichier.taille }}</p>
                     <a href="#" id="bouton_telechargement">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="svg_home">

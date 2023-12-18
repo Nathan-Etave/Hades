@@ -1,52 +1,41 @@
 {% extends "baseUser.html" %}
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
-<title>{{user.nom}} {{user.prenom}}</title>
+<title>Modifier : {{ user.nomPompier }} {{ user.prenomPompier }}</title>
 {% endblock %}
 {% block content %}
-<div class="info">
-    <ul class="info1">
+<form method="POST" role="form" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="info">
+        <ul class="info1">
+            <li>
+                <p>Identifiant : {{ user.idPompier }}</p>
+            </li>
+            <li>
+                <p>{{ form.prenom.label }} : {{ form.prenom }}</p>
+            </li>
+            <li>
+                <p>{{ form.nom.label }} : {{ form.nom }}</p>
+            </li>
+            <li>
+                <p>{{ form.photo.label }} : {{ form.photo }}</p>
+            </li>
+        </ul>
+        <object data="data:image/jpeg;base64,{{ user.photoPompier.decode('utf-8') }}" type="image/jpeg"></object>
+    </div>
+    <ul class="info2">
         <li>
-            <form role="form" method="POST" action ="">
-                Identifiant : {{ user.id }}
-            </form>
+            <p>{{ form.mail.label }} : {{ form.mail}}</p>
         </li>
         <li>
-            <form role="form" method="POST" action ="">
-                {{ form.prenom.label }} : {{ form.prenom}}
-            </form>
+            <p>{{ form.telephone.label }} : {{ form.telephone }}</p>
         </li>
         <li>
-            <form role="form" method="POST" action ="">
-                {{ form.nom.label }} : {{ form.nom}}
-            </form>
-        </li>
-        <li>
-            <form role="form" method="POST" action ="">
-                {{ form.photo.label }} : {{ form.photo}}
-            </form>
+            <p>Mot de passe : {{ form.mdp }}</p>
         </li>
     </ul>
-    <object data="data:image/jpeg;base64,{{ user.photo }}" type="image/jpeg"></object>
-</div>
-<ul class="info2">
-    <li>
-        <form role="form" method="POST" action ="">
-            {{ form.mail.label }} : {{ form.mail}}
-        </form>
-    </li>
-    <li>
-        <form role="form" method="POST" action ="">
-            {{ form.telephone.label }} : {{ form.telephone}}
-        </form>
-    </li>
-    <li>
-        <form role="form" method="POST" action ="">
-            {{ form.mdp.label }} : {{ form.mdp}}
-        </form>
-    </li>
-</ul>
-<div class="bouton">
-    <input class="modifier" type="button" value="Valider" onclick="location.href='{{ url_for('user') }}'">
-</div>
+    <div class="bouton">
+        {{ form.submit }}
+    </div>
+</form>
 {% endblock %}
