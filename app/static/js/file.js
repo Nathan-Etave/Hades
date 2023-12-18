@@ -35,6 +35,17 @@ document.addEventListener('DOMContentLoaded', function() {
 			body: JSON.stringify({
 				file_id: fileId
 			})
+		})
+		.then(response => response.blob())
+		.then(blob => {
+			let downloadLink = document.createElement('a');
+			blob.text().then(function(result) {
+				let file_data = result;
+				downloadLink.href = 'data:application/octet-stream;base64,' + file_data;
+				downloadLink.download = document.querySelector('h2').textContent.match(/^(.*) \(/)[1];
+				downloadLink.click();
+				dowlnoadLink.remove();
+			});
 		});
 	});
 	addToMultiViewButton.addEventListener('click', function() {
