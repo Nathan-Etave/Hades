@@ -16,7 +16,7 @@
 <div class="container">
     <ul class="notif">
         {% for notification,fichier,date in liste_notifications %}
-            <li class="notification">
+            <li class="notification" id = "notification">
                 <span class="file_id" style="display: none;">{{ fichier.idFichier }}</span>
                 <span class="notification_id" style="display: none;">{{ notification.idNotification }}</span>
                 <span class="date_id" style="display: none;">{{ date.idDate }}</span>
@@ -31,5 +31,5 @@
         {% endfor %}
     </ul>
 </div>
-<body>
+</body>
 </html>

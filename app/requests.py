@@ -56,16 +56,19 @@ def remove_from_user_favourites(id_user, id_file):
     session.close()
 
 def add_administrator_signalement(id_file, id_user, description):
-    db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, descriptionSignalement=description))
+    all_administrators = POMPIER.query.filter_by(idRole=1).all()
+    date = DATE(laDate=datetime.now())
+    db.session.add(date)
     db.session.commit()
     file = FICHIER.query.filter_by(idFichier=id_file).first()
-    all_administrators = POMPIER.query.filter_by(idRole=1).all()
+    notification = NOTIFICATION(texteNotification=f'Un signalement a été fait sur le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description)
+    db.session.add(notification)
+    db.session.commit()
+    db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, idDate=date.idDate, descriptionSignalement=description))
+    db.session.commit()
     while all_administrators:
         administrator = all_administrators.pop(0)
-        db.session.add(NOTIFICATION(texteNotification=f'Un signalement a été fait sur le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description))
-        db.session.add(DATE(laDate=datetime.now()))
-        db.session.commit()
-        db.session.add(ANOTIFICATION(idPompier=administrator.idPompier, idNotification=NOTIFICATION.query.order_by(NOTIFICATION.idNotification.desc()).first().idNotification, idFichier=file.idFichier, idDate=DATE.query.order_by(DATE.idDate.desc()).first().idDate))
+        db.session.add(ANOTIFICATION(idPompier=administrator.idPompier, idNotification=notification.idNotification, idFichier=file.idFichier, idDate=date.idDate))
         db.session.commit()
 
 def get_user_notifications(id_user):
