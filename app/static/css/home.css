@@ -29,6 +29,7 @@ body {
 	overflow-y: scroll;
 	height: 15vh;
 	justify-content: center;
+	align-items: center;
 }
 
 #title_fav h2 {
