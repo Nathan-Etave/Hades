@@ -170,9 +170,7 @@ def report():
 def download_file():
     file_id = request.get_json()['file_id']
     file_object = get_file_by_id(file_id)
-    file_data = BytesIO(file_object.data)
-    file_data.seek(0)
-    return send_file(path_or_file=file_data, download_name=file_object.nomFichier, as_attachment=True)
+    return make_response(send_file(BytesIO(file_object.data), mimetype='application/octet-stream'))
 
 @app.route('/multivue', methods=['GET', 'POST'])
 @login_required
