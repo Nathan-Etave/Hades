@@ -82,7 +82,7 @@ def init_database():
         reader = csv.reader(f)
         next(reader)
         for row in reader:
-            signalement = SIGNALEMENT(idFichier=row[0], idPompier=row[1], descriptionSignalement=row[2])
+            signalement = SIGNALEMENT(idFichier=row[0], idPompier=row[1], idDate=row[2], descriptionSignalement=row[3])
             db.session.add(signalement)
     db.session.commit()
 
