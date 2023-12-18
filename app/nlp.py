@@ -3,7 +3,7 @@ from spacy.lang.en.stop_words import STOP_WORDS as en_stop
 from spacy.util import compile_infix_regex
 from spacy import load
 from unidecode import unidecode
-from fitz import open as fitz_open
+import fitz
 from docx import Document
 from pptx import Presentation
 from pandas import read_excel
@@ -17,7 +17,7 @@ def process_pdf(pdf_file):
     Returns:
         list: La liste des mots clés.
     """
-    with fitz_open(pdf_file) as doc:
+    with fitz.open(pdf_file) as doc:
         text = ''
         for page in doc:
             text += page.get_text()
@@ -66,7 +66,7 @@ def process_presentation(presentation_file):
                 text += shape.text
     return process_nlp(text)
 
-def process_nlp(text):
+def process_nlp(text, batch_size=100000):
     """Permet de traiter un texte et de retourner une liste de mots clés.
 
     Args:
@@ -76,7 +76,7 @@ def process_nlp(text):
         list: La liste des mots clés.
     """
     nlp = load('fr_dep_news_trf')
-    nlp.max_length = 10000000
+    nlp.max_length = batch_size
     default_infixes = list(nlp.Defaults.infixes)
     default_infixes.append('[A-Z][a-z0-9]+')
     infix_regex = compile_infix_regex(default_infixes)
@@ -102,8 +102,10 @@ def process_nlp(text):
                 and not token.lemma_.lower() in stop_words
                 and token.lemma_.isalnum()]
 
+    batches = [text[i:i + batch_size] for i in range(0, len(text), batch_size)]
     word_frequencies = {}
-    for word in clean(text):
-        word_frequencies[word] = word_frequencies.get(word, 0) + 1
+    for batch in batches:
+        for word in clean(batch):
+            word_frequencies[word] = word_frequencies.get(word, 0) + 1
     word_frequencies = sorted(word_frequencies.items(), key=lambda x: x[1], reverse=True)
     return [word for word, frequency in word_frequencies if frequency > 1]
