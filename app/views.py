@@ -247,16 +247,16 @@ def history():
 @login_required
 @admin_required
 def upload():
+    if not os.path.exists(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        os.makedirs(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}')
     if request.method == 'POST':
         for key, uploaded_file in request.files.items():
             if key.startswith('file'):
                 filename = secure_filename(uploaded_file.filename)
-                if not os.path.exists(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}'):
-                    os.makedirs(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}')
-                uploaded_file.save(os.path.join(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}', filename))
+                uploaded_file.save(os.path.join(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}', filename))
     else:
-        for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}'):
-            os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}\\{stored_file}')
+        for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+            os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
     return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/manage_files')
@@ -264,8 +264,8 @@ def upload():
 @admin_required
 def manageFiles():
     stored_files = {}
-    for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}'):
-        stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}\\{stored_file}', 'rb').read())
+    for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}', 'rb').read())
     return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree())
 
 @app.route('/automatic_files_management')
@@ -291,7 +291,7 @@ def generateTags():
 @admin_required
 def uploadFilesToDatabase():
     for filename, file_properties in request.get_json().items():
-        file_path = f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}\\{filename}'
+        file_path = f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{filename}'
         extension = filename.split('.')[-1]
         with open(file_path, 'rb') as file_data:
             add_file_to_database(base64.b64encode(file_data.read()), filename, extension, file_properties['tags'], file_properties['categories'], 2)
