@@ -17,6 +17,15 @@ from app import login_manager
 import base64
 import collections
 
+process_functions = {
+    'pdf': nlp.process_pdf,
+    'docx': nlp.process_docx,
+    'xlsx': nlp.process_sheet,
+    'xls': nlp.process_sheet,
+    'pptx': nlp.process_presentation,
+    'txt': nlp.process_txt,
+}
+
 @app.after_request
 def add_cookie(response):
     if not request.cookies.get('multiview_list'):
@@ -270,17 +279,11 @@ def automaticFilesManagement():
 @admin_required
 def generateTags():
     filename = request.get_json()['filename']
-    extension = filename.split('.')[-1]
-    file_path = f'{app.config["UPLOADED_TEMP_DEST"]}\\{current_user.get_id()}\\{filename}'
+    extension = filename.split('.')[-1].lower()
+    file_path = f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{filename}'
     tags = []
-    if extension == 'pdf':
-        tags = nlp.process_pdf(file_path)
-    elif extension == 'docx':
-        tags = nlp.process_docx(file_path)
-    elif extension == 'xlsx' or extension == 'xls':
-        tags = nlp.process_sheet(file_path)
-    elif extension == 'pptx':
-        tags = nlp.process_presentation(file_path)
+    if extension in process_functions:
+        tags = process_functions[extension](file_path)
     return jsonify(tags)
 
 @app.route('/upload_files_to_database', methods=['POST'])
