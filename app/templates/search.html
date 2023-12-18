@@ -13,7 +13,7 @@
     {% include "components/header.html" %}
     {% include "components/bottomHeaderSearchBar.html" %}
     <section id="bandeau_recherche">
-        <h2>{{ nb_fichiers }}  résultat(s)</h2>
+        <h2>{{ liste_fichiers|length }}  résultat(s)</h2>
         <button id="bouton_recherche_avance">
             <svg id="svg_search" version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-3.2 -3.2 70.40 70.40" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000" stroke="#000000" stroke-width="1.472"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <circle fill="#004F8A" cx="32" cy="32" r="4"></circle> <path fill="#004F8A" d="M32,0C14.328,0,0,14.328,0,32s14.328,32,32,32s32-14.328,32-32S49.672,0,32,0z M40,40l-22,6l6-22l22-6 L40,40z"></path> </g> </g></svg>
         </button>
@@ -21,7 +21,7 @@
     <section id="scroller">
         {% for fichier in liste_fichiers %}
             <div class="fichier">
-                <a href="{{url_for('file', id=fichier.id)}}" id="bouton_fichier">{{ fichier.nom }}</a>
+                <a href="{{url_for('file', id_fichier=fichier.idFichier)}}" id="bouton_fichier">{{ fichier.nomFichier }}</a>
                 <p>{{ fichier.taille }}</p>
                 <a href="#" id="bouton_telechargement">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="svg_telechargement">
@@ -37,12 +37,12 @@
         <div class="categorie_search">
             <h5>Catégorie</h5>
             <div class="advanced_categorie_search">
-                <button id="categorie_button">{{ categorie.nom }}</button>
+                <button id="categorie_button">{{ categorie.nomCategorie }}</button>
                 <div>
                     <select name="sous_categorie" id="sous_categorie">
                         <option value="all">Toutes</option>
                         {% for sous_categorie in liste_sous_categories %}
-                            <option value="{{ sous_categorie.id }}">{{ sous_categorie.nom }}</option>
+                            <option value="{{ sous_categorie.idCategorie }}">{{ sous_categorie.nomCategorie }}</option>
                         {% endfor %}
                     </select>
                 </div>
