@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
         {% block css %}{% endblock %}
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
-        <title>Profil</title>
+        <title>Profil : {{ user.nomPompier }} {{ user.prenomPompier }}</title>
     </head>
     <body>
         {% include "components/header.html" %}
