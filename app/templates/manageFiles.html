@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/manageFiles.css') }}" />
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/manageFiles.js') }}"></script>
+        <title>{{ nom_page }}</title>
+</head>
+<body>
+    {% include "components/header.html" %}
+    {% include "components/bottomHeader.html" %}
+    <main>
+        <div class="main_container">
+        {% for (filename, data) in stored_files.items() %}
+            <div class="file_container">
+                <div class="file_header">
+                    <h2>{{ filename }}</h2>
+                    {% if filename.endswith('.pdf') or filename.endswith('.PDF') %}
+                        <object class="file_object" data="data:application/pdf;base64,{{ data.decode('utf-8') }}" type="application/pdf">
+                            <p>Impossible d'afficher le fichier</p>
+                        </object>
+                    {% elif filename.endswith('.png') or filename.endswith('.PNG') %}
+                        <img class="file_object" src="data:image/png;base64,{{ data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                    {% elif filename.endswith('.jpg') or filename.endswith('.JPG') %}
+                        <img class="file_object" src="data:image/jpg;base64,{{ data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                    {% elif filename.endswith('.jpeg') or filename.endswith('.JPEG') %}
+                        <img class="file_object" src="data:image/jpeg;base64,{{ data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                    {% elif filename.endswith('.gif') or filename.endswith('.GIF') %}
+                        <img class="file_object" src="data:image/gif;base64,{{ data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                    {% else %}
+                        <p>Apperçu non disponible pour ce type de fichier</p>
+                    {% endif %}
+                </div>
+                <div class="category_container">
+                    <h3>Catégorie(s) :</h3>
+                    <div class="category_list_container">
+                        {% macro render_category_tree(category_tree, parent_id=None) %}
+                            <ul>
+                                {% for category in category_tree %}
+                                    <li>
+                                        <details>
+                                            <summary>
+                                                <input type="checkbox" id="{{ category[0].idCategorie }}" value="{{ category[0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
+                                                <label for="{{ category[0].idCategorie }}">{{ category[0].nomCategorie }}</label>
+                                            </summary>
+                                            {% if category[1] %}
+                                                {{ render_category_tree(category[1], category[0].idCategorie) }}
+                                            {% endif %}
+                                        </details>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endmacro %}
+                        {{ render_category_tree(category_tree) }}
+                    </div>
+                </div>
+                <div class="tags_container">
+                    <h3>Tag(s) de recherche :</h3>
+                    <div class="tags_list_container">
+                        <ul class="tags_list">
+                        </ul>
+                    </div>
+                    <button class="automatic_tags_generation" name="{{ filename }}">Générer automatiquement les tags</button>
+                    <form class="add_tag_form" action="javascript:void(0);">
+                        <input type="text" placeholder="Ajouter un tag" required>
+                        <button class="add_tag_button" type="submit">Ajouter</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <div class="button_container">
+            <button id="cancel_button" onclick="window.location.href='{{ url_for('upload') }}';">Annuler</button>
+            <button id="validate_button">Ajouter les fichiers</button>
+        </div>
+    </main>
+</body>
+</html>
