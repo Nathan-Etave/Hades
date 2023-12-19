@@ -1,6 +1,6 @@
 from app import db
 from typing import List, Optional
-from sqlalchemy import Column, Date, ForeignKeyConstraint, Index, String, Table
+from sqlalchemy import Column, ForeignKeyConstraint, Index, String, Table, DateTime
 from sqlalchemy.dialects.mysql import INTEGER, BLOB
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
@@ -25,7 +25,7 @@ class DATE(Base):
     __tablename__ = 'DATE'
 
     idDate = mapped_column(INTEGER(11), primary_key=True)
-    laDate = mapped_column(Date)
+    laDate = mapped_column(DateTime)
 
     A_CONSULTE: Mapped[List['ACONSULTE']] = relationship('ACONSULTE', uselist=True, back_populates='DATE_')
     A_NOTIFICATION: Mapped[List['ANOTIFICATION']] = relationship('ANOTIFICATION', uselist=True, back_populates='DATE_')
