@@ -6,12 +6,12 @@
             <link rel="stylesheet" href="{{ url_for('static',filename='css/administration.css')}}">
             <link rel="stylesheet" href="{{ url_for('static',filename='css/header.css')}}">
             <script type="module" src="{{ url_for('static', filename='js/header.js')}}"></script>
-            <title>admin</title>
+            <title>Administration</title>
         </head>
         <body> 
             {% include "components/header.html" %}
             <main>
-                <a class="gestionFic">
+            <a class="gestionFic">
                 
                 <div class="fichier">
                     
@@ -47,7 +47,7 @@
                    </g>
                    </svg>
                 
-                <h1 class="nomGestion"> Gérer fichiers</h1>
+                <h2 class="nomGestion"> Gérer fichiers</h2>
                 </div>
             </a>
             <a class="gestionUser">
@@ -74,45 +74,58 @@
                    </g>
                    </svg>
                
-                <h1 class="nomGestion">Gérer utilisateurs</h1>
+                <h2 class="nomGestion">Gérer utilisateurs</h2>
                 </div>
             </a>
-            <a class="gestion" sr="#">
-                <div class="categorie">
-               <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 512.000000 512.000000"
-                    preserveAspectRatio="xMidYMid meet">
-                   
-                   <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-                   fill="#004F8A" stroke="none">
-                   <path d="M1618 5101 c-71 -15 -128 -72 -148 -151 -7 -30 -10 -155 -8 -376 3
-                   -310 4 -333 22 -353 13 -14 31 -21 57 -21 69 0 69 1 69 372 0 189 4 338 10
-                   352 l10 26 477 -2 477 -3 58 -125 c128 -279 128 -278 160 -289 21 -8 359 -11
-                   1069 -11 570 0 1045 -3 1054 -6 46 -18 45 -2 45 -1034 0 -1044 1 -1012 -49
-                   -1040 -11 -5 -72 -10 -137 -10 l-117 0 7 83 c8 102 -10 172 -60 227 -73 81 31
-                   74 -1244 80 l-1134 5 -62 140 c-35 77 -80 178 -101 225 -21 47 -53 102 -72
-                   123 -58 64 -79 71 -241 77 l-145 5 -5 283 c-5 266 -6 285 -24 298 -29 21 -80
-                   18 -102 -7 -18 -19 -19 -42 -22 -301 l-3 -280 -432 3 c-480 3 -474 4 -546 -64
-                   -36 -34 -70 -99 -71 -133 0 -21 -6 -22 -124 -26 -107 -3 -129 -7 -172 -29 -56
-                   -29 -103 -95 -110 -155 -7 -53 303 -2787 320 -2827 21 -50 62 -93 114 -119
-                   l47 -23 1965 0 c1580 0 1972 3 2001 13 46 16 107 74 127 121 12 29 22 228 52
-                   1081 21 575 38 1046 39 1048 1 1 57 2 125 2 177 0 242 29 299 135 l22 40 3
-                   1004 c3 1107 5 1056 -59 1134 -64 78 29 71 -1139 77 l-1045 5 -80 172 c-44 95
-                   -91 184 -105 199 -58 61 -41 59 -560 61 -261 1 -491 -2 -512 -6z m266 -1883
-                   c14 -14 66 -117 127 -256 86 -198 107 -237 137 -260 l35 -27 1146 -5 c630 -3
-                   1152 -9 1160 -14 40 -26 40 -19 -4 -1258 -39 -1102 -43 -1189 -60 -1208 -18
-                   -20 -25 -20 -1972 -20 -1940 0 -1953 0 -1973 20 -17 17 -20 33 -20 98 0 98 88
-                   2662 96 2801 5 91 9 107 30 128 l23 23 625 0 625 0 25 -22z m-1484 -250 c-1
-                   -103 -58 -1650 -61 -1653 -2 -2 -46 370 -97 827 -89 791 -93 830 -76 849 15
-                   16 31 19 126 19 l108 0 0 -42z"/>
-                   </g>
-                   </svg>
+           <a class="gestion" href="{{url_for('editCategorie')}}">
+               <div class="categorie">
+                   <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 512.000000 512.000000"
+                   preserveAspectRatio="xMidYMid meet">
                   
-                <h1 class="nomGestion">Gérer catégories</h1>
+                  <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                  fill="#004F8A" stroke="none">
+                  <path d="M1043 5112 c-29 -18 -33 -70 -33 -397 l0 -334 -220 -3 c-213 -3 -220
+                  -4 -242 -26 l-23 -23 -3 -613 -3 -613 -74 -6 c-141 -10 -254 -87 -312 -212
+                  l-28 -60 0 -1270 0 -1270 31 -65 c40 -82 92 -134 174 -174 l65 -31 2155 -3
+                  c2258 -3 2217 -4 2303 40 57 29 125 101 155 166 l27 57 0 1565 0 1565 -28 53
+                  c-15 29 -44 70 -63 92 -37 41 -142 100 -178 100 -45 0 -45 -1 -48 348 -3 330
+                  -3 332 -26 354 -22 22 -29 23 -242 26 l-220 3 0 334 c0 327 -4 379 -33 397 -7
+                  4 -712 8 -1567 8 -855 0 -1560 -4 -1567 -8z m3007 -792 l0 -660 -165 0 -164 0
+                  -3 335 c-3 333 -3 335 -26 357 l-23 23 -1249 3 -1250 2 0 300 0 300 1440 0
+                  1440 0 0 -660z m-482 -377 l-3 -278 -430 -5 -430 -5 -57 -27 c-116 -54 -193
+                  -165 -208 -302 -5 -39 -14 -84 -20 -101 -16 -42 -58 -84 -105 -106 -38 -17
+                  -78 -19 -652 -19 -436 0 -619 -3 -637 -11 -49 -23 -53 -104 -7 -129 15 -7 214
+                  -10 663 -8 l643 3 55 26 c66 31 140 102 170 164 12 25 26 75 32 113 16 107 27
+                  140 61 179 67 76 31 73 785 73 735 0 712 2 776 -58 16 -15 37 -45 47 -67 18
+                  -38 19 -102 19 -1548 0 -1652 4 -1545 -58 -1610 -64 -67 105 -62 -1917 -65
+                  -1358 -2 -1844 0 -1884 8 -70 16 -132 75 -149 142 -16 61 -17 2424 -2 2479 16
+                  56 51 101 100 129 43 24 54 25 237 28 l193 4 20 25 c27 34 25 69 -5 98 -19 20
+                  -34 25 -75 25 l-50 0 0 560 0 560 1445 0 1445 0 -2 -277z m972 -463 c0 -806 0
+                  -802 54 -816 44 -11 76 4 92 41 11 28 14 107 14 415 0 359 1 380 18 380 28 0
+                  95 -48 122 -88 l25 -36 3 -1520 c3 -1698 8 -1571 -68 -1640 -54 -48 -91 -56
+                  -277 -56 l-162 0 24 53 c13 28 27 69 30 90 l7 37 114 0 c128 0 147 9 159 72 3
+                  18 4 486 3 1039 -3 974 -4 1008 -22 1028 -26 29 -86 29 -112 0 -18 -20 -19
+                  -54 -22 -1005 l-2 -984 -60 0 -60 0 -2 1453 -3 1452 -22 48 c-32 68 -76 121
+                  -134 158 l-49 32 0 294 0 293 165 0 165 0 0 -740z"/>
+                  <path d="M1031 3963 c-11 -10 -24 -32 -27 -50 -5 -26 -1 -37 19 -57 l26 -26
+                  938 0 c1021 0 973 -3 987 55 7 29 -15 79 -39 89 -9 3 -437 6 -950 6 -874 0
+                  -934 -1 -954 -17z"/>
+                  <path d="M1031 3583 c-11 -10 -24 -32 -27 -50 -5 -26 -1 -37 19 -57 l26 -26
+                  545 0 c299 0 552 3 561 6 26 10 45 63 34 93 -20 52 -5 50 -590 51 -506 0 -548
+                  -1 -568 -17z"/>
+                  <path d="M2370 2677 c-48 -24 -50 -40 -48 -359 3 -295 3 -298 26 -320 l23 -23
+                  819 0 819 0 23 23 c23 23 23 23 23 333 l0 311 -28 24 -28 24 -802 0 c-623 0
+                  -808 -3 -827 -13z m1538 -344 l2 -203 -715 0 -715 0 0 205 0 205 713 -2 712
+                  -3 3 -202z"/>
+                  </g>
+                  </svg>
+                  
+                <h2 class="nomGestion">Gérer catégories</h2>
                     
                 </div>
             </a>
-            <a class="gestion" src="#">
+            <a class="gestion" href="{{url_for('edit_role')}}">
                 <div class="role">
                 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512.000000 512.000000"
@@ -149,7 +162,7 @@
                    -130 298 -47 437 l33 55 -30 6 c-43 9 -535 5 -647 -5z"/>
                    </g>
                    </svg>
-                <h1 class="nomGestion">Gérer rôles</h1>
+                <h2 class="nomGestion">Gérer rôles</h2>
                     
                 </div>
                 </a>
@@ -157,13 +170,13 @@
                     <button class="close-btn" onclick="closePopup()">X</button>
                     <p>Que souhaitez-vous faire sur les fichiers?</p>
                     <a id="ajouterFic" href="{{url_for('upload')}}">Ajouter</a>
-                    <a id="supFic" href="{{url_for('search')}}">modifier,Supprimer</a>
+                    <a id="supFic" href="{{url_for('search')}}">Modifier</a>
                 </div>
                 <div id="popup2" class="popup">
                     <button class="close-btn" onclick="closePopup2()">X</button>
-                    <p>Que souhaitez-vous faire sur les users?</p>
-                    <a id="ajouterUser" href="#">Ajouter</a>
-                    <a id="supUser" href="{{url_for('search_user')}}">modifier,Supprimer</a>
+                    <p>Que souhaitez-vous faire sur les utilisateurs?</p>
+                    <a id="ajouterUser" href="{{url_for('add_user_page')}}">Ajouter</a>
+                    <a id="supUser" href="{{url_for('search_user')}}">Modifier</a>
                 </div>
         
                 <script>
