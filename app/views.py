@@ -119,7 +119,7 @@ def search():
 @app.route('/file')
 @login_required
 def file():
-    add_consulted_file(request.args.get('id_fichier', type=int, default=''), current_user.get_id())
+    add_consulted_file(current_user.get_id(), request.args.get('id_fichier', type=int, default=''))
     return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')), liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')), notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/add_to_multiview', methods=['POST'])
