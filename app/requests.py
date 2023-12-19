@@ -3,6 +3,7 @@ from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, 
                         SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
                         table_HISTORIQUE, table_A_ACCES)
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import asc
 from datetime import datetime
 from unidecode import unidecode
 
@@ -264,3 +265,13 @@ def remove_forbiden_file(file_list, user_id) :
         if is_valide_file(user_id, file.idFichier) :
             res.append(file)
     return res
+
+def get_file_by_consult(id_user):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_files = session.query(ACONSULTE).filter_by(idPompier=id_user).order_by(asc(ACONSULTE.dateConsultation)).all()
+    files = []
+    for file in all_files:
+        files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
+    session.close()
+    return files
