@@ -11,8 +11,7 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
                           get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, get_file_category_leaves,
-                          update_old_file, remove_file, update_file_categories, update_file_tags)
-
+                          update_old_file, remove_file, update_file_categories, update_file_tags, add_consulted_file)
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
 import base64
@@ -120,6 +119,7 @@ def search():
 @app.route('/file')
 @login_required
 def file():
+    add_consulted_file(current_user.get_id(), request.args.get('id_fichier', type=int, default=''))
     return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')),
                            liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')),
                            notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
