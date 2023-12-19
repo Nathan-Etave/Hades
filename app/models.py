@@ -1,6 +1,6 @@
 from app import db
 from typing import List, Optional
-from sqlalchemy import Column, Date, ForeignKeyConstraint, Index, String, Table
+from sqlalchemy import Column, ForeignKeyConstraint, Index, String, Table, DateTime
 from sqlalchemy.dialects.mysql import INTEGER, BLOB
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
@@ -25,11 +25,11 @@ class DATE(Base):
     __tablename__ = 'DATE'
 
     idDate = mapped_column(INTEGER(11), primary_key=True)
-    laDate = mapped_column(Date)
+    laDate = mapped_column(DateTime)
 
     A_CONSULTE: Mapped[List['ACONSULTE']] = relationship('ACONSULTE', uselist=True, back_populates='DATE_')
     A_NOTIFICATION: Mapped[List['ANOTIFICATION']] = relationship('ANOTIFICATION', uselist=True, back_populates='DATE_')
-
+    SIGNALEMENT: Mapped[List['SIGNALEMENT']] = relationship('SIGNALEMENT', uselist=True, back_populates='DATE_')
 
 class ETATFICHIER(Base):
     __tablename__ = 'ETAT_FICHIER'
@@ -236,12 +236,15 @@ class SIGNALEMENT(Base):
     __table_args__ = (
         ForeignKeyConstraint(['idFichier'], ['FICHIER.idFichier'], name='FKsignalement_fichier'),
         ForeignKeyConstraint(['idPompier'], ['POMPIER.idPompier'], name='FKsignalement_pompier'),
+        ForeignKeyConstraint(['idDate'], ['DATE.idDate'], name='FKsignalement_date'),
         Index('FKsignalement_pompier', 'idPompier')
     )
 
     idFichier = mapped_column(INTEGER(11), primary_key=True, nullable=False)
     idPompier = mapped_column(INTEGER(11), primary_key=True, nullable=False)
+    idDate = mapped_column(INTEGER(11), primary_key=True, nullable=False)
     descriptionSignalement = mapped_column(String(255))
 
     FICHIER_: Mapped['FICHIER'] = relationship('FICHIER', back_populates='SIGNALEMENT')
     POMPIER_: Mapped['POMPIER'] = relationship('POMPIER', back_populates='SIGNALEMENT')
+    DATE_: Mapped['DATE'] = relationship('DATE', back_populates='SIGNALEMENT')
