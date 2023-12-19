@@ -260,7 +260,7 @@ def upload():
     else:
         for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
             os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
-    return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/manage_files')
 @login_required
@@ -269,13 +269,35 @@ def manageFiles():
     stored_files = {}
     for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
         stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}', 'rb').read())
-    return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree())
+    return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree(), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
-@app.route('/automatic_files_management')
+@app.route('/automatic_files_management', methods=['POST'])
 @login_required
 @admin_required
 def automaticFilesManagement():
-    return 'A implémenter'
+    custom_tags = request.get_json()['tags'].split(';')
+    if custom_tags == ['']:
+        custom_tags = []
+    elif '' in custom_tags:
+        custom_tags.remove('')
+    stored_files = {}
+    for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}', 'rb').read())
+    for filename, file_data in stored_files.items():
+        extension = filename.split('.')[-1]
+        filename_tags = []
+        tags = []
+        filename_tags.append(filename.split('.')[0])
+        filename_tags.append(filename)
+        if extension in process_functions:
+            tags = process_functions[extension](f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{filename}')
+            tags.extend(custom_tags)
+            tags.extend(filename_tags)
+        else:
+            tags = custom_tags.copy()
+            tags.extend(filename_tags)
+        add_file_to_database(file_data, filename, extension, tags, [1], 2)
+    return redirect(url_for('upload'))
 
 @app.route('/generate_tags', methods=['POST'])
 @login_required

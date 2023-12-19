@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     generateTagsButton.parentElement.querySelector('form button').disabled = false;
                     generateTagsButton.textContent = 'Générer automatiquement les tags';
                     let ulList = generateTagsButton.parentElement.querySelector('div ul');
+                    ulList.innerHTML = '<li>' + generateTagsButton.name + '</li>';
+                    ulList.innerHTML += '<li>' + generateTagsButton.name.split('.')[0] + '</li>';
                     for (let tag of result) {
                         ulList.innerHTML += '<li>' + tag + '</li>';
                     }
