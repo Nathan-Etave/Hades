@@ -282,3 +282,14 @@ def get_file_by_extension(extension):
     files = session.query(FICHIER).filter_by(extensionFichier=extension).all()
     session.close()
     return files
+
+def get_all_extension():
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    extensions = session.query(FICHIER.extensionFichier).distinct().all()
+    extensions_set = set()
+    while extensions:
+        extension = extensions.pop(0)[0]
+        extensions_set.add(extension)
+    session.close()
+    return list(extensions_set)
