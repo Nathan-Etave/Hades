@@ -275,3 +275,10 @@ def get_file_by_consult(id_user):
         files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
     session.close()
     return files
+
+def get_file_by_extension(extension):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    files = session.query(FICHIER).filter_by(extensionFichier=extension).all()
+    session.close()
+    return files
