@@ -223,3 +223,13 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=file.idFichier))
     session.commit()
     session.close()
+
+def add_consulted_file(id_user, id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    date = DATE(laDate=datetime.now())
+    session.add(date)
+    session.commit()
+    session.add(ACONSULTE(idPompier=id_user, idFichier=id_file, idDate=date.idDate))
+    session.commit()
+    session.close()
