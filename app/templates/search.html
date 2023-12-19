@@ -23,7 +23,7 @@
             <div class="fichier">
                 <a href="{{url_for('file', id_fichier=fichier.idFichier)}}" id="bouton_fichier">{{ fichier.nomFichier }}</a>
                 <p>{{ fichier.taille }}</p>
-                <a href="#" id="bouton_telechargement">
+                <a href="#" class="bouton_telechargement" id="{{ fichier.idFichier }}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="svg_telechargement">
                         <circle cx="12" cy="12" r="8" stroke="#0A0A30" stroke-width="1.5"/>
                         <path class="slide" fill="#265BFF" d="M12.75 8.75a.75.75 0 00-1.5 0h1.5zm-1.5 6a.75.75 0 001.5 0h-1.5zm-1.22-2.53a.75.75 0 10-1.06 1.06l1.06-1.06zM12 15.25l-.53.53a.75.75 0 001.06 0l-.53-.53zm3.03-1.97a.75.75 0 10-1.06-1.06l1.06 1.06zm-3.78-4.53v6h1.5v-6h-1.5zm-2.28 4.53l2.5 2.5 1.06-1.06-2.5-2.5-1.06 1.06zm3.56 2.5l2.5-2.5-1.06-1.06-2.5 2.5 1.06 1.06z"/>

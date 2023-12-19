@@ -220,3 +220,81 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=file.idFichier))
     session.commit()
     session.close()
+
+def get_file_category_leaves(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_categories = session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).all()
+    categories = []
+    while all_categories:
+        category = all_categories.pop(0)
+        categories.append(session.query(CATEGORIE).filter_by(idCategorie=category.idCategorie).first())
+    session.close()
+    return categories
+
+def update_old_file(file, filename, extension, tags, categories, id_etat, old_file_id):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    old_file = session.query(FICHIER).filter_by(idFichier=old_file_id).first()
+    old_file.idEtatFichier = 1
+    session.commit()
+    new_file = FICHIER(nomFichier=filename, data=file, extensionFichier=extension, idEtatFichier=id_etat)
+    session.add(new_file)
+    session.commit()
+    new_id = new_file.idFichier
+    session.execute(table_HISTORIQUE.insert().values(ancienneVersion=old_file.idFichier, nouvelleVersion=new_file.idFichier))
+    for tag in tags:
+        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
+        if not is_tag_exists:
+            new_tag = TAG(nomTag=tag)
+            session.add(new_tag)
+            session.commit()
+        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=new_file.idFichier))
+    for categorie in categories:
+        session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=new_file.idFichier))
+    session.commit()
+    session.close()
+    return new_id
+
+def remove_file(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    old_versions = session.query(table_HISTORIQUE).filter_by(ancienneVersion=id_file).all()
+    id_old_versions = [old_file[1] for old_file in old_versions]
+    session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
+    session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).delete()
+    session.query(table_FAVORI).filter_by(idFichier=id_file).delete()
+    session.query(table_HISTORIQUE).filter_by(ancienneVersion=id_file).delete()
+    session.query(ANOTIFICATION).filter_by(idFichier=id_file).delete()
+    session.query(SIGNALEMENT).filter_by(idFichier=id_file).delete()
+    session.query(ACONSULTE).filter_by(idFichier=id_file).delete()
+    session.query(FICHIER).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for id_old_version in id_old_versions:
+        remove_file(id_old_version)
+    session.close()
+
+def update_file_tags(id_file, tags):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for tag in tags:
+        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
+        if not is_tag_exists:
+            new_tag = TAG(nomTag=tag)
+            session.add(new_tag)
+            session.commit()
+        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=id_file))
+    session.commit()
+    session.close()
+
+def update_file_categories(id_file, categories):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for categorie in categories:
+        session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=id_file))
+    session.commit()
+    session.close()
