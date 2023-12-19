@@ -1,6 +1,6 @@
 import os
 from app import app, nlp
-from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify
+from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify, Response
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import generate_password_hash, check_password_hash
 from io import BytesIO
@@ -10,7 +10,8 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
-                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database)
+                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, get_file_category_leaves,
+                          update_old_file, remove_file, update_file_categories, update_file_tags)
 
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
@@ -21,7 +22,6 @@ process_functions = {
     'pdf': nlp.process_pdf,
     'docx': nlp.process_docx,
     'xlsx': nlp.process_sheet,
-    'xls': nlp.process_sheet,
     'pptx': nlp.process_presentation,
     'txt': nlp.process_txt,
 }
@@ -120,7 +120,9 @@ def search():
 @app.route('/file')
 @login_required
 def file():
-    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')), liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')), notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')),
+                           liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')),
+                           notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/add_to_multiview', methods=['POST'])
 @login_required
@@ -206,7 +208,8 @@ def multivue():
                         liste_fichiers=liste_fich,
                         index_selected=file_index,
                         liste_tags=get_file_tags(fichier_selected.idFichier if fichier_selected else None),
-                        fichier_selected=fichier_selected, notification_enabled=user_has_notifications(current_user.get_id()))
+                        fichier_selected=fichier_selected, notification_enabled=user_has_notifications(current_user.get_id()),
+                        is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/user')
 @login_required
@@ -296,3 +299,65 @@ def uploadFilesToDatabase():
         with open(file_path, 'rb') as file_data:
             add_file_to_database(base64.b64encode(file_data.read()), filename, extension, file_properties['tags'], file_properties['categories'], 2)
     return redirect(url_for('upload'))
+
+@app.route('/edit_file', methods=['POST', 'GET'])
+@login_required
+@admin_required
+def edit_file():
+    if not os.path.exists(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        os.makedirs(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}')
+    file_id = request.args.get('id_fichier', type=int, default='')
+    file_object = get_file_by_id(file_id)
+    file_tags = get_file_tags(file_id)
+    file_categories_leaves = get_file_category_leaves(file_id)
+    temp_file_path = f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{file_object.nomFichier}'
+    with open(temp_file_path, 'wb') as temp_file:
+        temp_file.write(base64.b64decode(file_object.data))
+    return render_template('editFile.html', nom_page=f"Modifier {file_object.nomFichier}", fichier=file_object, notification_enabled=user_has_notifications(current_user.get_id()),
+                           category_tree=get_category_tree(), file_tags=file_tags, file_categories_leaves=file_categories_leaves)
+
+@app.route('/add_file_to_temp', methods=['POST'])
+@login_required
+@admin_required
+def add_file_to_temp():
+    if not os.path.exists(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        os.makedirs(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}')
+    json = request.get_json()
+    uploaded_file = json['fileData']
+    filename = secure_filename(json['filename'])
+    with open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{filename}', 'wb') as temp_file:
+        temp_file.write(base64.b64decode(uploaded_file.split(',')[1]))
+    return jsonify(filename)
+
+@app.route('/update_file', methods=['POST'])
+@login_required
+@admin_required
+def update_file():
+    json = request.get_json()
+    for filename, file_properties in json.items():
+        extension = filename.split('.')[-1]
+        tags = file_properties['tags']
+        categories = file_properties['categories']
+        will_be_updated = file_properties['willBeUpdated']
+        will_be_deleted = file_properties['willBeDeleted']
+        old_file_id = file_properties['oldFileId']
+        file_data = file_properties['fileData']
+        if will_be_updated:
+            new_id = update_old_file(bytes(file_data.split(',')[1], 'utf-8'),
+                                     filename, extension, tags, categories, 2, old_file_id)
+            return redirect(url_for('file', id_fichier=new_id))
+        elif will_be_deleted:
+            remove_file(old_file_id)
+        else:
+            update_file_categories(old_file_id, categories)
+            update_file_tags(old_file_id, tags)
+            return redirect(url_for('file', id_fichier=old_file_id))
+    return redirect(url_for('home'))
+
+@app.route('/delete_all_temp_files', methods=['POST'])
+@login_required
+@admin_required
+def delete_all_temp_files():
+    for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
+    return Response(status=204)
