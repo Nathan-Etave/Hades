@@ -9,8 +9,6 @@ main{
 }
 .gestion,.gestionUser,.gestionFic{
     flex-basis: 40%;
-
-    content: center;
 }
 .gestion>div,.gestionUser>div,.gestionFic>div {
     display: flex;
@@ -26,17 +24,22 @@ main{
     width: 5rem;
     margin: 2rem;
     flex-basis: 100%;
+    margin-top: 3rem
 
 
 }
-.nomGestion{
+.nomGestion {
     font-size: 200%;
-
     margin: 3em;
     margin-top: 0rem;
     text-align: center;
     color: #004F8A;
     flex-basis: 100%;
+    margin-bottom: 3rem;
+}
+
+.gestion{
+    text-decoration: none;
 }
 
 .popup {
@@ -52,23 +55,21 @@ main{
     margin-top: 10%;
 
   }
-  
 
-
-    #ajouterFic, #supFic,#ajouterUser,#supUser{
-        margin: 2rem;
-        padding: 0.5rem;
-        border: solid 0.2rem #004F8A;
-        border-radius: 1rem;
-        align-items: center;
-        text-align: center;
-        text-decoration: none;
-        color: #004F8A;
-    }
-  .popup>#ajouterFic:hover, .popup>#supFic:hover, .popup>#ajouterUser:hover, .popup>#supUser:hover {
+#ajouterFic, #supFic,#ajouterUser,#supUser{
+    margin: 2rem;
+    padding: 0.5rem;
+    border: solid 0.2rem #004F8A;
+    border-radius: 1rem;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    color: #004F8A;
+}
+.popup>#ajouterFic:hover, .popup>#supFic:hover, .popup>#ajouterUser:hover, .popup>#supUser:hover {
     background-color: #004F8A;
     color: white;
-  }
+}
   .popup>p{
     font-size: 200%;
     text-align: center;
@@ -77,7 +78,7 @@ main{
   .close-btn{
     position: absolute;
     right: 0;
-    background-color: red;
+    background-color: #EA4E4E;
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
