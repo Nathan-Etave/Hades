@@ -5,9 +5,9 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/manageFiles.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/editFile.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
-        <script type="module" src="{{ url_for('static', filename='js/manageFiles.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/editFile.js') }}"></script>
         <title>{{ nom_page }}</title>
 </head>
 <body>
@@ -15,11 +15,11 @@
     {% include "components/bottomHeader.html" %}
     <main>
         <div class="main_container">
-        {% for (filename, data) in stored_files.items() %}
             <div class="file_container">
                 <div class="file_header">
-                    <h2>{{ filename }}</h2>
-                    {% set lower_file_name = filename.lower() %}
+                    <h2>{{ fichier.nomFichier }}</h2>
+                    <span class="file_id" hidden>{{ fichier.idFichier }}</span>
+                    {% set lower_file_name = fichier.nomFichier.lower() %}
                     {% set mime_types = {
                         '.pdf': 'application/pdf',
                         '.png': 'image/png',
@@ -31,9 +31,9 @@
                     {% set mime_type = mime_types.get('.'+lower_file_name.split('.')[-1], None) %}
                     {% if mime_type %}
                         {% if mime_type.startswith('image') %}
-                            <img class="file_object" src="data:{{ mime_type }};base64,{{ data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                            <img class="file_object" src="data:{{ mime_type }};base64,{{ fichier.data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
                         {% else %}
-                            <object class="file_object" data="data:{{ mime_type }};base64,{{ data.decode('utf-8') }}" type="{{ mime_type }}">
+                            <object class="file_object" data="data:{{ mime_type }};base64,{{ fichier.data.decode('utf-8') }}" type="{{ mime_type }}">
                                 <p>Impossible d'afficher le fichier</p>
                             </object>
                         {% endif %}
@@ -41,9 +41,20 @@
                         <p>Apperçu non disponible pour ce type de fichier</p>
                     {% endif %}
                 </div>
+                <div class="edit_button_container">
+                    <h3>Options de modification :</h3>
+                    <p>Les modifications seront effectives après<br>la validation de celles-ci.</p>
+                    <button id="update_button">Modifier le fichier*¹</button>
+                    <button id="delete_button">Supprimer le fichier*²</button>
+                    <p>*¹ L'ancienne version du fichier sera<br>conservée dans l'historique.</p>
+                    <p>*² Le fichier sera définitivement supprimé<br>et ses ancienne versions aussi.</p>
+                </div>
                 <div class="category_container">
                     <h3>Catégorie(s) :</h3>
                     <div class="category_list_container">
+                        {% for category in file_categories_leaves %}
+                            <span class="category" hidden>{{ category.idCategorie }}</span>
+                        {% endfor %}
                         {% macro render_category_tree(category_tree, parent_id=None) %}
                             <ul>
                                 {% for category in category_tree %}
@@ -68,20 +79,22 @@
                     <h3>Tag(s) de recherche :</h3>
                     <div class="tags_list_container">
                         <ul class="tags_list">
+                            {% for tag in file_tags %}
+                                <li>{{ tag.nomTag }}</li>
+                            {% endfor %}
                         </ul>
                     </div>
-                    <button class="automatic_tags_generation" name="{{ filename }}">Générer automatiquement les tags</button>
+                    <button class="automatic_tags_generation" name="{{ fichier.nomFichier }}">Générer automatiquement les tags</button>
                     <form class="add_tag_form" action="javascript:void(0);">
                         <input type="text" placeholder="Ajouter un tag" required>
                         <button class="add_tag_button" type="submit">Ajouter</button>
                     </form>
                 </div>
             </div>
-        {% endfor %}
         </div>
         <div class="button_container">
-            <button id="cancel_button" onclick="window.location.href='{{ url_for('upload') }}';">Annuler</button>
-            <button id="validate_button">Ajouter les fichiers</button>
+            <button id="cancel_button" onclick="window.location.href='{{ url_for('file', id_fichier=fichier.idFichier) }}';">Annuler les modifications</button>
+            <button id="validate_button">Valider les modifications</button>
         </div>
     </main>
 </body>

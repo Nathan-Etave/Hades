@@ -1,0 +1,156 @@
+body {
+	margin: 0;
+
+}
+main{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.gestion,.gestionUser,.gestionFic{
+    flex-basis: 40%;
+}
+.gestion>div,.gestionUser>div,.gestionFic>div {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 2rem;
+    border: solid 0.5rem #004F8A;
+    border-radius: 1rem;
+
+}
+
+.gestion>div>svg,.gestionUser>div>svg,.gestionFic>div>svg{
+	height: 5rem;
+    width: 5rem;
+    margin: 2rem;
+    flex-basis: 100%;
+    margin-top: 3rem
+
+
+}
+.nomGestion {
+    font-size: 200%;
+    margin: 3em;
+    margin-top: 0rem;
+    text-align: center;
+    color: #004F8A;
+    flex-basis: 100%;
+    margin-bottom: 3rem;
+}
+
+.gestion{
+    text-decoration: none;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    width: 30%;
+    height: 30%;
+    content: center;
+    background-color: #fefefe;
+    border: solid 0.5rem #004F8A;
+    border-radius: 1rem;
+    z-index: 2rem;
+    margin-top: 10%;
+
+  }
+
+#ajouterFic, #supFic,#ajouterUser,#supUser{
+    margin: 2rem;
+    padding: 0.5rem;
+    border: solid 0.2rem #004F8A;
+    border-radius: 1rem;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    color: #004F8A;
+}
+.popup>#ajouterFic:hover, .popup>#supFic:hover, .popup>#ajouterUser:hover, .popup>#supUser:hover {
+    background-color: #004F8A;
+    color: white;
+}
+  .popup>p{
+    font-size: 200%;
+    text-align: center;
+    color: #004F8A;
+  }
+  .close-btn{
+    position: absolute;
+    right: 0;
+    background-color: #EA4E4E;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: right;
+    cursor: pointer;
+    content: right;
+  }
+  #ajouterFic,#ajouterUser{
+    margin-left: 10rem;
+  }
+
+@media only screen and (max-width: 1000px) {
+    .gestion,.gestionUser,.gestionFic{
+        flex-basis: 100%;
+    }
+    #ajouterFic, #supFic,#ajouterUser,#supUser{
+        font-size: 300%;
+        margin-left: 0rem;
+        border: 0.5rem solid #004F8A;
+        align-items: center;
+        text-align: center;
+        
+    }
+    .popup {
+        width: 50rem;
+        height: 30rem;
+        margin-top: 10%;
+    }
+    .popup>p{
+        font-size: 300%;
+    }
+    .close-btn{
+        width: 4rem;
+        height: 4rem;
+        font-size: 200%;
+    }
+    #ajouterFic,#ajouterUser{
+        margin-left: 1rem;
+    }
+
+
+}
+@media only screen and (max-width: 535px) {
+    
+    .nomGestion{
+        font-size: 100%;}
+    .gestion>div>svg,.gestionUser>div>svg,.gestionFic>div>svg{
+        height: 3rem;
+        width: 3rem;
+        margin: 1rem;
+    }
+    .popup {
+        width: 50%;
+        height: 30%;
+        margin-top: 10%;
+    }
+    .close-btn{
+        width: 1rem;
+        height: 1rem;
+        font-size: 50%;
+    }
+    .popup>p{
+        font-size: 100%;
+    }
+    #ajouterFic, #supFic,#ajouterUser,#supUser{
+        font-size: 50%;
+        margin: 0rem;
+        margin-left: 0rem;
+        border: 0.2rem solid #004F8A;
+        align-items: center;
+        text-align: center;
+        z-index: 2rem;
+    }
+}

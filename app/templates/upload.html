@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/upload.js') }}"></script>
         {{ dropzone.load_css() }}
         <title>{{ nom_page }}</title>
 </head>
@@ -19,7 +20,7 @@
         {{ dropzone.config() }}
         <div class="button_container">
             <button id="upload_button" onclick="window.location.href='{{ url_for('manageFiles') }}';">Réviser les fichiers un par un</button>
-            <button id="upload_button" onclick="window.location.href='{{ url_for('automaticFilesManagement') }}';">Réviser les fichiers automatiquement*</button>
+            <button id="auto_upload_button">Réviser les fichiers automatiquement*</button>
         </div>
         <p>* : Les tags de recherche seront générés automatiquement mais les fichiers seront non catégorisés.</p>
     </main>
