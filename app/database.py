@@ -17,11 +17,14 @@ while True:
 
 @app.cli.command('init_database')
 def init_database():
+    """Initialise la base de données avec les données des fichiers CSV
+    """    
     
     db.create_all()
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
+    #Table TAG
     with open('app/static/csv/TAG.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -30,6 +33,7 @@ def init_database():
             db.session.add(tag)
     db.session.commit()
 
+    #Table ETAT_FICHIER
     with open('app/static/csv/ETAT_FICHIER.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -38,6 +42,7 @@ def init_database():
             db.session.add(etat)
     db.session.commit()
 
+    #Table FICHIER
     with open('app/static/csv/FICHIER.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -46,6 +51,7 @@ def init_database():
             db.session.add(fichier)
     db.session.commit()
 
+    #Table NOTIFICATION
     with open('app/static/csv/NOTIFICATION.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -54,6 +60,7 @@ def init_database():
             db.session.add(notif)
     db.session.commit()
 
+    #Table CATEGORIE
     with open('app/static/csv/CATEGORIE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -62,6 +69,7 @@ def init_database():
             db.session.add(categorie)
     db.session.commit()
 
+    #Table ROLE_POMPIER
     with open('app/static/csv/ROLE_POMPIER.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -70,6 +78,7 @@ def init_database():
             db.session.add(role)
     db.session.commit()
 
+    #Table POMPIER
     with open('app/static/csv/POMPIER.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -78,6 +87,7 @@ def init_database():
             db.session.add(pompier)
     db.session.commit()
 
+    #Table SIGNALEMENT
     with open('app/static/csv/SIGNALEMENT.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -86,6 +96,7 @@ def init_database():
             db.session.add(signalement)
     db.session.commit()
 
+    #Table FAVORI
     with open('app/static/csv/FAVORI.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -93,6 +104,7 @@ def init_database():
             session.execute(table_FAVORI.insert().values(idFichier=row[0], idPompier=row[1]))
             session.commit()
 
+    #Table DATE
     with open('app/static/csv/DATE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -101,6 +113,7 @@ def init_database():
             db.session.add(date)
     db.session.commit()
 
+    #Table A_CONSULTE
     with open('app/static/csv/A_CONSULTE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -109,6 +122,7 @@ def init_database():
             db.session.add(a_consulte)
     db.session.commit()
 
+    #Table SOUS_CATEGORIE
     with open('app/static/csv/SOUS_CATEGORIE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -116,6 +130,7 @@ def init_database():
             session.execute(table_SOUS_CATEGORIE.insert().values(categorieParent=row[0], categorieEnfant=row[1]))
             session.commit()
 
+    #Table EST_CATEGORIE
     with open('app/static/csv/EST_CATEGORIE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -123,6 +138,7 @@ def init_database():
             session.execute(table_EST_CATEGORIE.insert().values(idCategorie=row[0], idFichier=row[1]))
             session.commit()
 
+    #Table HISTORIQUE
     with open('app/static/csv/HISTORIQUE.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -130,6 +146,7 @@ def init_database():
             session.execute(table_HISTORIQUE.insert().values(nouvelleVersion=row[0], ancienneVersion=row[1]))
             session.commit()
 
+    #Table A_TAG
     with open('app/static/csv/A_TAG.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -137,6 +154,7 @@ def init_database():
             session.execute(table_A_TAG.insert().values(nomTag=row[0], idFichier=row[1]))
             session.commit()
 
+    #Table A_NOTIFICATION
     with open('app/static/csv/A_NOTIFICATION.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
@@ -145,6 +163,7 @@ def init_database():
             db.session.add(a_notif)
     db.session.commit()
 
+    #Table A_ACCES
     with open('app/static/csv/A_ACCES.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         next(reader)
