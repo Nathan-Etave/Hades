@@ -1,8 +1,9 @@
 from app import db
 from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
                         SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
-                        table_HISTORIQUE, ROLEPOMPIER)
+                        table_A_ACCES, ROLEPOMPIER, table_HISTORIQUE)
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import asc
 from datetime import datetime
 from unidecode import unidecode
 from pytz import timezone
@@ -341,6 +342,68 @@ def add_consulted_file(id_user, id_file):
     session.add(ACONSULTE(idPompier=id_user, idFichier=id_file, idDate=date.idDate))
     session.commit()
     session.close()
+    
+def get_category_file(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_categories = session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).all()
+    categories = []
+    while all_categories:
+        categorie = all_categories.pop(0)
+        categories.append(session.query(CATEGORIE).filter_by(idCategorie=categorie.idCategorie).first())
+    session.close()
+    return categories
+
+def is_valide_file(user_id, file_id) :
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    id_etat = session.query(FICHIER.idEtatFichier).filter_by(idFichier=file_id).first()[0]
+    if id_etat != 2 :
+        return False
+    lst_category = get_category_file(file_id)
+    id_role = session.query(POMPIER.idRole).filter_by(idPompier=user_id).first()[0]
+    for category in lst_category :
+        lst_access = []
+        for row in session.query(table_A_ACCES.c.idRole).filter_by(idCategorie=category.idCategorie).all() :
+            lst_access.append(row[0])
+        if id_role not in lst_access :
+            return False
+    return True
+
+def remove_forbiden_file(file_list, user_id) :
+    res = []
+    for file in file_list :
+        if is_valide_file(user_id, file.idFichier) :
+            res.append(file)
+    return res
+
+def get_file_by_consult(id_user):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_files = session.query(ACONSULTE).filter_by(idPompier=id_user).order_by(asc(ACONSULTE.dateConsultation)).all()
+    files = []
+    for file in all_files:
+        files.append(session.query(FICHIER).filter_by(idFichier=file.idFichier).first())
+    session.close()
+    return files
+
+def get_file_by_extension(extension):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    files = session.query(FICHIER).filter_by(extensionFichier=extension).all()
+    session.close()
+    return files
+
+def get_all_extension():
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    extensions = session.query(FICHIER.extensionFichier).distinct().all()
+    extensions_set = set()
+    while extensions:
+        extension = extensions.pop(0)[0]
+        extensions_set.add(extension)
+    session.close()
+    return list(extensions_set)
 
 def add_category_to_database(name, parent_id):
     Session = sessionmaker(bind=db.engine)
