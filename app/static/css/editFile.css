@@ -144,3 +144,8 @@ body {
     font-size: 1rem;
     padding: 0.1rem 3rem 0.1rem 3rem;
 }
+
+.edit_button_container button:hover {
+    color: #004F8A;
+    background-color: #FFFFFF;
+}

@@ -6,6 +6,10 @@ from flask_dropzone import Dropzone
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = ''
+if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(__file__), 'database'))):
+    os.makedirs(os.path.normpath(os.path.join(os.path.dirname(__file__), 'database')))
+if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(__file__), 'static/temp'))):
+    os.makedirs(os.path.normpath(os.path.join(os.path.dirname(__file__), 'static/temp')))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.normpath(os.path.join(os.path.dirname(__file__), 'database/app.db'))
 app.config['DROPZONE_UPLOAD_MULTIPLE'] = True
 app.config['DROPZONE_DEFAULT_MESSAGE'] = 'Glissez-déposez vos fichiers ici<br/>ou<br/>Cliquez ici pour sélectionner vos fichiers'
