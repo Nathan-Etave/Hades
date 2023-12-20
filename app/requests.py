@@ -1,7 +1,7 @@
 from app import db
 from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
                         SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
-                        table_HISTORIQUE, table_A_ACCES)
+                        table_A_ACCES, ROLEPOMPIER)
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import asc
 from datetime import datetime
@@ -30,6 +30,34 @@ def get_user_favourites_file(id_user):
         favourites.append(session.query(FICHIER).filter_by(idFichier=favourite.idFichier).first())
     session.close()
     return favourites
+
+def add_user( prenom, nom, email, telephone,role, mdp):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    id = POMPIER.query.count() + 1
+    user = POMPIER(idPompier=id, nomPompier = nom,prenomPompier = prenom, emailPompier = email, telephonePompier = telephone,
+                   mdpPompier = mdp,photoPompier = bytes("","utf-8"),idRole = role)
+    session.add(user)
+    session.commit()
+    session.close()
+    
+def desactivate_user(id_user):
+    user = POMPIER.query.filter_by(idPompier=id_user).first()
+    user.idRole = 2
+    db.session.commit()
+    
+def get_role_by_id(id):
+    return ROLEPOMPIER.query.filter_by(idRole=id).first()
+
+def get_role_pompier():
+    pompiers = POMPIER.query.all() 
+    role_dict = {}
+    for pompier in pompiers:
+        nomrole = get_role_by_id(pompier.idRole)
+        if nomrole not in role_dict:
+            role_dict[nomrole] = []
+        role_dict[nomrole].append(pompier)
+    return role_dict
 
 def get_user_by_id(id):
     return POMPIER.query.filter_by(idPompier=id).first()
