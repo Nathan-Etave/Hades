@@ -22,7 +22,7 @@ body {
 	text-decoration: underline;
 }
 
-#bouton_telechargement {
+.bouton_telechargement {
 	margin-top: 0.4rem;
 	margin-right: 1rem;
 }
@@ -201,7 +201,7 @@ body {
 		height: 3rem;
 	}
 
-	#bouton_telechargement {
+	.bouton_telechargement {
 		margin-top: 1.3rem;
 	}
 
@@ -252,7 +252,7 @@ body {
 		height: 1.5rem;
 	}
 
-	#bouton_telechargement {
+	.bouton_telechargement {
 		margin-top: 1rem;
 	}
     
