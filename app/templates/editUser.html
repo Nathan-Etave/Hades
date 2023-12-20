@@ -20,8 +20,18 @@
             <li>
                 <p>{{ form.photo.label }} : {{ form.photo }}</p>
             </li>
+            <li>
+                <p>Rôle :
+                    <select name="role" id="role">
+                        {% for role in roles %}
+                            <option value="{{ role }}">{{ role[2:] }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+            </li>
         </ul>
         <object data="data:image/jpeg;base64,{{ user.photoPompier.decode('utf-8') }}" type="image/jpeg"></object>
+        
     </div>
     <ul class="info2">
         <li>
