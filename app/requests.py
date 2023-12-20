@@ -440,3 +440,14 @@ def remove_category_from_database(category_id):
     session.query(CATEGORIE).filter_by(idCategorie=category_id).delete()
     session.commit()
     session.close()
+
+def get_all_roles():
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    extensions = session.query(ROLEPOMPIER.idRole,ROLEPOMPIER.nomRole).distinct().all()
+    extensions_set = set()
+    while extensions:
+        extension = extensions.pop(0)
+        extensions_set.add(str(extension[0])+" "+extension[1])
+    session.close()
+    return list(extensions_set)
