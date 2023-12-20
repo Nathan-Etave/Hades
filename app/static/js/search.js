@@ -4,12 +4,35 @@ document.addEventListener('DOMContentLoaded', function() {
     let close = document.querySelector("#close");
     let validerRechercheAvanceButton = document.getElementById("valider_recherche_avance");
 
+    // Charger les sélections précédentes depuis le stockage local
+    function loadSelections() {
+        let selectedCategories = JSON.parse(localStorage.getItem('selectedCategories')) || [];
+        
+        selectedCategories.forEach(function(categoryId) {
+            let categoryCheckbox = document.getElementById(categoryId);
+            if (categoryCheckbox) {
+                categoryCheckbox.checked = true;
+            }
+        });
+
+        let favoris = JSON.parse(localStorage.getItem('favoris')) || false;
+        let date = JSON.parse(localStorage.getItem('date')) || false;
+        let extension = JSON.parse(localStorage.getItem('extension')) || 'all';
+
+        document.getElementById("favoris").checked = favoris;
+        document.getElementById("date").checked = date;
+        document.getElementById("extension").value = extension;
+    }
+
     advancedSearchButton.addEventListener('click', function() {
         if (advancedSearchForm.style.display === "block") {
             advancedSearchForm.style.display = "none";
         } else {
             advancedSearchForm.style.display = "block";
         }
+
+        // Charger les sélections lors de l'ouverture du formulaire
+        loadSelections();
     });
 
     close.addEventListener('click', function() {
@@ -17,33 +40,56 @@ document.addEventListener('DOMContentLoaded', function() {
         advancedSearchForm.style.display = "none";
     });
 
-    
+    validerRechercheAvanceButton.addEventListener('click', function() {
+        let extension = document.getElementById("extension").value;
+        let favoris = document.getElementById("favoris").checked;
+        let date = document.getElementById("date").checked;
 
-                validerRechercheAvanceButton.addEventListener('click', function() {
-                    let extension = document.getElementById("extension").value;
-                    let favoris = document.getElementById("favoris").checked;
-                    let date = document.getElementById("date").checked;
+        // Construire l'URL avec les paramètres de filtrage
+        let url = window.location.href.split('?')[0] + '?';
 
-                    // Construire l'URL avec les paramètres de filtrage
-                    let url = window.location.href.split('?')[0] + '?';
+        if (favoris) {
+            url += 'favoris=true&';
+        }
 
-                    if (extension !== 'all') {
-                        url += 'extension=' + extension + '&';
-                    }
+        if (date) {
+            url += 'recent=true&';
+        }
 
-                    if (favoris) {
-                        url += 'favoris=true&';
-                    }
+        if (extension !== 'all') {
+            url += 'extension=' + extension + '&';
+        }
 
-                    if (date) {
-                        url += 'recent=true&';
-                    }
+        let categories = document.querySelectorAll('.category_checkbox:checked');
+        categories.forEach(function(category) {
+            url += 'categorie=' + category.value + '&';
+        });
 
-                    
-                    url = url.slice(0, -1);
+        url = url.slice(0, -1);
 
-                    // Recharger la page avec la nouvelle URL
-                    window.location.href = url;
-                    //garder les paramètres de recherche dans le formulaire
-                });
+        // Enregistrer les sélections dans le stockage local
+        let selectedCategories = Array.from(categories).map(function(category) {
+            return category.value;
+        });
+        localStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
+        localStorage.setItem('favoris', JSON.stringify(favoris));
+        localStorage.setItem('date', JSON.stringify(date));
+        localStorage.setItem('extension', JSON.stringify(extension));
+
+        // Recharger la page avec la nouvelle URL
+        window.location.href = url;
+    });
+
+    // Charger les sélections lors du chargement initial de la page
+    loadSelections();
+
+    // Désélectionner les autres catégories lorsqu'une catégorie est sélectionnée
+    let checkboxes = document.querySelectorAll('input[type="checkbox"].category_checkbox');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            checkboxes.forEach(function(c) {
+                if (c !== checkbox) c.checked = false;
+            });
+        });
+    });
 });

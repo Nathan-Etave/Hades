@@ -74,17 +74,13 @@ def home():
     return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()))
 
 def intersect_files(file_lists):
-    file_lists = [lst for lst in file_lists if lst]
-
+    file_lists = [lst for lst in file_lists if "vide" not in lst]
     if not file_lists:
         return []
-
     intersection = file_lists[0]
-
     for file in intersection.copy():
         if not all(any(file.nomFichier == other_file.nomFichier for other_file in lst) for lst in file_lists[1:]):
             intersection.remove(file)
-
     return intersection
 
 def unique_files(file_list):
@@ -99,16 +95,13 @@ def unique_files(file_list):
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
-    #Envoi vers la page 
     if request.method == 'POST':
         search_term = request.form['search']
         favourites_sort = request.form.get('favoris', '')
         recent_sort = request.form.get('recent', '')
         categorie_id = request.form.get('categorie', '')
         extension = request.form.get('extension', '')
-        
         return redirect(url_for('search', search=search_term, categorie=categorie_id,favoris=favourites_sort, recent=recent_sort, extension=extension))
-    #Affichage de la page de recherche
     else:
         # Recupération des paramètres de recherche
         search_term = request.args.get('search', type=str, default='')
@@ -117,55 +110,39 @@ def search():
         categorie_id = request.args.get('categorie', type=int, default='')
         extension = request.args.get('extension', type=str, default='')
         
-        liste_fichiers_favourites_sort = []
-        liste_fichiers_search_term = []
-        liste_fichiers_categories = []
-        liste_recent_sort = []
-        liste_extension_sort = []
+        liste_fichiers_favourites_sort = ["vide"]
+        liste_fichiers_search_term = ["vide"]
+        liste_fichiers_categories = ["vide"]
+        liste_recent_sort = ["vide"]
+        liste_extension_sort = ["vide"]
         print("Info", favourites_sort, recent_sort, categorie_id, search_term, extension)
         
+        #Remplissage des listes de fichiers
         if favourites_sort :
             liste_fichiers_favourites_sort = get_user_favourites_file(current_user.get_id())
-            print("taille 1", len(liste_fichiers_favourites_sort))
-            for file in liste_fichiers_favourites_sort:
-                print(file.nomFichier)
         if search_term :
             liste_fichiers_search_term = get_file_by_tag(unidecode(search_term))
-            print("taille 2", len(liste_fichiers_search_term))
-            for file in liste_fichiers_search_term:
-                print(file.nomFichier)
         if categorie_id :
             liste_fichiers_categories = get_file_by_categorie(categorie_id)
-            print("taille 4", len(liste_fichiers_categories))
-            for file in liste_fichiers_categories:
-                print(file.nomFichier)
         if recent_sort :
             liste_recent_sort = get_file_order_by_date(current_user.get_id())
-            print("taille 5", len(liste_recent_sort))
-            for file in liste_recent_sort:
-                print(file.nomFichier)
         if extension :
             liste_extension_sort = get_file_by_extension(extension)
-            print("taille 7", len(liste_extension_sort))
-            for file in liste_extension_sort:
-                print(file.nomFichier)
-            
         
+        #Intersection des listes de fichiers et tri
         counter_list = [liste_recent_sort, liste_fichiers_favourites_sort, liste_fichiers_search_term, liste_fichiers_categories, liste_extension_sort]
-        
         liste_fichiers = intersect_files(counter_list)
-        print("taille 6", len(liste_fichiers))
-        for file in liste_fichiers:
-            print(file.nomFichier)
         liste_fichiers.reverse()
         liste_fichiers = unique_files(liste_fichiers)
-        print("taille 3", len(liste_fichiers))
 
-        if not favourites_sort and not recent_sort and not categorie_id and not search_term:
+        #Si aucune recherche n'est faite, on affiche tous les fichiers
+        if not favourites_sort and not recent_sort and not categorie_id and not search_term and not extension:
             liste_fichiers = get_all_files()
-        
-        liste_fichiers_favourites_sort = remove_forbiden_file(liste_fichiers_favourites_sort,current_user.get_id())
-        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1,liste_extensions=get_all_extension())
+            
+        #on retire les fichiers que l'on ne doit pas voir
+        liste_fichiers = remove_forbiden_file(liste_fichiers,current_user.get_id())
+
+        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1,liste_extensions=get_all_extension(), category_tree=get_category_tree())
 
 @app.route('/file')
 @login_required
