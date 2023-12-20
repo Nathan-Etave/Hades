@@ -1,0 +1,20 @@
+{% extends "baseUser.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/searchUser.css') }}" />
+<title>Rechercher un utilisateurs</title>
+{% endblock %}
+{% block content %}
+<form method="POST" role="id" enctype="multipart/form-data", action="">
+    <input type="search" name="searchId" placeholder="Rechercher par ID" aria-label="searchId">
+    <input type="submit" name="submitId" value="Rechercher">
+</form>
+<form method="POST" role="email" enctype="multipart/form-data"> 
+    <input type="search" name="searchId" placeholder="Rechercher par Email" aria-label="searchEmail">
+    <input type="submit" name="submitEmail" value="Rechercher">
+</form>
+{% if error %}
+    <p>Element invalide</p>
+{% endif %}
+
+{% endblock %}
