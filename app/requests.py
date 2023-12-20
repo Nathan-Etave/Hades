@@ -311,3 +311,39 @@ def add_consulted_file(id_user, id_file):
     session.add(ACONSULTE(idPompier=id_user, idFichier=id_file, idDate=date.idDate))
     session.commit()
     session.close()
+
+def add_category_to_database(name, parent_id):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    category = CATEGORIE(nomCategorie=name)
+    session.add(category)
+    session.commit()
+    if parent_id is not None:
+        session.execute(table_SOUS_CATEGORIE.insert().values(categorieParent=parent_id, categorieEnfant=category.idCategorie))
+    session.commit()
+    session.close()
+
+def update_category_from_database(category_id, name):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    category = session.query(CATEGORIE).filter_by(idCategorie=category_id).first()
+    category.nomCategorie = name
+    session.commit()
+    session.close()
+
+def remove_category_from_database(category_id):
+    sous_categories = get_liste_sous_categorie(category_id)
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    for sous_categorie in sous_categories:
+        remove_category_from_database(sous_categorie.idCategorie)
+    files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=category_id).all()
+    for file in files:
+        other_categories = session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie != category_id).all()
+        if len(other_categories) == 0:
+            session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie == category_id).update({table_EST_CATEGORIE.c.idCategorie: 1}, synchronize_session=False)
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=category_id).delete()
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieEnfant=category_id).delete()
+    session.query(CATEGORIE).filter_by(idCategorie=category_id).delete()
+    session.commit()
+    session.close()
