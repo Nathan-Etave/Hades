@@ -17,6 +17,16 @@ class EditUserForm(FlaskForm):
     telephone = StringField(validators=[DataRequired()], render_kw={"placeholder": "Téléphone"})
     submit = SubmitField('Modifier')
 
+class EditUserFormStringPassword(FlaskForm):
+    id = HiddenField('id')
+    nom = StringField(validators=[DataRequired()], render_kw={"placeholder": "Nom"})
+    prenom = StringField(validators=[DataRequired()], render_kw={"placeholder": "Prénom"})
+    mail = StringField(validators=[DataRequired()], render_kw={"placeholder": "Email"})
+    mdp = StringField(validators=[DataRequired()], render_kw={"type": "password", "placeholder": "Mot de passe", "readonly": True})
+    photo = FileField()
+    telephone = StringField(validators=[DataRequired()], render_kw={"placeholder": "Téléphone"})
+    submit = SubmitField('Modifier')
+
 class AddUserForm(FlaskForm):
     id = HiddenField('id')
     nom = StringField(validators=[DataRequired()], render_kw={"placeholder": "Nom"})

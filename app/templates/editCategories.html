@@ -24,11 +24,11 @@
                                     <li>
                                         <details>
                                             <summary>
-                                                <input type="checkbox" id="{{ category[0].idCategorie }}" value="{{ category[0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
-                                                <label for="{{ category[0].idCategorie }}">{{ category[0].nomCategorie }}</label>
+                                                <input type="checkbox" id="{{ category[0][0].idCategorie }}" value="{{ category[0][0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
+                                                <label for="{{ category[0].idCategorie }}">{{ category[0][0].nomCategorie }} ({{ category[0][1]}} fichier(s))</label>
                                             </summary>
                                             {% if category[1] %}
-                                                {{ render_category_tree(category[1], category[0].idCategorie) }}
+                                                {{ render_category_tree(category[1], category[0][0].idCategorie) }}
                                             {% endif %}
                                         </details>
                                     </li>
