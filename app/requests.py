@@ -1,7 +1,7 @@
 from app import db
 from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
                         SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
-                        table_A_ACCES, ROLEPOMPIER)
+                        table_A_ACCES, ROLEPOMPIER, table_HISTORIQUE)
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import asc
 from datetime import datetime
