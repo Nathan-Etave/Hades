@@ -167,7 +167,7 @@ def remove_from_notifications():
     id_file = request.get_json()['id_file']
     id_date = request.get_json()['id_date']
     remove_from_user_notification(id_notification, id_file, id_date, current_user.get_id())
-    return redirect(url_for('login'))
+    return redirect(url_for('notifications'))
 
 @app.route('/report', methods=['POST'])
 @login_required
