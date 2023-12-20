@@ -1,9 +1,8 @@
 from app import db
-from app.models import (POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
+from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, FICHIER, ANOTIFICATION,
                         SIGNALEMENT, NOTIFICATION, DATE, ACONSULTE, TAG, table_A_TAG, table_EST_CATEGORIE,
-                        table_HISTORIQUE, table_A_ACCES, ROLEPOMPIER,CATEGORIE)
+                        table_HISTORIQUE, ROLEPOMPIER)
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import desc, asc
 from datetime import datetime
 from unidecode import unidecode
 
@@ -30,9 +29,21 @@ def get_user_favourites_file(id_user):
     session.close()
     return favourites
 
-def get_user_by_id(id):
-    return POMPIER.query.filter_by(idPompier=id).first()
-
+def add_user( prenom, nom, email, telephone,role, mdp):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    id = POMPIER.query.count() + 1
+    user = POMPIER(idPompier=id, nomPompier = nom,prenomPompier = prenom, emailPompier = email, telephonePompier = telephone,
+                   mdpPompier = mdp,photoPompier = bytes("","utf-8"),idRole = role)
+    session.add(user)
+    session.commit()
+    session.close()
+    
+def desactivate_user(id_user):
+    user = POMPIER.query.filter_by(idPompier=id_user).first()
+    user.idRole = 2
+    db.session.commit()
+    
 def get_role_by_id(id):
     return ROLEPOMPIER.query.filter_by(idRole=id).first()
 
@@ -46,9 +57,11 @@ def get_role_pompier():
         role_dict[nomrole].append(pompier)
     return role_dict
 
+def get_user_by_id(id):
+    return POMPIER.query.filter_by(idPompier=id).first()
+
 def get_user_by_email(email):
     return POMPIER.query.filter_by(emailPompier=email).first()
-
 
 def get_file_by_id(id):
     return FICHIER.query.filter_by(idFichier=id).first()
@@ -97,7 +110,7 @@ def get_user_notifications(id_user):
 def remove_from_user_notification(id_notification, id_fichier, idd_date, id_user):
     db.session.delete(ANOTIFICATION.query.filter_by(idPompier=id_user).filter_by(idNotification=id_notification).filter_by(idFichier=id_fichier).filter_by(idDate=idd_date).first())
     db.session.commit()
-    
+
 def get_file_order_by_date(id_user):
     Session = sessionmaker(bind=db.engine)
     session = Session()
@@ -116,21 +129,6 @@ def update_user(id_user, prenom, nom, mail, telephone, mdp):
     user.emailPompier = mail
     user.telephonePompier = telephone
     user.mdpPompier = mdp
-    db.session.commit()
-
-def add_user( prenom, nom, email, telephone,role, mdp):
-    Session = sessionmaker(bind=db.engine)
-    session = Session()
-    id = POMPIER.query.count() + 1
-    user = POMPIER(idPompier=id, nomPompier = nom,prenomPompier = prenom, emailPompier = email, telephonePompier = telephone,
-                   mdpPompier = mdp,photoPompier = bytes("","utf-8"),idRole = role)
-    session.add(user)
-    session.commit()
-    session.close()
-    
-def desactivate_user(id_user):
-    user = POMPIER.query.filter_by(idPompier=id_user).first()
-    user.idRole = 2
     db.session.commit()
 
 def update_user_photo(id_user, photo):
@@ -329,6 +327,8 @@ def update_file_categories(id_file, categories):
     session.commit()
     for categorie in categories:
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=id_file))
+    session.commit()
+    session.close()
 
 def add_consulted_file(id_user, id_file):
     Session = sessionmaker(bind=db.engine)
@@ -339,32 +339,39 @@ def add_consulted_file(id_user, id_file):
     session.add(ACONSULTE(idPompier=id_user, idFichier=id_file, idDate=date.idDate))
     session.commit()
     session.close()
-    
-def get_file_by_extension(extension):
-    Session = sessionmaker(bind=db.engine)
-    session = Session()
-    files = session.query(FICHIER).filter_by(extensionFichier=extension).all()
-    session.close()
-    return files
 
-def get_all_extension():
+def add_category_to_database(name, parent_id):
     Session = sessionmaker(bind=db.engine)
     session = Session()
-    extensions = session.query(FICHIER.extensionFichier).distinct().all()
-    extensions_set = set()
-    while extensions:
-        extension = extensions.pop(0)[0]
-        extensions_set.add(extension)
+    category = CATEGORIE(nomCategorie=name)
+    session.add(category)
+    session.commit()
+    if parent_id is not None:
+        session.execute(table_SOUS_CATEGORIE.insert().values(categorieParent=parent_id, categorieEnfant=category.idCategorie))
+    session.commit()
     session.close()
-    return list(extensions_set)
 
-def get_all_roles():
+def update_category_from_database(category_id, name):
     Session = sessionmaker(bind=db.engine)
     session = Session()
-    extensions = session.query(ROLEPOMPIER.idRole,ROLEPOMPIER.nomRole).distinct().all()
-    extensions_set = set()
-    while extensions:
-        extension = extensions.pop(0)
-        extensions_set.add(str(extension[0])+" "+extension[1])
+    category = session.query(CATEGORIE).filter_by(idCategorie=category_id).first()
+    category.nomCategorie = name
+    session.commit()
     session.close()
-    return list(extensions_set)
+
+def remove_category_from_database(category_id):
+    sous_categories = get_liste_sous_categorie(category_id)
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    for sous_categorie in sous_categories:
+        remove_category_from_database(sous_categorie.idCategorie)
+    files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=category_id).all()
+    for file in files:
+        other_categories = session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie != category_id).all()
+        if len(other_categories) == 0:
+            session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie == category_id).update({table_EST_CATEGORIE.c.idCategorie: 1}, synchronize_session=False)
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=category_id).delete()
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieEnfant=category_id).delete()
+    session.query(CATEGORIE).filter_by(idCategorie=category_id).delete()
+    session.commit()
+    session.close()
