@@ -299,6 +299,8 @@ def update_file_categories(id_file, categories):
     session.commit()
     for categorie in categories:
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=id_file))
+    session.commit()
+    session.close()
 
 def add_consulted_file(id_user, id_file):
     Session = sessionmaker(bind=db.engine)
