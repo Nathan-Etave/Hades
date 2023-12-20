@@ -16,12 +16,12 @@
 <div class="container">
     <ul class="notif">
         {% for notification,fichier,date in liste_notifications %}
-            <li class="notification">
+            <li class="notification" id = "notification">
                 <span class="file_id" style="display: none;">{{ fichier.idFichier }}</span>
                 <span class="notification_id" style="display: none;">{{ notification.idNotification }}</span>
                 <span class="date_id" style="display: none;">{{ date.idDate }}</span>
                 <div class="texte">
-                    <h3>{{ notification.typeChange }} de {{ fichier.nomFichier }} ({{ fichier.idFichier }}) le {{ date.laDate }}.</h3>
+                    <h3>{{ notification.typeChange }} de <a style="color: white;" href="{{ url_for('file', id_fichier=fichier.idFichier) }}">{{ fichier.nomFichier }}</a> ({{ fichier.idFichier }}) le {{ date.laDate.strftime('%d/%m/%Y') }} à {{ date.laDate.strftime('%H:%M') }}</h3>
                     <p>{{ notification.texteNotification }}</p>
                     <h4> Raison : </h4>
                     <p>{{ notification.raisonNotification }}</p>
@@ -31,5 +31,5 @@
         {% endfor %}
     </ul>
 </div>
-<body>
+</body>
 </html>
