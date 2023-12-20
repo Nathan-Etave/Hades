@@ -1,4 +1,5 @@
 "idRole","nomRole","descriptionRole"
 1,"Administrateur","Administrateur (peut voir la catégorie 3)"
-2,"Role1","Le rôle 1 (ne peut pas voir la catégorie 3)"
-3,"Role2","Le rôle 2 (ne peut pas voir la catégorie 3 et 4)"
+2,"Désactivé","Désactivé (le compte est désactivé)"
+3,"Role1","Le rôle 1 (ne peut pas voir la catégorie 3)"
+4,"Role2","Le rôle 2 (ne peut pas voir la catégorie 3 et 4)"
