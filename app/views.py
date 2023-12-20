@@ -5,6 +5,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import generate_password_hash, check_password_hash
 from io import BytesIO
 from functools import wraps
+from unidecode import unidecode
 from werkzeug.utils import secure_filename
 from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
@@ -13,7 +14,7 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file,
                           add_category_to_database, update_category_from_database, remove_category_from_database,
                           get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
-                          desactivate_user, get_all_roles, add_user)
+                          get_file_by_extension, get_all_extension, remove_forbiden_file, desactivate_user, get_all_roles, add_user)
 from app.forms import LoginForm, EditUserForm, AddUserForm
 from app import login_manager
 import base64
@@ -73,50 +74,76 @@ def logout():
 def home():
     return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()))
 
+def intersect_files(file_lists):
+    file_lists = [lst for lst in file_lists if "vide" not in lst]
+    if not file_lists:
+        return []
+    intersection = file_lists[0]
+    for file in intersection.copy():
+        if not all(any(file.nomFichier == other_file.nomFichier for other_file in lst) for lst in file_lists[1:]):
+            intersection.remove(file)
+    return intersection
+
+def unique_files(file_list):
+    unique_list = []
+    seen_files = []
+    for file in file_list:
+        if file.nomFichier not in seen_files:
+            seen_files.append(file.nomFichier)
+            unique_list.append(file)
+    return unique_list
+
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
     if request.method == 'POST':
         search_term = request.form['search']
-        favourites_sort = request.form.get('favoris', False)
-        recent_sort = request.form.get('recent', False)
-        advanced_sort = request.form.get('advanced_search', False)
+        favourites_sort = request.form.get('favoris', '')
+        recent_sort = request.form.get('recent', '')
         categorie_id = request.form.get('categorie', '')
-        return redirect(url_for('search', search=search_term, categorie=categorie_id,favoris=favourites_sort, recent=recent_sort, advanced_search=advanced_sort))
+        extension = request.form.get('extension', '')
+        return redirect(url_for('search', search=search_term, categorie=categorie_id,favoris=favourites_sort, recent=recent_sort, extension=extension))
     else:
+        # Recupération des paramètres de recherche
         search_term = request.args.get('search', type=str, default='')
         favourites_sort = request.args.get('favoris', type=bool, default='')
         recent_sort = request.args.get('recent', type=bool, default='')
-        advanced_sort = request.args.get('advanced_search', type=bool, default='')
         categorie_id = request.args.get('categorie', type=int, default='')
-        liste_fichiers_search_term = []
-        liste_fichiers_recent_sort = []
-        liste_fichiers_favourites_sort = []
-        liste_fichiers_categorie_sort = []
-        liste_fichiers_extension_sort = []
-        liste_fichiers_advanced_sort = []
-        if search_term :
-            liste_fichiers_search_term = get_file_by_tag(search_term)
-        if recent_sort :
-            liste_fichiers_recent_sort = get_file_order_by_date(current_user.get_id())
+        extension = request.args.get('extension', type=str, default='')
+        
+        liste_fichiers_favourites_sort = ["vide"]
+        liste_fichiers_search_term = ["vide"]
+        liste_fichiers_categories = ["vide"]
+        liste_recent_sort = ["vide"]
+        liste_extension_sort = ["vide"]
+        print("Info", favourites_sort, recent_sort, categorie_id, search_term, extension)
+        
+        #Remplissage des listes de fichiers
         if favourites_sort :
             liste_fichiers_favourites_sort = get_user_favourites_file(current_user.get_id())
-        if advanced_sort :
-            liste_fichiers_advanced_sort = get_all_files()
+        if search_term :
+            liste_fichiers_search_term = get_file_by_tag(unidecode(search_term))
         if categorie_id :
-            liste_fichiers_categorie_sort = get_file_by_categorie(categorie_id)
-        counter_list = [collections.Counter(liste_fichiers_recent_sort), collections.Counter(liste_fichiers_favourites_sort),
-                        collections.Counter(liste_fichiers_search_term), collections.Counter(liste_fichiers_advanced_sort), collections.Counter(liste_fichiers_categorie_sort)]
-        counter_list = [counter for counter in counter_list if counter]
-        if len(counter_list) == 0:
-            liste_fichiers = []
-        else :
-            while counter_list:
-                result = counter_list.pop(0)
-                for counter in counter_list:
-                    result &= counter
-                liste_fichiers = list(result.elements())
-        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()))
+            liste_fichiers_categories = get_file_by_categorie(categorie_id)
+        if recent_sort :
+            liste_recent_sort = get_file_order_by_date(current_user.get_id())
+        if extension :
+            liste_extension_sort = get_file_by_extension(extension)
+        
+        #Intersection des listes de fichiers et tri
+        counter_list = [liste_recent_sort, liste_fichiers_favourites_sort, liste_fichiers_search_term, liste_fichiers_categories, liste_extension_sort]
+        liste_fichiers = intersect_files(counter_list)
+        liste_fichiers.reverse()
+        liste_fichiers = unique_files(liste_fichiers)
+
+        #Si aucune recherche n'est faite, on affiche tous les fichiers
+        if not favourites_sort and not recent_sort and not categorie_id and not search_term and not extension:
+            liste_fichiers = get_all_files()
+            
+        #on retire les fichiers que l'on ne doit pas voir
+        liste_fichiers = remove_forbiden_file(liste_fichiers,current_user.get_id())
+
+        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1,liste_extensions=get_all_extension(), category_tree=get_category_tree())
 
 @app.route('/file')
 @login_required
