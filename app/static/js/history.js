@@ -1,14 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let advancedSearchButton = document.getElementById("bouton_recherche_avance");
-    let advancedSearchForm = document.querySelector(".advanced_search_popup");
     let downloadButtons = document.querySelectorAll(".bouton_telechargement");
-    advancedSearchButton.addEventListener('click', function() {
-        if (advancedSearchForm.style.display == "block") {
-            advancedSearchForm.style.display = "none";
-        } else {
-            advancedSearchForm.style.display = "block";
-        }
-    });
     downloadButtons.forEach(function(downloadButton) {
         let fileId = downloadButton.id;
         downloadButton.addEventListener('click', function() {
