@@ -13,6 +13,11 @@
     <input type="search" name="searchId" placeholder="Rechercher par Email" aria-label="searchEmail">
     <input type="submit" name="submitEmail" value="Rechercher">
 </form>
+<form method="POST" role="email" enctype="multipart/form-data"> 
+    <input type="search" name="searchNom" placeholder="Rechercher par Nom" aria-label="searchNom">
+    <input type="search" name="searchPrenom" placeholder="Rechercher par Prénom" aria-label="searchPrenom">
+    <input type="submit" name="submitPrenom" value="Rechercher">
+</form>
 {% if error %}
     <p>Element invalide</p>
 {% endif %}
