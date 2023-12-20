@@ -86,6 +86,15 @@ def home():
     return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 def intersect_files(file_lists):
+    """
+    Trouve l'intersection de plusieurs listes de fichiers.
+
+    Args:
+        file_lists (list): Une liste de listes contenant des objets de fichiers.
+
+    Returns:
+        list: L'intersection des listes de fichiers.
+    """
     file_lists = [lst for lst in file_lists if "vide" not in lst]
     if not file_lists:
         return []
@@ -96,6 +105,15 @@ def intersect_files(file_lists):
     return intersection
 
 def unique_files(file_list):
+    """
+    Retourne une liste de fichiers uniques à partir de la liste de fichiers donnée.
+    
+    Paramètres:
+        file_list (list): Une liste de fichiers.
+    
+    Retour:
+        list: Une liste de fichiers uniques.
+    """
     unique_list = []
     seen_files = []
     for file in file_list:
