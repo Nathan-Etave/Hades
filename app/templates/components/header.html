@@ -32,6 +32,11 @@
                     <li>
                         <a href="{{ url_for('user') }}">Profil</a>
                     </li>
+                    {% if is_admin %}
+                        <li>
+                            <a href="{{ url_for('administration') }}">Admin</a>
+                        </li>
+                    {% endif %}
                     <li>
                         <a href="{{ url_for('notifications') }}" aria-label="Notifications">
                             <span class="notification_enabler" style="display: none;">{{ notification_enabled }}</span>

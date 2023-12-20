@@ -18,7 +18,7 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-#upload_button {
+#upload_button, #auto_upload_button {
 	color: #FFFFFF;
 	background-color: #004F8A;
 	border-radius: 5rem;

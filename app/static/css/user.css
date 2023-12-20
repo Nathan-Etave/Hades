@@ -6,7 +6,7 @@ body {
     padding: 0;
 }
 
-.info1 li, .info2 li, form{
+.info1 li, .info2 li {
     background-color: #004F8A;
 	list-style-type: none;
     color: #FFFFFF;
