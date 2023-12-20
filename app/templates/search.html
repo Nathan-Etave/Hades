@@ -33,26 +33,39 @@
         {% endfor %}
     </section>
     <div class="advanced_search_popup">
+        <button id="close">X</button>
         <h4>Recherche avancée</h4>
         <div class="categorie_search">
             <h5>Catégorie</h5>
-            <div class="advanced_categorie_search">
-                <button id="categorie_button">{{ categorie.nomCategorie }}</button>
-                <div>
-                    <select name="sous_categorie" id="sous_categorie">
-                        <option value="all">Toutes</option>
-                        {% for sous_categorie in liste_sous_categories %}
-                            <option value="{{ sous_categorie.idCategorie }}">{{ sous_categorie.nomCategorie }}</option>
+            <div class="category_list_container">
+                {% for category in file_categories_leaves %}
+                    <span class="category" hidden>{{ category.idCategorie }}</span>
+                {% endfor %}
+                {% macro render_category_tree(category_tree, parent_id=None) %}
+                    <ul>
+                        {% for category in category_tree %}
+                            <li>
+                                <details>
+                                    <summary>
+                                        <input type="checkbox" id="{{ category[0].idCategorie }}" value="{{ category[0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
+                                        <label for="{{ category[0].idCategorie }}">{{ category[0].nomCategorie }}</label>
+                                    </summary>
+                                    {% if category[1] %}
+                                        {{ render_category_tree(category[1], category[0].idCategorie) }}
+                                    {% endif %}
+                                </details>
+                            </li>
                         {% endfor %}
-                    </select>
-                </div>
+                    </ul>
+                {% endmacro %}
+                {{ render_category_tree(category_tree) }}
             </div>
         </div>
         <div class="extension_search">
             <h5>Extension</h5>
             <div class="advanced_extension_search">
                 <select name="extension" id="extension">
-                    <option value="all">Toutes</option>
+                    <option value="all" id="extends">Extension</option>
                     {% for extension in liste_extensions %}
                         <option value="{{ extension }}">{{ extension }}</option>
                     {% endfor %}
@@ -61,13 +74,15 @@
         </div>
         <div class="favoris_search">
             <h5>Favoris</h5>
+            <label for="favoris" id="textFav">Recherche par Favoris</label>
             <input type="checkbox" name="favoris" id="favoris">
-            <label for="favoris">Oui/Non</label>
+            
         </div>
         <div class="date_search">
             <h5>Récemment consultés</h5>
+            <label for="date" id="texteDate">Recherche par recement consultés</label>
             <input type="checkbox" name="date" id="date">
-            <label for="date">Oui/Non</label>
+           
         </div>
         <button id="valider_recherche_avance">Valider</button>
     </div>
