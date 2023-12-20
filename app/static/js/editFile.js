@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
             tagForm.querySelector('button').disabled = false;
             generateTagsButton.textContent = 'Générer automatiquement les tags';
             let ulList = generateTagsButton.parentElement.querySelector('div ul');
+            ulList.innerHTML = '<li>' + generateTagsButton.name + '</li>';
+            ulList.innerHTML += '<li>' + generateTagsButton.name.split('.')[0] + '</li>';
             for (let tag of result) {
                 ulList.innerHTML += '<li>' + tag + '</li>';
             }
@@ -185,6 +187,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         json[filename]['categories'].push(lastCategory.id);
                     }
                 }
+            }
+            if (json[filename]['categories'].length > 1 && json[filename]['categories'].includes('1')) {
+                alert('Vous ne pouvez pas sélectionner d\'autres catégories en plus de la catégorie "Non catégorisé".');
+                return;
             }
         }
         json[filename]['willBeUpdated'] = willBeUpdated;
