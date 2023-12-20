@@ -125,13 +125,14 @@ def get_file_order_by_date(id_user):
     session.close()
     return files
 
-def update_user(id_user, prenom, nom, mail, telephone, mdp,role=None):
+def update_user(id_user, prenom, nom, mail, telephone, mdp=None, role=None):
     user = POMPIER.query.filter_by(idPompier=id_user).first()
     user.prenomPompier = prenom
     user.nomPompier = nom
     user.emailPompier = mail
     user.telephonePompier = telephone
-    user.mdpPompier = mdp
+    if mdp is not None:
+        user.mdpPompier = mdp
     if role is not None:
         user.idRole = role
     db.session.commit()
@@ -236,7 +237,7 @@ def get_category_tree(category_id=None):
             subcategory_tree = get_category_tree(category.idCategorie)
         else:
             subcategory_tree = []
-        category_tree.append([category, subcategory_tree])
+        category_tree.append([[category, len(get_file_by_categorie(category.idCategorie))], subcategory_tree])
     return category_tree
 
 def add_file_to_database(file, filename, extension, tags, categories, id_etat):
@@ -246,12 +247,14 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
     session.add(file)
     session.commit()
     for tag in tags:
-        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
-        if not is_tag_exists:
+        existing_tag = session.query(TAG).filter_by(nomTag=tag).first()
+        if existing_tag is None:
             new_tag = TAG(nomTag=tag)
             session.add(new_tag)
             session.commit()
-        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=file.idFichier))
+        existing_association = session.query(table_A_TAG).filter_by(nomTag=tag, idFichier=file.idFichier).first()
+        if existing_association is None:
+            session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=file.idFichier))
     for categorie in categories:
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=file.idFichier))
     session.commit()
@@ -453,3 +456,21 @@ def get_all_roles():
         extensions_set.add(str(extension[0])+" "+extension[1])
     session.close()
     return list(extensions_set)
+
+def already_exist_mail(mail):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    user = session.query(POMPIER).filter_by(emailPompier=mail).first()
+    print(mail, user, user is not None)
+    session.close()
+    return user is not None
+
+def get_user_access(id_user):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    id_role = session.query(POMPIER.idRole).filter_by(idPompier=id_user).first()[0]
+    list_access = []
+    for row in session.query(table_A_ACCES.c.idCategorie).filter_by(idRole=id_role).all() :
+        list_access.append(row[0])
+    session.close()
+    return list_access
