@@ -12,8 +12,9 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
                           get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file,
                           add_category_to_database, update_category_from_database, remove_category_from_database,
-                          get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags)
-from app.forms import LoginForm, EditUserForm
+                          get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
+                          desactivate_user, get_all_roles, add_user)
+from app.forms import LoginForm, EditUserForm, AddUserForm
 from app import login_manager
 import base64
 import collections
@@ -419,3 +420,57 @@ def delete_all_temp_files():
     for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
         os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
     return Response(status=204)
+
+@app.route('/search_user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def search_user():
+    if request.method == 'POST':
+        search_term = request.form['searchId']
+        if search_term == '':
+            search_term = request.form['searchEmail']
+        return redirect(url_for('edit_profil_admin', user=search_term))
+    else:
+        user = get_user_by_id(current_user.get_id())
+        error = request.args.get('error', type=bool, default=False)
+        return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    
+@app.route('/edit_profil_admin', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profil_admin():
+    user = get_user_by_id(request.args.get('user', type=int, default=''))
+    if user is None:
+        user = get_user_by_email(request.args.get('user', type=str, default=''))
+        if user is None:
+            return redirect(url_for('search_user', error=True))
+    form = EditUserForm(id=user.idPompier, nom=user.nomPompier, prenom=user.prenomPompier, mail=user.emailPompier, mdp=user.mdpPompier, photo=user.photoPompier,telephone=user.telephonePompier)
+    page_name = f'Modifier le profil : {user.nomPompier} {user.prenomPompier}'
+    if form.validate_on_submit():
+        password = generate_password_hash(form.mdp.data).decode('utf-8')
+        if form.photo.data:
+            encoded_photo = base64.b64encode(form.photo.data.read())
+            update_user_photo(user.idPompier, encoded_photo)
+        update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
+        return redirect(url_for('administration'))
+    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
+@app.route('/del_user')
+@login_required
+@admin_required
+def delUser():
+    id = request.args.get('user', type=int, default='')
+    desactivate_user(id)
+    return redirect(url_for('administration'))
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_user_page():
+    form = AddUserForm()
+    if form.validate_on_submit():
+        role = int(request.form.get('role', 2)[0])
+        password = generate_password_hash(form.mdp.data).decode('utf-8')
+        add_user(form.prenom.data, form.nom.data, form.mail.data,form.telephone.data,role, password)
+        return redirect(url_for('administration'))
+    return render_template('addUser.html', form=form,roles=get_all_roles(), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
