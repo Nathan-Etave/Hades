@@ -1,20 +1,19 @@
 import os
 from app import app, nlp
-from flask import Response, render_template, request, redirect, url_for, make_response, send_file, jsonify
+from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify, Response
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import generate_password_hash, check_password_hash
 from io import BytesIO
 from functools import wraps
 from werkzeug.utils import secure_filename
-from unidecode import unidecode
-from app.requests import (get_role_pompier,get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
+from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
-                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file,remove_forbiden_file, 
-                          desactivate_user, update_old_file, remove_file, update_file_categories, update_file_tags, get_file_category_leaves,
-                          add_user, get_file_by_extension,get_all_extension,get_all_roles)
-
+                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file,
+                          add_category_to_database, update_category_from_database, remove_category_from_database,
+                          get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
+                          desactivate_user, get_all_roles, add_user)
 from app.forms import LoginForm, EditUserForm, AddUserForm
 from app import login_manager
 import base64
@@ -24,7 +23,6 @@ process_functions = {
     'pdf': nlp.process_pdf,
     'docx': nlp.process_docx,
     'xlsx': nlp.process_sheet,
-    'xls': nlp.process_sheet,
     'pptx': nlp.process_presentation,
     'txt': nlp.process_txt,
 }
@@ -73,108 +71,60 @@ def logout():
 @app.route('/')
 @login_required
 def home():
-    return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
-
-def intersect_files(file_lists):
-    file_lists = [lst for lst in file_lists if lst]
-
-    if not file_lists:
-        return []
-
-    intersection = file_lists[0]
-
-    for file in intersection.copy():
-        if not all(any(file.nomFichier == other_file.nomFichier for other_file in lst) for lst in file_lists[1:]):
-            intersection.remove(file)
-
-    return intersection
-
-def unique_files(file_list):
-    unique_list = []
-    seen_files = []
-    for file in file_list:
-        if file.nomFichier not in seen_files:
-            seen_files.append(file.nomFichier)
-            unique_list.append(file)
-    return unique_list
+    return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/search', methods=['GET', 'POST'])
 @login_required
 def search():
-    #Envoi vers la page 
     if request.method == 'POST':
         search_term = request.form['search']
-        favourites_sort = request.form.get('favoris', '')
-        recent_sort = request.form.get('recent', '')
+        favourites_sort = request.form.get('favoris', False)
+        recent_sort = request.form.get('recent', False)
+        advanced_sort = request.form.get('advanced_search', False)
         categorie_id = request.form.get('categorie', '')
-        extension = request.form.get('extension', '')
-        
-        return redirect(url_for('search', search=search_term, categorie=categorie_id,favoris=favourites_sort, recent=recent_sort, extension=extension))
-    #Affichage de la page de recherche
+        return redirect(url_for('search', search=search_term, categorie=categorie_id,favoris=favourites_sort, recent=recent_sort, advanced_search=advanced_sort))
     else:
-        # Recupération des paramètres de recherche
         search_term = request.args.get('search', type=str, default='')
         favourites_sort = request.args.get('favoris', type=bool, default='')
         recent_sort = request.args.get('recent', type=bool, default='')
+        advanced_sort = request.args.get('advanced_search', type=bool, default='')
         categorie_id = request.args.get('categorie', type=int, default='')
-        extension = request.args.get('extension', type=str, default='')
-        
-        liste_fichiers_favourites_sort = []
         liste_fichiers_search_term = []
-        liste_fichiers_categories = []
-        liste_recent_sort = []
-        liste_extension_sort = []
-        print("Info", favourites_sort, recent_sort, categorie_id, search_term, extension)
-        
+        liste_fichiers_recent_sort = []
+        liste_fichiers_favourites_sort = []
+        liste_fichiers_categorie_sort = []
+        liste_fichiers_extension_sort = []
+        liste_fichiers_advanced_sort = []
+        if search_term :
+            liste_fichiers_search_term = get_file_by_tag(search_term)
+        if recent_sort :
+            liste_fichiers_recent_sort = get_file_order_by_date(current_user.get_id())
         if favourites_sort :
             liste_fichiers_favourites_sort = get_user_favourites_file(current_user.get_id())
-            print("taille 1", len(liste_fichiers_favourites_sort))
-            for file in liste_fichiers_favourites_sort:
-                print(file.nomFichier)
-        if search_term :
-            liste_fichiers_search_term = get_file_by_tag(unidecode(search_term))
-            print("taille 2", len(liste_fichiers_search_term))
-            for file in liste_fichiers_search_term:
-                print(file.nomFichier)
+        if advanced_sort :
+            liste_fichiers_advanced_sort = get_all_files()
         if categorie_id :
-            liste_fichiers_categories = get_file_by_categorie(categorie_id)
-            print("taille 4", len(liste_fichiers_categories))
-            for file in liste_fichiers_categories:
-                print(file.nomFichier)
-        if recent_sort :
-            liste_recent_sort = get_file_order_by_date(current_user.get_id())
-            print("taille 5", len(liste_recent_sort))
-            for file in liste_recent_sort:
-                print(file.nomFichier)
-        if extension :
-            liste_extension_sort = get_file_by_extension(extension)
-            print("taille 7", len(liste_extension_sort))
-            for file in liste_extension_sort:
-                print(file.nomFichier)
-            
-        
-        counter_list = [liste_recent_sort, liste_fichiers_favourites_sort, liste_fichiers_search_term, liste_fichiers_categories, liste_extension_sort]
-        
-        liste_fichiers = intersect_files(counter_list)
-        print("taille 6", len(liste_fichiers))
-        for file in liste_fichiers:
-            print(file.nomFichier)
-        liste_fichiers.reverse()
-        liste_fichiers = unique_files(liste_fichiers)
-        print("taille 3", len(liste_fichiers))
-
-        if not favourites_sort and not recent_sort and not categorie_id and not search_term and not extension:
-            liste_fichiers = get_all_files()
-        
-        liste_fichiers_favourites_sort = remove_forbiden_file(liste_fichiers_favourites_sort,current_user.get_id())
-        print(liste_fichiers)
-        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1,liste_extensions=get_all_extension(), category_tree=get_category_tree())
+            liste_fichiers_categorie_sort = get_file_by_categorie(categorie_id)
+        counter_list = [collections.Counter(liste_fichiers_recent_sort), collections.Counter(liste_fichiers_favourites_sort),
+                        collections.Counter(liste_fichiers_search_term), collections.Counter(liste_fichiers_advanced_sort), collections.Counter(liste_fichiers_categorie_sort)]
+        counter_list = [counter for counter in counter_list if counter]
+        if len(counter_list) == 0:
+            liste_fichiers = []
+        else :
+            while counter_list:
+                result = counter_list.pop(0)
+                for counter in counter_list:
+                    result &= counter
+                liste_fichiers = list(result.elements())
+        return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/file')
 @login_required
 def file():
     add_consulted_file(current_user.get_id(), request.args.get('id_fichier', type=int, default=''))
-    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')), liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('file.html' , nom_page='Consultation de fichier', fichier=get_file_by_id(request.args.get('id_fichier', type=int, default='')),
+                           liste_tags=get_file_tags(request.args.get('id_fichier', type=int, default='')),
+                           notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/add_to_multiview', methods=['POST'])
 @login_required
@@ -211,8 +161,6 @@ def remove_from_favourites():
     remove_from_user_favourites(current_user.get_id(), file_id)
     return redirect(url_for('login'))
 
-
-
 @app.route('/remove_from_notifications', methods=['POST'])
 @login_required
 def remove_from_notifications():
@@ -220,7 +168,7 @@ def remove_from_notifications():
     id_file = request.get_json()['id_file']
     id_date = request.get_json()['id_date']
     remove_from_user_notification(id_notification, id_file, id_date, current_user.get_id())
-    return redirect(url_for('notifications'))
+    return redirect(url_for('login'))
 
 @app.route('/report', methods=['POST'])
 @login_required
@@ -263,14 +211,14 @@ def multivue():
                         index_selected=file_index,
                         liste_tags=get_file_tags(fichier_selected.idFichier if fichier_selected else None),
                         fichier_selected=fichier_selected, notification_enabled=user_has_notifications(current_user.get_id()),
-                        is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+                        is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/user')
 @login_required
 def user():
     user = get_user_by_id(current_user.get_id())
     page_name = f'Profil : {user.nomPompier} {user.prenomPompier}'
-    return render_template('user.html', user = user, nom_page=page_name, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('user.html', user = user, nom_page=page_name, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/editUser', methods=['GET', 'POST'])
 @login_required
@@ -285,28 +233,20 @@ def editUser():
             update_user_photo(user.idPompier, encoded_photo)
         update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
         return redirect(url_for('user'))
-    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/notifications')
 @login_required
 def notifications():
     notif = get_user_notifications(current_user.get_id())
-    return render_template('notifications.html', nom_page="Notification(s)", liste_notifications=notif, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
-
-@app.route('/edit_role')
-@login_required
-@admin_required
-def edit_role():
-    dico_role = get_role_pompier()
-    return render_template('editRole.html', nom_page="Role", dico_role=dico_role, category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
-
+    return render_template('notifications.html', nom_page="Notification(s)", liste_notifications=notif, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/history')
 @login_required
 def history():
     id_file = request.args.get('id_fichier', type=int, default='')
     history_list = get_file_history(id_file)
-    return render_template('history.html', nom_page=f"Historique de {get_file_by_id(id_file).nomFichier}", liste_fichiers=history_list, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('history.html', nom_page=f"Historique de {get_file_by_id(id_file).nomFichier}", liste_fichiers=history_list, notification_enabled=user_has_notifications(current_user.get_id()))
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -322,7 +262,7 @@ def upload():
     else:
         for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
             os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
-    return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/manage_files')
 @login_required
@@ -331,7 +271,7 @@ def manageFiles():
     stored_files = {}
     for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
         stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}', 'rb').read())
-    return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree(), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/automatic_files_management', methods=['POST'])
 @login_required
@@ -383,69 +323,41 @@ def uploadFilesToDatabase():
         with open(file_path, 'rb') as file_data:
             add_file_to_database(base64.b64encode(file_data.read()), filename, extension, file_properties['tags'], file_properties['categories'], 2)
     return redirect(url_for('upload'))
-
-
-@app.route('/administration')
+  
+@app.route('/edit_categories')
 @login_required
 @admin_required
-def administration():
-    return render_template('administration.html', nom_page="Administration", notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+def edit_categories():
+    return render_template('editCategories.html', nom_page="Modifier les catégories", notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree())
 
-@app.route('/search_user', methods=['GET', 'POST'])
+@app.route('/add_category', methods=['POST'])
 @login_required
 @admin_required
-def search_user():
-    if request.method == 'POST':
-        search_term = request.form['searchId']
-        if search_term == '':
-            search_term = request.form['searchEmail']
-        return redirect(url_for('edit_profil_admin', user=search_term))
-    else:
-        user = get_user_by_id(current_user.get_id())
-        error = request.args.get('error', type=bool, default=False)
-        return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
-    
-@app.route('/edit_profil_admin', methods=['GET', 'POST'])
+def add_category():
+    json = request.get_json()
+    category_name = json['categoryName']
+    parent_id = json['parentId']
+    add_category_to_database(category_name, parent_id)
+    return redirect(url_for('edit_categories'))
+
+@app.route('/update_category', methods=['POST'])
 @login_required
 @admin_required
-def edit_profil_admin():
-    user = get_user_by_id(request.args.get('user', type=int, default=''))
-    if user is None:
-        user = get_user_by_email(request.args.get('user', type=str, default=''))
-        if user is None:
-            return redirect(url_for('search_user', error=True))
-    form = EditUserForm(id=user.idPompier, nom=user.nomPompier, prenom=user.prenomPompier, mail=user.emailPompier, mdp=user.mdpPompier, photo=user.photoPompier,telephone=user.telephonePompier)
-    page_name = f'Modifier le profil : {user.nomPompier} {user.prenomPompier}'
-    if form.validate_on_submit():
-        password = generate_password_hash(form.mdp.data).decode('utf-8')
-        if form.photo.data:
-            encoded_photo = base64.b64encode(form.photo.data.read())
-            update_user_photo(user.idPompier, encoded_photo)
-        update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
-        return redirect(url_for('administration'))
-    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+def update_category():
+    json = request.get_json()
+    category_id = json['categoryId']
+    category_name = json['categoryName']
+    update_category_from_database(category_id, category_name)
+    return redirect(url_for('edit_categories'))
 
-@app.route('/del_user')
+@app.route('/delete_category', methods=['POST'])
 @login_required
 @admin_required
-def delUser():
-    id = request.args.get('user', type=int, default='')
-    desactivate_user(id)
-    return redirect(url_for('administration'))
-
-@app.route('/add_user', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def add_user_page():
-    form = AddUserForm()
-    if form.validate_on_submit():
-        role = int(request.form.get('role', 2)[0])
-        password = generate_password_hash(form.mdp.data).decode('utf-8')
-        add_user(form.prenom.data, form.nom.data, form.mail.data,form.telephone.data,role, password)
-        return redirect(url_for('administration'))
-    return render_template('addUser.html', form=form,roles=get_all_roles(), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
-
-
+def delete_category():
+    json = request.get_json()
+    category_id = json['categoryId']
+    remove_category_from_database(category_id)
+    return redirect(url_for('edit_categories'))
 
 @app.route('/edit_file', methods=['POST', 'GET'])
 @login_required
@@ -508,3 +420,57 @@ def delete_all_temp_files():
     for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
         os.remove(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}')
     return Response(status=204)
+
+@app.route('/search_user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def search_user():
+    if request.method == 'POST':
+        search_term = request.form['searchId']
+        if search_term == '':
+            search_term = request.form['searchEmail']
+        return redirect(url_for('edit_profil_admin', user=search_term))
+    else:
+        user = get_user_by_id(current_user.get_id())
+        error = request.args.get('error', type=bool, default=False)
+        return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    
+@app.route('/edit_profil_admin', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profil_admin():
+    user = get_user_by_id(request.args.get('user', type=int, default=''))
+    if user is None:
+        user = get_user_by_email(request.args.get('user', type=str, default=''))
+        if user is None:
+            return redirect(url_for('search_user', error=True))
+    form = EditUserForm(id=user.idPompier, nom=user.nomPompier, prenom=user.prenomPompier, mail=user.emailPompier, mdp=user.mdpPompier, photo=user.photoPompier,telephone=user.telephonePompier)
+    page_name = f'Modifier le profil : {user.nomPompier} {user.prenomPompier}'
+    if form.validate_on_submit():
+        password = generate_password_hash(form.mdp.data).decode('utf-8')
+        if form.photo.data:
+            encoded_photo = base64.b64encode(form.photo.data.read())
+            update_user_photo(user.idPompier, encoded_photo)
+        update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
+        return redirect(url_for('administration'))
+    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
+@app.route('/del_user')
+@login_required
+@admin_required
+def delUser():
+    id = request.args.get('user', type=int, default='')
+    desactivate_user(id)
+    return redirect(url_for('administration'))
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_user_page():
+    form = AddUserForm()
+    if form.validate_on_submit():
+        role = int(request.form.get('role', 2)[0])
+        password = generate_password_hash(form.mdp.data).decode('utf-8')
+        add_user(form.prenom.data, form.nom.data, form.mail.data,form.telephone.data,role, password)
+        return redirect(url_for('administration'))
+    return render_template('addUser.html', form=form,roles=get_all_roles(), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
