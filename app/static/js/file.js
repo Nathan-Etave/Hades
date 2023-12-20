@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				downloadLink.href = 'data:application/octet-stream;base64,' + file_data;
 				downloadLink.download = document.querySelector('h2').textContent.match(/^(.*) \(/)[1];
 				downloadLink.click();
-				dowlnoadLink.remove();
+				downloadLink.remove();
 			});
 		});
 	});

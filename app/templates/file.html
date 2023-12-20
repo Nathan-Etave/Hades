@@ -17,9 +17,27 @@
         <div class="file_container">
             <div class="file_header">
                 <h2>{{ fichier.nomFichier }} ({{ fichier.idFichier }})</h2>
-                <object class="file_object" data="data:application/pdf;base64,{{ fichier.data.decode('utf-8') }}" type="application/pdf">
-                    <p>Impossible d'afficher le fichier</p>
-                </object>
+                {% set lower_file_name = fichier.nomFichier.lower() %}
+                {% set mime_types = {
+                    '.pdf': 'application/pdf',
+                    '.png': 'image/png',
+                    '.jpg': 'image/jpg',
+                    '.jpeg': 'image/jpeg',
+                    '.gif': 'image/gif',
+                    '.txt': 'text/plain'
+                } %}
+                {% set mime_type = mime_types.get('.'+lower_file_name.split('.')[-1], None) %}
+                {% if mime_type %}
+                    {% if mime_type.startswith('image') %}
+                        <img class="file_object" src="data:{{ mime_type }};base64,{{ fichier.data.decode('utf-8') }}" alt="Impossible d'afficher le fichier">
+                    {% else %}
+                        <object class="file_object" data="data:{{ mime_type }};base64,{{ fichier.data.decode('utf-8') }}" type="{{ mime_type }}">
+                            <p>Impossible d'afficher le fichier</p>
+                        </object>
+                    {% endif %}
+                {% else %}
+                    <p>Apperçu non disponible pour ce type de fichier</p>
+                {% endif %}
             </div>
             <div class="file_info">
                 <div class="tags_info">
@@ -33,6 +51,9 @@
                     </div>
                 </div>
                 <ul class="file_options">
+                    {% if is_admin %}
+                        <li><button onclick="window.location.href='{{ url_for('edit_file', id_fichier=fichier.idFichier) }}';">Modifier</button></li>
+                    {% endif %}
                     <li><button onclick="window.location.href='{{ url_for('history', id_fichier=fichier.idFichier) }}';">Historique</button></li>
                     <li><button id="download">Télécharger</button></li>
                     <li><button id="add_to_multiview">Ajouter à la MultiVue</button></li>
