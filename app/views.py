@@ -10,7 +10,8 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
-                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file)
+                          get_file_by_categorie, get_file_tags, get_category_tree, add_file_to_database, add_consulted_file,
+                          add_category_to_database, update_category_from_database, remove_category_from_database)
 from app.forms import LoginForm, EditUserForm
 from app import login_manager
 import base64
@@ -296,3 +297,38 @@ def uploadFilesToDatabase():
         with open(file_path, 'rb') as file_data:
             add_file_to_database(base64.b64encode(file_data.read()), filename, extension, file_properties['tags'], file_properties['categories'], 2)
     return redirect(url_for('upload'))
+
+@app.route('/edit_categories')
+@login_required
+@admin_required
+def edit_categories():
+    return render_template('editCategories.html', nom_page="Modifier les catégories", notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree())
+
+@app.route('/add_category', methods=['POST'])
+@login_required
+@admin_required
+def add_category():
+    json = request.get_json()
+    category_name = json['categoryName']
+    parent_id = json['parentId']
+    add_category_to_database(category_name, parent_id)
+    return redirect(url_for('edit_categories'))
+
+@app.route('/update_category', methods=['POST'])
+@login_required
+@admin_required
+def update_category():
+    json = request.get_json()
+    category_id = json['categoryId']
+    category_name = json['categoryName']
+    update_category_from_database(category_id, category_name)
+    return redirect(url_for('edit_categories'))
+
+@app.route('/delete_category', methods=['POST'])
+@login_required
+@admin_required
+def delete_category():
+    json = request.get_json()
+    category_id = json['categoryId']
+    remove_category_from_database(category_id)
+    return redirect(url_for('edit_categories'))
