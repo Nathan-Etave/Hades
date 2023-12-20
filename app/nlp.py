@@ -9,6 +9,7 @@ from pptx import Presentation
 from pandas import read_excel
 from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
+from chardet import detect
 
 def process_pdf(pdf_file):
     """Permet de traiter un fichier PDF et de retourner une liste de mots clés.
@@ -77,7 +78,8 @@ def process_txt(txt_file):
     Returns:
         list: La liste des mots clés.
     """
-    with open(txt_file, 'r', encoding='utf-8') as file:
+    rawdata = open(txt_file, 'rb').read()
+    with open(txt_file, 'r', encoding=detect(rawdata)['encoding']) as file:
         text = file.read()
     return process_nlp(text)
 

@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import asc
 from datetime import datetime
 from unidecode import unidecode
+from pytz import timezone
 
 def get_root_categories():
     Session = sessionmaker(bind=db.engine)
@@ -57,16 +58,20 @@ def remove_from_user_favourites(id_user, id_file):
     session.close()
 
 def add_administrator_signalement(id_file, id_user, description):
-    db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, descriptionSignalement=description))
+    all_administrators = POMPIER.query.filter_by(idRole=1).all()
+    date = DATE(laDate=datetime.now(timezone('Europe/Paris')))
+    db.session.add(date)
     db.session.commit()
     file = FICHIER.query.filter_by(idFichier=id_file).first()
-    all_administrators = POMPIER.query.filter_by(idRole=1).all()
+    user = POMPIER.query.filter_by(idPompier=id_user).first()
+    notification = NOTIFICATION(texteNotification=f'{user.prenomPompier} {user.nomPompier} a signalé le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description)
+    db.session.add(notification)
+    db.session.commit()
+    db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, idDate=date.idDate, descriptionSignalement=description))
+    db.session.commit()
     while all_administrators:
         administrator = all_administrators.pop(0)
-        db.session.add(NOTIFICATION(texteNotification=f'Un signalement a été fait sur le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description))
-        db.session.add(DATE(laDate=datetime.now()))
-        db.session.commit()
-        db.session.add(ANOTIFICATION(idPompier=administrator.idPompier, idNotification=NOTIFICATION.query.order_by(NOTIFICATION.idNotification.desc()).first().idNotification, idFichier=file.idFichier, idDate=DATE.query.order_by(DATE.idDate.desc()).first().idDate))
+        db.session.add(ANOTIFICATION(idPompier=administrator.idPompier, idNotification=notification.idNotification, idFichier=file.idFichier, idDate=date.idDate))
         db.session.commit()
 
 def get_user_notifications(id_user):
@@ -222,6 +227,84 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
     session.commit()
     session.close()
 
+def get_file_category_leaves(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_categories = session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).all()
+    categories = []
+    while all_categories:
+        category = all_categories.pop(0)
+        categories.append(session.query(CATEGORIE).filter_by(idCategorie=category.idCategorie).first())
+    session.close()
+    return categories
+
+def update_old_file(file, filename, extension, tags, categories, id_etat, old_file_id):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    old_file = session.query(FICHIER).filter_by(idFichier=old_file_id).first()
+    old_file.idEtatFichier = 1
+    session.commit()
+    new_file = FICHIER(nomFichier=filename, data=file, extensionFichier=extension, idEtatFichier=id_etat)
+    session.add(new_file)
+    session.commit()
+    new_id = new_file.idFichier
+    session.execute(table_HISTORIQUE.insert().values(ancienneVersion=old_file.idFichier, nouvelleVersion=new_file.idFichier))
+    for tag in tags:
+        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
+        if not is_tag_exists:
+            new_tag = TAG(nomTag=tag)
+            session.add(new_tag)
+            session.commit()
+        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=new_file.idFichier))
+    for categorie in categories:
+        session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=new_file.idFichier))
+    session.commit()
+    session.close()
+    return new_id
+
+def remove_file(id_file):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    old_versions = session.query(table_HISTORIQUE).filter_by(ancienneVersion=id_file).all()
+    id_old_versions = [old_file[1] for old_file in old_versions]
+    session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
+    session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).delete()
+    session.query(table_FAVORI).filter_by(idFichier=id_file).delete()
+    session.query(table_HISTORIQUE).filter_by(ancienneVersion=id_file).delete()
+    session.query(ANOTIFICATION).filter_by(idFichier=id_file).delete()
+    session.query(SIGNALEMENT).filter_by(idFichier=id_file).delete()
+    session.query(ACONSULTE).filter_by(idFichier=id_file).delete()
+    session.query(FICHIER).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for id_old_version in id_old_versions:
+        remove_file(id_old_version)
+    session.close()
+
+def update_file_tags(id_file, tags):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for tag in tags:
+        is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
+        if not is_tag_exists:
+            new_tag = TAG(nomTag=tag)
+            session.add(new_tag)
+            session.commit()
+        session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=id_file))
+    session.commit()
+    session.close()
+
+def update_file_categories(id_file, categories):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).delete()
+    session.commit()
+    for categorie in categories:
+        session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=id_file))
+    session.commit()
+    session.close()
+
 def add_consulted_file(id_user, id_file):
     Session = sessionmaker(bind=db.engine)
     session = Session()
@@ -293,3 +376,39 @@ def get_all_extension():
         extensions_set.add(extension)
     session.close()
     return list(extensions_set)
+
+def add_category_to_database(name, parent_id):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    category = CATEGORIE(nomCategorie=name)
+    session.add(category)
+    session.commit()
+    if parent_id is not None:
+        session.execute(table_SOUS_CATEGORIE.insert().values(categorieParent=parent_id, categorieEnfant=category.idCategorie))
+    session.commit()
+    session.close()
+
+def update_category_from_database(category_id, name):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    category = session.query(CATEGORIE).filter_by(idCategorie=category_id).first()
+    category.nomCategorie = name
+    session.commit()
+    session.close()
+
+def remove_category_from_database(category_id):
+    sous_categories = get_liste_sous_categorie(category_id)
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    for sous_categorie in sous_categories:
+        remove_category_from_database(sous_categorie.idCategorie)
+    files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=category_id).all()
+    for file in files:
+        other_categories = session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie != category_id).all()
+        if len(other_categories) == 0:
+            session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie == category_id).update({table_EST_CATEGORIE.c.idCategorie: 1}, synchronize_session=False)
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=category_id).delete()
+    session.query(table_SOUS_CATEGORIE).filter_by(categorieEnfant=category_id).delete()
+    session.query(CATEGORIE).filter_by(idCategorie=category_id).delete()
+    session.commit()
+    session.close()
