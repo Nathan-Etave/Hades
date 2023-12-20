@@ -36,7 +36,7 @@ header {
 	border-radius: 5rem;
 	text-decoration: none;
 	font-size: 1.5rem;
-	padding: 0.1rem 3rem 0.1rem 3rem;
+	padding: 0.1rem 2rem 0.1rem 2rem;
 	border-style: solid;
 	border-color: #004F8A;
 }
@@ -48,7 +48,7 @@ header {
 .nav_item {
 	display: flex;
 	list-style-type: none;
-	gap: 2rem;
+	gap: 1.5rem;
 	align-items: center;
 }
 .logo_notification {
