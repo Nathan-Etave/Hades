@@ -125,13 +125,15 @@ def get_file_order_by_date(id_user):
     session.close()
     return files
 
-def update_user(id_user, prenom, nom, mail, telephone, mdp):
+def update_user(id_user, prenom, nom, mail, telephone, mdp,role=None):
     user = POMPIER.query.filter_by(idPompier=id_user).first()
     user.prenomPompier = prenom
     user.nomPompier = nom
     user.emailPompier = mail
     user.telephonePompier = telephone
     user.mdpPompier = mdp
+    if role is not None:
+        user.idRole = role
     db.session.commit()
 
 def update_user_photo(id_user, photo):

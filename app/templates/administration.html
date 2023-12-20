@@ -4,22 +4,21 @@
             <meta charset="utf-8">
             <meta name="admin">
             <link rel="stylesheet" href="{{ url_for('static',filename='css/administration.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/bottomHeader.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/mediaBottomHeader.css')}}">
             <link rel="stylesheet" href="{{ url_for('static',filename='css/header.css')}}">
             <script type="module" src="{{ url_for('static', filename='js/header.js')}}"></script>
             <title>Administration</title>
         </head>
         <body> 
             {% include "components/header.html" %}
+            {% include "components/bottomHeader.html" %}
             <main>
             <a class="gestionFic">
-                
                 <div class="fichier">
-                    
-                   
                 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512.000000 512.000000"
                     preserveAspectRatio="xMidYMid meet">
-                   
                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
                    fill="#004F8A" stroke="none">
                    <path d="M955 5106 c-84 -21 -147 -57 -211 -121 -65 -65 -105 -136 -123 -223
@@ -46,8 +45,7 @@
                    -38 19 -57 20 -672 20 -610 -1 -634 -2 -670 -21z"/>
                    </g>
                    </svg>
-                
-                <h2 class="nomGestion"> Gérer fichiers</h2>
+                <h2 class="nomGestion">Gérer fichiers</h2>
                 </div>
             </a>
             <a class="gestionUser">
@@ -55,7 +53,6 @@
                 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
                      viewBox="0 0 512.000000 512.000000"
                     preserveAspectRatio="xMidYMid meet">
-                   
                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
                    fill="#004F8A" stroke="none">
                    <path d="M2375 4793 c-921 -80 -1710 -724 -1963 -1603 -68 -235 -87 -373 -86
@@ -73,7 +70,6 @@
                    237 1103 -112 173 -272 287 -480 343 -78 22 -250 26 -335 10z"/>
                    </g>
                    </svg>
-               
                 <h2 class="nomGestion">Gérer utilisateurs</h2>
                 </div>
             </a>
@@ -120,9 +116,7 @@
                   -3 3 -202z"/>
                   </g>
                   </svg>
-                  
                 <h2 class="nomGestion">Gérer catégories</h2>
-                    
                 </div>
             </a>
             <a class="gestion" href="{{url_for('edit_role')}}">
@@ -130,7 +124,6 @@
                 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512.000000 512.000000"
                     preserveAspectRatio="xMidYMid meet">
-                   
                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
                    fill="#004F8A" stroke="none">
                    <path d="M2245 4835 c-244 -44 -472 -168 -643 -349 -403 -426 -429 -1083 -61
@@ -163,7 +156,6 @@
                    </g>
                    </svg>
                 <h2 class="nomGestion">Gérer rôles</h2>
-                    
                 </div>
                 </a>
                 <div id="popup" class="popup">
@@ -178,7 +170,6 @@
                     <a id="ajouterUser" href="{{url_for('add_user_page')}}">Ajouter</a>
                     <a id="supUser" href="{{url_for('search_user')}}">Modifier</a>
                 </div>
-        
                 <script>
                     function closePopup() {
                         var modal = document.getElementById('popup');
@@ -192,18 +183,11 @@
                     document.querySelector('.gestionFic').addEventListener('click', function () {
                         var modal = document.getElementById('popup');
                         modal.style.display = 'block';
-
-                    
-
                     });
                     document.querySelector('.gestionUser').addEventListener('click', function () {
                         var modal = document.getElementById('popup2');
                         modal.style.display = 'block';
-
-                    
-        
                     });
-        
                 </script>
             </main>
         </body>

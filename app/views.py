@@ -53,6 +53,15 @@ def admin_required(f):
             return redirect(url_for('home'))
     return decorated_function
 
+def activated_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if get_user_by_id(current_user.get_id()).idRole != 2:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('login'))
+    return decorated_function
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -70,9 +79,10 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/')
+@activated_required
 @login_required
 def home():
-    return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('home.html', nom_page='Accueil', liste_categories=get_root_categories(), liste_fichiers=get_user_favourites_file(current_user.get_id()), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 def intersect_files(file_lists):
     file_lists = [lst for lst in file_lists if "vide" not in lst]
@@ -94,6 +104,7 @@ def unique_files(file_list):
     return unique_list
 
 @app.route('/search', methods=['GET', 'POST'])
+@activated_required
 @login_required
 def search():
     if request.method == 'POST':
@@ -116,7 +127,6 @@ def search():
         liste_fichiers_categories = ["vide"]
         liste_recent_sort = ["vide"]
         liste_extension_sort = ["vide"]
-        print("Info", favourites_sort, recent_sort, categorie_id, search_term, extension)
         
         #Remplissage des listes de fichiers
         if favourites_sort :
@@ -146,6 +156,7 @@ def search():
         return render_template('search.html', nom_page=search_term, categorie=get_root_categories()[0], liste_fichiers=liste_fichiers, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1,liste_extensions=get_all_extension(), category_tree=get_category_tree())
 
 @app.route('/file')
+@activated_required
 @login_required
 def file():
     add_consulted_file(current_user.get_id(), request.args.get('id_fichier', type=int, default=''))
@@ -154,6 +165,7 @@ def file():
                            notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/add_to_multiview', methods=['POST'])
+@activated_required
 @login_required
 def add_to_multiview():
     multiview_list = request.cookies.get('multiview_list')
@@ -165,6 +177,7 @@ def add_to_multiview():
     return response
 
 @app.route('/remove_from_multiview', methods=['POST'])
+@activated_required
 @login_required
 def remove_from_multiview():
     multiview_list = request.cookies.get('multiview_list')
@@ -175,6 +188,7 @@ def remove_from_multiview():
     return response
 
 @app.route('/add_to_favourites', methods=['POST'])
+@activated_required
 @login_required
 def add_to_favourites():
     file_id = request.get_json()['file_id']
@@ -182,6 +196,7 @@ def add_to_favourites():
     return redirect(url_for('login'))
 
 @app.route('/remove_from_favourites', methods=['POST'])
+@activated_required
 @login_required
 def remove_from_favourites():
     file_id = request.get_json()['file_id']
@@ -189,6 +204,7 @@ def remove_from_favourites():
     return redirect(url_for('login'))
 
 @app.route('/remove_from_notifications', methods=['POST'])
+@activated_required
 @login_required
 def remove_from_notifications():
     id_notification = request.get_json()['id_notification']
@@ -198,6 +214,7 @@ def remove_from_notifications():
     return redirect(url_for('notifications'))
 
 @app.route('/report', methods=['POST'])
+@activated_required
 @login_required
 def report():
     file_id = request.get_json()['file_id']
@@ -206,6 +223,7 @@ def report():
     return redirect(url_for('login'))
 
 @app.route('/download_file', methods=['POST'])
+@activated_required
 @login_required
 def download_file():
     file_id = request.get_json()['file_id']
@@ -213,6 +231,7 @@ def download_file():
     return make_response(send_file(BytesIO(file_object.data), mimetype='application/octet-stream'))
 
 @app.route('/multivue', methods=['GET', 'POST'])
+@activated_required
 @login_required
 def multivue():
     liste_mv = request.cookies.get('multiview_list').split(';')
@@ -241,13 +260,15 @@ def multivue():
                         is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/user')
+@activated_required
 @login_required
 def user():
     user = get_user_by_id(current_user.get_id())
     page_name = f'Profil : {user.nomPompier} {user.prenomPompier}'
-    return render_template('user.html', user = user, nom_page=page_name, notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('user.html', user = user, nom_page=page_name, notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/editUser', methods=['GET', 'POST'])
+@activated_required
 @login_required
 def editUser():
     user = get_user_by_id(current_user.get_id())
@@ -260,22 +281,25 @@ def editUser():
             update_user_photo(user.idPompier, encoded_photo)
         update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
         return redirect(url_for('user'))
-    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/notifications')
+@activated_required
 @login_required
 def notifications():
     notif = get_user_notifications(current_user.get_id())
-    return render_template('notifications.html', nom_page="Notification(s)", liste_notifications=notif, notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('notifications.html', nom_page="Notification(s)", liste_notifications=notif, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/history')
+@activated_required
 @login_required
 def history():
     id_file = request.args.get('id_fichier', type=int, default='')
     history_list = get_file_history(id_file)
-    return render_template('history.html', nom_page=f"Historique de {get_file_by_id(id_file).nomFichier}", liste_fichiers=history_list, notification_enabled=user_has_notifications(current_user.get_id()))
+    return render_template('history.html', nom_page=f"Historique de {get_file_by_id(id_file).nomFichier}", liste_fichiers=history_list, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/upload', methods=['GET', 'POST'])
+@activated_required
 @login_required
 @admin_required
 def upload():
@@ -292,6 +316,7 @@ def upload():
     return render_template('upload.html', nom_page="Ajouter un/des fichier(s)", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/manage_files')
+@activated_required
 @login_required
 @admin_required
 def manageFiles():
@@ -301,6 +326,7 @@ def manageFiles():
     return render_template('manageFiles.html', nom_page="Gestion des fichiers ajoutés", stored_files=stored_files, notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree(), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/automatic_files_management', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def automaticFilesManagement():
@@ -309,6 +335,7 @@ def automaticFilesManagement():
         custom_tags = []
     elif '' in custom_tags:
         custom_tags.remove('')
+    custom_tags = list(dict.fromkeys(custom_tags))
     stored_files = {}
     for stored_file in os.listdir(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
         stored_files[stored_file] = base64.b64encode(open(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{stored_file}', 'rb').read())
@@ -329,6 +356,7 @@ def automaticFilesManagement():
     return redirect(url_for('upload'))
 
 @app.route('/generate_tags', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def generateTags():
@@ -341,6 +369,7 @@ def generateTags():
     return jsonify(tags)
 
 @app.route('/upload_files_to_database', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def uploadFilesToDatabase():
@@ -352,12 +381,14 @@ def uploadFilesToDatabase():
     return redirect(url_for('upload'))
   
 @app.route('/edit_categories')
+@activated_required
 @login_required
 @admin_required
 def edit_categories():
-    return render_template('editCategories.html', nom_page="Modifier les catégories", notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree())
+    return render_template('editCategories.html', nom_page="Modifier les catégories", notification_enabled=user_has_notifications(current_user.get_id()), category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/add_category', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def add_category():
@@ -368,6 +399,7 @@ def add_category():
     return redirect(url_for('edit_categories'))
 
 @app.route('/update_category', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def update_category():
@@ -378,6 +410,7 @@ def update_category():
     return redirect(url_for('edit_categories'))
 
 @app.route('/delete_category', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def delete_category():
@@ -387,6 +420,7 @@ def delete_category():
     return redirect(url_for('edit_categories'))
 
 @app.route('/edit_file', methods=['POST', 'GET'])
+@activated_required
 @login_required
 @admin_required
 def edit_file():
@@ -400,9 +434,10 @@ def edit_file():
     with open(temp_file_path, 'wb') as temp_file:
         temp_file.write(base64.b64decode(file_object.data))
     return render_template('editFile.html', nom_page=f"Modifier {file_object.nomFichier}", fichier=file_object, notification_enabled=user_has_notifications(current_user.get_id()),
-                           category_tree=get_category_tree(), file_tags=file_tags, file_categories_leaves=file_categories_leaves)
+                           category_tree=get_category_tree(), file_tags=file_tags, file_categories_leaves=file_categories_leaves, is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
 
 @app.route('/add_file_to_temp', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def add_file_to_temp():
@@ -416,6 +451,7 @@ def add_file_to_temp():
     return jsonify(filename)
 
 @app.route('/update_file', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def update_file():
@@ -441,6 +477,7 @@ def update_file():
     return redirect(url_for('home'))
 
 @app.route('/delete_all_temp_files', methods=['POST'])
+@activated_required
 @login_required
 @admin_required
 def delete_all_temp_files():
@@ -449,6 +486,7 @@ def delete_all_temp_files():
     return Response(status=204)
 
 @app.route('/search_user', methods=['GET', 'POST'])
+@activated_required
 @login_required
 @admin_required
 def search_user():
@@ -476,13 +514,29 @@ def edit_profil_admin():
     if form.validate_on_submit():
         password = generate_password_hash(form.mdp.data).decode('utf-8')
         if form.photo.data:
+            role = int(request.form.get('role',2)[0])
             encoded_photo = base64.b64encode(form.photo.data.read())
             update_user_photo(user.idPompier, encoded_photo)
-        update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password)
+        update_user(user.idPompier, form.prenom.data, form.nom.data, form.mail.data, form.telephone.data, password,role)
         return redirect(url_for('administration'))
-    return render_template('editUser.html', nom_page=page_name, user=user, form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    return render_template('editUser.html', nom_page=page_name, user=user,roles=get_all_roles(), form=form, notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
+@app.route('/administration')
+@activated_required
+@login_required
+@admin_required
+def administration():
+    return render_template('administration.html', nom_page="Administration", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
+
+@app.route('/edit_role')
+@activated_required
+@login_required
+@admin_required
+def edit_role():
+    return 'À implémenter'
 
 @app.route('/del_user')
+@activated_required
 @login_required
 @admin_required
 def delUser():
@@ -491,6 +545,7 @@ def delUser():
     return redirect(url_for('administration'))
 
 @app.route('/add_user', methods=['GET', 'POST'])
+@activated_required
 @login_required
 @admin_required
 def add_user_page():
