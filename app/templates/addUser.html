@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+        <title>Ajouter un utilisateur</title>
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <title>Ajouter un utilisateur</title>
+    </head>
+    <body>
+        {% include "components/header.html" %}
+        {% include "components/bottomHeader.html"%}
+        <form method="POST" role="form" enctype="multipart/form-data">
+            <ul class="info2">
+                {{ form.hidden_tag() }}
+                <li>
+                    <p>Prénom       : {{form.prenom}}</p>
+                </li>
+                <li>
+                    <p>Nom          : {{form.nom}}</p>
+                </li>
+                <li>
+                    <p>Email        : {{form.mail}}</p>
+                </li>
+                <li>
+                    <p>Téléphone    : {{form.telephone}}</p>
+                </li>
+                <li>
+                    <p>Rôle :
+                        <select name="role" id="role">
+                            {% for role in roles %}
+                                <option value="{{ role }}">{{ role[2:] }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                </li>
+                <li>
+                    <p>Mot de passe : {{form.mdp}}</p>
+                </li>
+            </ul>
+            <div class="bouton">
+                {{ form.submit }}
+            </div>
+        </form>
+    </body>
+</html>
