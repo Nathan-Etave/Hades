@@ -5,6 +5,7 @@ from app.models import (CATEGORIE, POMPIER, table_SOUS_CATEGORIE, table_FAVORI, 
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from unidecode import unidecode
+from pytz import timezone
 
 def get_root_categories():
     Session = sessionmaker(bind=db.engine)
@@ -57,11 +58,12 @@ def remove_from_user_favourites(id_user, id_file):
 
 def add_administrator_signalement(id_file, id_user, description):
     all_administrators = POMPIER.query.filter_by(idRole=1).all()
-    date = DATE(laDate=datetime.now())
+    date = DATE(laDate=datetime.now(timezone('Europe/Paris')))
     db.session.add(date)
     db.session.commit()
     file = FICHIER.query.filter_by(idFichier=id_file).first()
-    notification = NOTIFICATION(texteNotification=f'Un signalement a été fait sur le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description)
+    user = POMPIER.query.filter_by(idPompier=id_user).first()
+    notification = NOTIFICATION(texteNotification=f'{user.prenomPompier} {user.nomPompier} a signalé le fichier {file.nomFichier} ({file.idFichier})', typeChange='Signalement', raisonNotification=description)
     db.session.add(notification)
     db.session.commit()
     db.session.add(SIGNALEMENT(idFichier=id_file, idPompier=id_user, idDate=date.idDate, descriptionSignalement=description))
