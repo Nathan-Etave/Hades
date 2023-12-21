@@ -65,6 +65,9 @@ def get_user_by_id(id):
 def get_user_by_email(email):
     return POMPIER.query.filter_by(emailPompier=email).first()
 
+def get_user_by_nom(nom, prenom):
+    return POMPIER.query.filter_by(nomPompier=nom, prenomPompier=prenom).first()
+
 def get_file_by_id(id):
     return FICHIER.query.filter_by(idFichier=id).first()
 
