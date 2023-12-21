@@ -7,7 +7,7 @@ from io import BytesIO
 from functools import wraps
 from unidecode import unidecode
 from werkzeug.utils import secure_filename
-from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
+from app.requests import (get_role_pompier ,get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
@@ -541,12 +541,15 @@ def edit_profil_admin():
 def administration():
     return render_template('administration.html', nom_page="Administration", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
-@app.route('/edit_role')
+
+@app.route('/edit_role', methods=['GET', 'POST'])
 @login_required
-@activated_required
 @admin_required
 def edit_role():
-    return 'À implémenter'
+    role = request.args.get('role', type=int, default='')
+    dico_role = get_role_pompier()
+    return render_template('editRole.html', nom_page="Role", dico_role=dico_role, category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
 
 @app.route('/del_user')
 @login_required
