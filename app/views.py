@@ -7,7 +7,7 @@ from io import BytesIO
 from functools import wraps
 from unidecode import unidecode
 from werkzeug.utils import secure_filename
-from app.requests import (get_role_pompier ,get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
+from app.requests import (get_root_categories, get_user_by_id, get_user_by_email,get_user_favourites_file,
                           get_file_by_id, user_has_notifications, add_to_user_favourites, remove_from_user_favourites,
                           add_administrator_signalement, get_user_notifications, update_user, get_file_order_by_date,
                           update_user_photo, remove_from_user_notification, get_file_by_tag, get_all_files, get_file_history,
@@ -15,7 +15,7 @@ from app.requests import (get_role_pompier ,get_root_categories, get_user_by_id,
                           add_category_to_database, update_category_from_database, remove_category_from_database,
                           get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
                           get_file_by_extension, get_all_extension, remove_forbiden_file, desactivate_user, get_all_roles, add_user,
-                          already_exist_mail, get_user_access)
+                          already_exist_mail, get_user_access, get_role_pompier)
 from app.forms import LoginForm, EditUserForm, AddUserForm, EditUserFormStringPassword
 from app import login_manager
 import base64
@@ -544,6 +544,7 @@ def administration():
 
 @app.route('/edit_role', methods=['GET', 'POST'])
 @login_required
+@activated_required
 @admin_required
 def edit_role():
     role = request.args.get('role', type=int, default='')
