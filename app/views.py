@@ -15,7 +15,7 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           add_category_to_database, update_category_from_database, remove_category_from_database,
                           get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
                           get_file_by_extension, get_all_extension, remove_forbiden_file, desactivate_user, get_all_roles, add_user,
-                          already_exist_mail, get_user_access,get_user_by_name)
+                          already_exist_mail, get_user_access, get_user_by_name, get_role_pompier)
 from app.forms import LoginForm, EditUserForm, AddUserForm, EditUserFormStringPassword
 from app import login_manager
 import base64
@@ -550,12 +550,16 @@ def edit_profil_admin():
 def administration():
     return render_template('administration.html', nom_page="Administration", notification_enabled=user_has_notifications(current_user.get_id()), is_admin=get_user_by_id(current_user.get_id()).idRole == 1)
 
-@app.route('/edit_role')
+
+@app.route('/edit_role', methods=['GET', 'POST'])
 @login_required
 @activated_required
 @admin_required
 def edit_role():
-    return 'À implémenter'
+    role = request.args.get('role', type=int, default='')
+    dico_role = get_role_pompier()
+    return render_template('editRole.html', nom_page="Role", dico_role=dico_role, category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
 
 @app.route('/del_user')
 @login_required
