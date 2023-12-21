@@ -15,7 +15,7 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           add_category_to_database, update_category_from_database, remove_category_from_database,
                           get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
                           get_file_by_extension, get_all_extension, remove_forbiden_file, desactivate_user, get_all_roles, add_user,
-                          already_exist_mail, get_user_access, get_role_pompier)
+                          already_exist_mail, get_user_access, get_user_by_name, get_role_pompier)
 from app.forms import LoginForm, EditUserForm, AddUserForm, EditUserFormStringPassword
 from app import login_manager
 import base64
@@ -502,10 +502,19 @@ def delete_all_temp_files():
 @admin_required
 def search_user():
     if request.method == 'POST':
-        search_term = request.form['searchId']
-        if search_term == '':
-            search_term = request.form['searchEmail']
-        return redirect(url_for('edit_profil_admin', user=search_term))
+        try:
+            id = request.form['searchId']
+            return redirect(url_for('edit_profil_admin', user=id))
+        except:
+            try:
+                email = unidecode(request.form['searchEmail'])
+                return redirect(url_for('edit_profil_admin', user=get_user_by_email(email).idPompier))
+            except:
+                try:
+                    nom,prenom = request.form['searchNom'],request.form['searchPrenom']
+                    return redirect(url_for('edit_profil_admin', user=get_user_by_nom(nom,prenom).idPompier))
+                except:
+                    return redirect(url_for('search_user', error=True))
     else:
         user = get_user_by_id(current_user.get_id())
         error = request.args.get('error', type=bool, default=False)
