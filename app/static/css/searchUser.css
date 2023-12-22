@@ -1,0 +1,60 @@
+p{
+    color: #EA4E4E;
+    text-align: center;
+}
+
+form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #004F8A;
+    border-radius: 100rem;
+    width: 70rem;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 3rem;
+}
+
+input{
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+@media only screen and (max-width: 1000px) {
+    input{
+        width: 20rem;
+        height: 5rem;
+        font-size: 80%;
+    }
+    form{
+        width: 58rem;
+        height: 10rem;
+    }
+
+}
+
+@media only screen and (max-width:535px){
+    form{
+        display: flex;
+        width: 20rem;
+        height: 20rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        margin-top: 2rem;
+        border-radius: 0%;
+        padding-top: 0%;
+        padding-bottom: 0%;
+        height: 15rem;
+    }
+    input{
+        flex-basis: 100%;
+        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
+        width: 10rem;
+        height: 3rem;
+
+
+    }
+}
