@@ -20,15 +20,17 @@
             <li>
                 <p>{{ form.photo.label }} : {{ form.photo }}</p>
             </li>
+            {% if is_admin %}
             <li>
                 <p>Rôle :
                     <select name="role" id="role">
                         {% for role in roles %}
-                            <option value="{{ role }}">{{ role[2:] }}</option>
+                            <option {% if role[0] == user.idRole|string %}selected=""{% endif %} value="{{ role }}">{{ role[2:] }}</option>
                         {% endfor %}
                     </select>
                 </p>
             </li>
+            {% endif %}
         </ul>
         <object data="data:image/jpeg;base64,{{ user.photoPompier.decode('utf-8') }}" type="image/jpeg"></object>
         

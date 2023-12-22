@@ -126,3 +126,54 @@ body {
     justify-content: space-around;
     margin: 1rem 1rem 0 1rem;
 }
+
+@media only screen and (max-width: 1000px) {
+    .file_container {
+        display: grid;
+        
+    }
+
+    .file_header {
+        height: 10%;
+        grid-row: 1;
+        grid-column: 1 / 3;
+    }
+    .c
+
+    .tags_container {
+        grid-row: 2;
+        grid-column: 1;
+        max-width: 45vw;
+        min-width: 45vw;
+        margin-right: 2vw;
+    }
+
+    .category_container {
+        grid-row: 2;
+        grid-column: 2;
+        max-width: 45vw;
+        min-width: 45vw;
+        min-height: 30vh;
+    }
+
+    .tags_list_container {
+        max-width: 45vw;
+        min-width: 45vw;
+    }
+    
+    .file_object {
+        width: 80vw;
+        height: 80vh;
+    }
+    .button_container {
+        flex-direction: column;
+    }
+
+    .main_container {
+        overflow-y: auto;
+        max-height: 80vh;
+    }
+    .file_container{
+        overflow: scroll;
+    }
+}

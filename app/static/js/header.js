@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     let notification_enabled = document.querySelector(".notification_enabler").textContent;
-    let svg_notification = document.querySelector(".logo_notification g");
-    if (notification_enabled == "False") {
-      svg_notification.style.animation = "none";
-    }
-  });
+    let svg_notifications = document.querySelectorAll(".logo_notification g");
+    Array.from(svg_notifications).forEach(function(element) {
+        if (notification_enabled == "False") {
+            element.style.animation = "none";
+        }
+    });
+});
