@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        {% block css %}{% endblock %}
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <title>Profil : {{ user.nomPompier }} {{ user.prenomPompier }}</title>
+    </head>
+    <body>
+        {% include "components/header.html" %}
+        {% include "components/bottomHeader.html"%}
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>

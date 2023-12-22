@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <html lang="fr">
+        <head>
+            <meta charset="utf-8">
+            <meta name="connexion">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/connexion.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/header.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/bottomHeader.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='css/mediaBottomHeader.css')}}">
+            <title>Connexion</title>
+        </head>
+        <body> 
+            {% include "components/headerLogin.html" %}
+            {% include "components/bottomHeader.html" %}
+            <main>
+                <form method="POST" class="page_connexion" action="">
+                    {{ form.hidden_tag() }}
+                <div class="email">
+                    <p>Email</p>
+                    {{ form.mail(size=50) }}
+                </div>
+                <div class="password">
+                    <p>Mot de passe</p>
+                   {{ form.mdp(size=50) }}
+                </div>
+                <div class="connexion">
+                    {{ form.submit }}
+                </div>
+            </form>
+            </main>
+        </body>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/editCategories.css') }}" />
+        <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/editCategories.js') }}"></script>
+        <title>{{ nom_page }}</title>
+</head>
+<body>
+    {% include "components/header.html" %}
+    {% include "components/bottomHeader.html" %}
+    <main>
+        <div class="main_container">
+                <div class="category_container">
+                    <h3>Catégorie(s) :</h3>
+                    <div class="category_list_container">
+                        {% macro render_category_tree(category_tree, parent_id=None) %}
+                            <ul>
+                                {% for category in category_tree %}
+                                    <li>
+                                        <details>
+                                            <summary>
+                                                <input type="checkbox" id="{{ category[0][0].idCategorie }}" value="{{ category[0][0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
+                                                <label for="{{ category[0].idCategorie }}">{{ category[0][0].nomCategorie }} ({{ category[0][1]}} fichier(s))</label>
+                                            </summary>
+                                            {% if category[1] %}
+                                                {{ render_category_tree(category[1], category[0][0].idCategorie) }}
+                                            {% endif %}
+                                        </details>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endmacro %}
+                        {{ render_category_tree(category_tree) }}
+                    </div>
+                </div>
+                <div class="edit_button_container">
+                    <h3>Options de modification :</h3>
+                    <form class="add_category_form" action="javascript:void(0);">
+                        <input type="text" placeholder="Nom de la catégorie">
+                        <button class="add_category_button" type="submit">Ajouter une catégorie*¹</button>
+                    </form>
+                    <p>*¹ : La catégorie sera ajoutée à la catégorie sélectionnée en tant que sous-catégorie ou à la racine si aucune catégorie n'est sélectionnée.</p>
+                    <form class="update_category_form" action="javascript:void(0);">
+                        <input type="text" placeholder="" readonly hidden>
+                        <button class="update_category_button" type="submit">Modifier la catégorie*²</button>
+                    </form>
+                    <p>*² : La catégorie sélectionnée sera renommée.</p>
+                    <button id="delete_category_button">Supprimer la catégorie*³</button>
+                    <p>*³ : La catégorie sélectionnée et ses sous-catégories seront supprimées.<br>Les fichiers associés seront non-catégorisés.</p>
+                </div>
+        </div>
+    </main>
+</body>
+</html>
