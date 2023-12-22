@@ -867,7 +867,6 @@ def remove_category_from_database(category_id):
     files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=1).all()
     for file in files:
         file_category = session.query(table_EST_CATEGORIE).filter_by(idFichier=file.idFichier).all()
-        print(file_category)
         if len(file_category) > 1:
             session.query(table_EST_CATEGORIE).filter_by(idFichier=file.idFichier, idCategorie=1).delete()
     session.commit()
@@ -903,7 +902,6 @@ def already_exist_mail(mail):
     Session = sessionmaker(bind=db.engine)
     session = Session()
     user = session.query(POMPIER).filter_by(emailPompier=mail).first()
-    print(mail, user, user is not None)
     session.close()
     return user is not None
 

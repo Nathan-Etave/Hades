@@ -182,8 +182,6 @@ def file():
     user_access = get_user_access(current_user.get_id())
     acess_granted = False
     for category in get_file_category_leaves(request.args.get('id_fichier', type=int, default='')):
-        print(category.idCategorie)
-        print(user_access)
         if category.idCategorie in user_access:
             acess_granted = True
     if acess_granted:
@@ -531,20 +529,16 @@ def search_user():
             except:
                 try:
                     nom,prenom = request.form['searchNom'],request.form['searchPrenom']
-                    print(nom,prenom)
                     if check_duplicate_user(prenom,nom):
-                        print("double")
                         return redirect(url_for('search_user', double=True))
                     else:
                         return redirect(url_for('edit_profil_admin', user=get_user_by_name(nom,prenom).idPompier))
                 except:
-                    print("error")
                     return redirect(url_for('search_user', error=True))
     else:
         user = get_user_by_id(current_user.get_id())
         error = request.args.get('error', type=bool, default=False)
         double = request.args.get('double', type=bool, default=False)
-        print(double)
         return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1, double=double)
     
 @app.route('/edit_profil_admin', methods=['GET', 'POST'])
@@ -585,7 +579,6 @@ def administration():
 def edit_role():
     if request.method == 'POST':
         role = request.form.getlist('role', '')
-        print(role)
         return redirect(url_for('edit_role', role=role))
     else:
         role = request.args.get('role', type=int, default='')
