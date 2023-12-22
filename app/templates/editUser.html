@@ -1,0 +1,53 @@
+{% extends "baseUser.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<title>Modifier : {{ user.nomPompier }} {{ user.prenomPompier }}</title>
+{% endblock %}
+{% block content %}
+<form method="POST" role="form" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="info">
+        <ul class="info1">
+            <li>
+                <p>Identifiant : {{ user.idPompier }}</p>
+            </li>
+            <li>
+                <p>{{ form.prenom.label }} : {{ form.prenom }}</p>
+            </li>
+            <li>
+                <p>{{ form.nom.label }} : {{ form.nom }}</p>
+            </li>
+            <li>
+                <p>{{ form.photo.label }} : {{ form.photo }}</p>
+            </li>
+            {% if is_admin %}
+            <li>
+                <p>Rôle :
+                    <select name="role" id="role">
+                        {% for role in roles %}
+                            <option {% if role[0] == user.idRole|string %}selected=""{% endif %} value="{{ role }}">{{ role[2:] }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+            </li>
+            {% endif %}
+        </ul>
+        <object data="data:image/jpeg;base64,{{ user.photoPompier.decode('utf-8') }}" type="image/jpeg"></object>
+        
+    </div>
+    <ul class="info2">
+        <li>
+            <p>{{ form.mail.label }} : {{ form.mail}}</p>
+        </li>
+        <li>
+            <p>{{ form.telephone.label }} : {{ form.telephone }}</p>
+        </li>
+        <li>
+            <p>Mot de passe : {{ form.mdp }}</p>
+        </li>
+    </ul>
+    <div class="bouton">
+        {{ form.submit }}
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,115 @@
+body {
+	margin: 0;
+}
+
+.info1,.info2{
+    padding: 0;
+}
+
+.info1 li, .info2 li {
+    background-color: #004F8A;
+	list-style-type: none;
+    color: #FFFFFF;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 5px;
+}
+
+.modifier, .deconnecter{
+    text-align: center;
+    color: #FFFFFF;
+    background-color: #EA4E4E;
+    border-radius: 5rem;
+    font-size: 1.5rem;
+    padding: 0.1rem 3rem 0.1rem 3rem;
+}
+
+
+object{
+    border-radius: 100%;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+
+}
+
+.info {
+    display: flex;
+}
+
+.bouton {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    justify-content: space-around;
+}
+
+.info1{
+    width: 75%;
+}
+@media only screen and (max-width: 1000px) {
+    .info {
+        flex-direction: column;
+        font-size: 2rem;
+    }
+    .info1{
+        width: 100%;
+    }
+    .info2{
+        width: 100%;
+        font-size: 2rem;
+    }
+    .bouton {
+        margin-top: 1rem;
+    }
+    .modifier, .deconnecter{
+        font-size: 1rem;
+        padding: 0.1rem 1rem 0.1rem 1rem;
+        font-size: 3rem;
+    }
+    object{
+        width: 50%;
+        height: 50%;
+    }
+    input, form{
+        font-size: 2rem;
+
+    }
+    @media only screen and (max-width: 535px) {
+        p,input,label,form{
+            font-size: 1rem;
+            
+        }
+        .modifier, .deconnecter{
+            font-size: 1.5rem;
+        }
+
+    }
+}
+
+.deleteButton{
+    background-color: #EA4E4E;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    border-radius: 1rem;
+    margin-left: 3rem;
+    text-decoration: none;
+}
+
+input{
+    border-radius: 1rem;
+    border: 1px solid #004F8A;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    color: #004F8A;
+    font-size: 1rem;
+}
+
+#role{
+    margin-left: 1rem;
+    background-color: #FFFFFF;
+    color: #004F8A;
+    border-radius: 1rem;
+}
