@@ -9,6 +9,11 @@ from unidecode import unidecode
 from pytz import timezone
 
 def get_root_categories():
+    """ fonction qui retourne les catégories racines
+
+    Returns:
+        List : liste des catégories racines
+    """    
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_categories = CATEGORIE.query.all()
@@ -21,6 +26,15 @@ def get_root_categories():
     return root_categories
 
 def get_user_favourites_file(id_user):
+    """
+    Récupère les fichiers favoris d'un utilisateur.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur.
+
+    Returns:
+        list: Une liste de fichiers favoris associés à l'utilisateur.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_favourites = session.query(table_FAVORI).filter_by(idPompier=id_user).all()
@@ -32,6 +46,20 @@ def get_user_favourites_file(id_user):
     return favourites
 
 def add_user( prenom, nom, email, telephone,role, mdp):
+    """
+    Ajoute un utilisateur à la base de données.
+
+    Args:
+        prenom (str): Le prénom de l'utilisateur.
+        nom (str): Le nom de l'utilisateur.
+        email (str): L'adresse e-mail de l'utilisateur.
+        telephone (str): Le numéro de téléphone de l'utilisateur.
+        role (int): L'identifiant du rôle de l'utilisateur.
+        mdp (str): Le mot de passe de l'utilisateur.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     id = POMPIER.query.count() + 1
@@ -42,14 +70,38 @@ def add_user( prenom, nom, email, telephone,role, mdp):
     session.close()
     
 def desactivate_user(id_user):
+    """
+    Désactive un utilisateur en définissant son ID de rôle à 2.
+    
+    Args:
+        id_user (int): L'ID de l'utilisateur à désactiver.
+    
+    Returns:
+        None
+    """
     user = POMPIER.query.filter_by(idPompier=id_user).first()
     user.idRole = 2
     db.session.commit()
     
 def get_role_by_id(id):
+    """
+    Récupère un rôle par son ID.
+
+    Args:
+        id (int): L'ID du rôle à récupérer.
+
+    Returns:
+        dict: Un dictionnaire contenant les informations du rôle.
+    """
     return ROLEPOMPIER.query.filter_by(idRole=id).first()
 
-def get_role_pompier():
+def get_role_pompier(): 
+    """
+    Récupère le rôle de chaque pompier.
+
+    Returns:
+        dict: Un dictionnaire où les clés sont les noms des rôles et les valeurs sont des listes de pompiers ayant ce rôle.
+    """
     pompiers = POMPIER.query.all() 
     role_dict = {}
     for pompier in pompiers:
@@ -60,21 +112,67 @@ def get_role_pompier():
     return role_dict
 
 def get_user_by_id(id):
+    """
+    Récupère un utilisateur par son ID.
+
+    Args:
+        id (int): L'ID de l'utilisateur à récupérer.
+
+    Returns:
+        dict: Un dictionnaire contenant les informations de l'utilisateur.
+    """
     return POMPIER.query.filter_by(idPompier=id).first()
 
 def get_user_by_email(email):
+    """
+    Récupère un utilisateur en fonction de son adresse e-mail.
+
+    Args:
+        email (str): L'adresse e-mail de l'utilisateur.
+
+    Returns:
+        dict: Un dictionnaire contenant les informations de l'utilisateur.
+    """
     return POMPIER.query.filter_by(emailPompier=email).first()
 
 def get_user_by_nom(nom, prenom):
     return POMPIER.query.filter_by(nomPompier=nom, prenomPompier=prenom).first()
 
 def get_file_by_id(id):
+    """
+    Récupère un fichier par son ID.
+
+    Args:
+        id (int): L'ID du fichier à récupérer.
+
+    Returns:
+        dict: Un dictionnaire contenant les informations du fichier.
+    """
     return FICHIER.query.filter_by(idFichier=id).first()
 
 def user_has_notifications(id_user):
+    """
+    Vérifie si un utilisateur a des notifications.
+
+    Args:
+        id_user (int): L'identifiant de l'utilisateur.
+
+    Returns:
+        bool: True si l'utilisateur a des notifications, False sinon.
+    """
     return ANOTIFICATION.query.filter_by(idPompier=id_user).first() is not None
 
 def add_to_user_favourites(id_user, id_file):
+    """
+    Ajoute un fichier aux favoris d'un utilisateur.
+
+    Paramètres:
+        id_user (int): L'ID de l'utilisateur.
+        id_file (int): L'ID du fichier.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.execute(table_FAVORI.insert().values(idFichier=id_file, idPompier=id_user))
@@ -82,6 +180,13 @@ def add_to_user_favourites(id_user, id_file):
     session.close()
 
 def remove_from_user_favourites(id_user, id_file):
+    """
+    Supprime un fichier des favoris d'un utilisateur.
+
+    Paramètres:
+        id_user (int): L'ID de l'utilisateur.
+        id_file (int): L'ID du fichier à supprimer.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.execute(table_FAVORI.delete().where(table_FAVORI.c.idFichier == id_file).where(table_FAVORI.c.idPompier == id_user))
@@ -89,6 +194,17 @@ def remove_from_user_favourites(id_user, id_file):
     session.close()
 
 def add_administrator_signalement(id_file, id_user, description):
+    """
+    Ajoute un signalement pour un fichier par un administrateur.
+
+    Args:
+        id_file (int): L'ID du fichier.
+        id_user (int): L'ID de l'utilisateur qui a signalé le fichier.
+        description (str): La description du signalement.
+
+    Returns:
+        None
+    """
     all_administrators = POMPIER.query.filter_by(idRole=1).all()
     date = DATE(laDate=datetime.now(timezone('Europe/Paris')))
     db.session.add(date)
@@ -106,6 +222,15 @@ def add_administrator_signalement(id_file, id_user, description):
         db.session.commit()
 
 def get_user_notifications(id_user):
+    """
+    Récupère les notifications pour un utilisateur donné.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur.
+
+    Returns:
+        list: Une liste de notifications.
+    """
     all_notifications = (ANOTIFICATION).query.filter_by(idPompier=id_user).all()
     notifications = []
     while all_notifications:
@@ -114,10 +239,31 @@ def get_user_notifications(id_user):
     return notifications
 
 def remove_from_user_notification(id_notification, id_fichier, idd_date, id_user):
+    """
+    Supprime une notification d'un utilisateur.
+
+    Parameters:
+    - id_notification (int): L'ID de la notification.
+    - id_fichier (int): L'ID du fichier associé à la notification.
+    - idd_date (int): L'ID de la date associée à la notification.
+    - id_user (int): L'ID de l'utilisateur.
+
+    Returns:
+    None
+    """
     db.session.delete(ANOTIFICATION.query.filter_by(idPompier=id_user).filter_by(idNotification=id_notification).filter_by(idFichier=id_fichier).filter_by(idDate=idd_date).first())
     db.session.commit()
 
 def get_file_order_by_date(id_user):
+    """
+    Récupère les fichiers associés à un utilisateur, triés par date.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur.
+
+    Returns:
+        list: Une liste de fichiers associés à l'utilisateur, triés par date.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_file = session.query(ACONSULTE).filter_by(idPompier=id_user).join(DATE).order_by(DATE.laDate).all()
@@ -129,6 +275,18 @@ def get_file_order_by_date(id_user):
     return files
 
 def update_user(id_user, prenom, nom, mail, telephone, mdp=None, role=None):
+    """
+    Met à jour les informations de l'utilisateur dans la base de données.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur à mettre à jour.
+        prenom (str): Le prénom mis à jour de l'utilisateur.
+        nom (str): Le nom de famille mis à jour de l'utilisateur.
+        mail (str): L'adresse e-mail mise à jour de l'utilisateur.
+        telephone (str): Le numéro de téléphone mis à jour de l'utilisateur.
+        mdp (str, optionnel): Le mot de passe mis à jour de l'utilisateur. Par défaut, None.
+        role (int, optionnel): L'ID du rôle mis à jour de l'utilisateur. Par défaut, None.
+    """
     user = POMPIER.query.filter_by(idPompier=id_user).first()
     user.prenomPompier = prenom
     user.nomPompier = nom
@@ -141,11 +299,30 @@ def update_user(id_user, prenom, nom, mail, telephone, mdp=None, role=None):
     db.session.commit()
 
 def update_user_photo(id_user, photo):
+    """
+    Met à jour la photo d'un utilisateur identifié par son ID.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur à mettre à jour.
+        photo (): La photo de l'utilisateur.
+
+    Returns:
+        None
+    """
     user = POMPIER.query.filter_by(idPompier=id_user).first()
     user.photoPompier = photo
     db.session.commit()
     
 def get_file_by_tag(search_term):
+    """
+    Récupère les fichiers en fonction d'un terme de recherche donné.
+
+    Args:
+        search_term (str): Le terme de recherche pour filtrer les fichiers par tag.
+
+    Returns:
+        list: Une liste de fichiers correspondant au terme de recherche.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     search_term = unidecode(search_term.lower())
@@ -167,9 +344,24 @@ def get_file_by_tag(search_term):
     return files
 
 def get_all_files():
+    """
+    Récupère tous les fichiers de la base de données.
+    
+    Returns:
+        list: Une liste de tous les fichiers de la base de données.
+    """
     return FICHIER.query.all()
 
 def get_file_history(id_file):
+    """
+    Récupère l'historique d'un fichier en fonction de son ID.
+
+    Args:
+        id_file (int): L'ID du fichier.
+
+    Returns:
+        list: Une liste de fichier représentant l'historique du fichier.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     history = []
@@ -180,6 +372,15 @@ def get_file_history(id_file):
     return history
 
 def get_file_by_categorie_unique(id_categorie):
+    """
+    Récupère les fichiers directement associés à une catégorie.
+
+    Args:
+        id_categorie (int): L'ID de la catégorie.
+
+    Returns:
+        set: Un ensemble de fichiers associés à l'ID de catégorie donné.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=id_categorie).all()
@@ -191,6 +392,15 @@ def get_file_by_categorie_unique(id_categorie):
     return set(files)
 
 def get_liste_sous_categorie(id_categorie) :
+    """
+    Récupère un ensemble de sous-catégories de manière récursive en fonction de l'ID de la catégorie donnée.
+
+    Paramètres:
+        id_categorie (int): L'ID de la catégorie parente.
+
+    Retour:
+        set: Un ensemble de sous-catégories.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_sous_categories = session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=id_categorie).all()
@@ -204,6 +414,15 @@ def get_liste_sous_categorie(id_categorie) :
     return sous_categories
 
 def get_file_by_categorie(id_categorie) :
+    """
+    Récupère une liste de fichiers en fonction de l'ID de la catégorie donnée.
+
+    Args:
+        id_categorie (int): L'ID de la catégorie.
+
+    Returns:
+        [List]: Une liste de fichiers correspondant à la catégorie donnée.
+    """
     res = set()
     res = res | get_file_by_categorie_unique(id_categorie)
     sous_categories = get_liste_sous_categorie(id_categorie)
@@ -212,6 +431,15 @@ def get_file_by_categorie(id_categorie) :
     return list(res)
 
 def get_file_tags(id_file):
+    """
+    Récupère les tags associés à un fichier.
+
+    Args:
+        id_file (int): L'ID du fichier.
+
+    Returns:
+        list: Une liste de tags associés au fichier.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_tags = session.query(table_A_TAG).filter_by(idFichier=id_file).all()
@@ -223,6 +451,19 @@ def get_file_tags(id_file):
     return tags
 
 def get_category_tree(category_id=None):
+    """
+    Récupère l'arborescence des catégories à partir de l'ID de catégorie donné.
+    Si aucun ID de catégorie n'est fourni, récupère l'ensemble de l'arborescence des catégories.
+
+    Args:
+        category_id (int, optionnel): L'ID de la catégorie à partir de laquelle commencer l'arborescence. Par défaut, None.
+
+    Returns:
+        list: Une liste imbriquée représentant l'arborescence des catégories. Chaque élément de la liste est une paire contenant
+        l'objet catégorie et le nombre de fichiers associés à cette catégorie. Le deuxième élément de
+        chaque paire est une liste représentant l'arborescence des sous-catégories.
+
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     if category_id is None:
@@ -244,6 +485,20 @@ def get_category_tree(category_id=None):
     return category_tree
 
 def add_file_to_database(file, filename, extension, tags, categories, id_etat):
+    """
+    Ajoute un fichier à la base de données avec les informations fournies.
+
+    Args:
+        file (bytes): Les données du fichier.
+        filename (str): Le nom du fichier.
+        extension (str): L'extension du fichier.
+        tags (list): Une liste de tags associés au fichier.
+        categories (list): Une liste de catégories associées au fichier.
+        id_etat (int): L'ID de l'état du fichier.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     file = FICHIER(nomFichier=filename, data=file, extensionFichier=extension, idEtatFichier=id_etat)
@@ -264,6 +519,15 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
     session.close()
 
 def get_file_category_leaves(id_file):
+    """
+    Récupère les categories associées à un fichier.
+
+    Paramètres:
+    id_file (int): L'ID du fichier.
+
+    Retourne:
+    list: Une liste de catégorie associées au fichier.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_categories = session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).all()
@@ -275,6 +539,21 @@ def get_file_category_leaves(id_file):
     return categories
 
 def update_old_file(file, filename, extension, tags, categories, id_etat, old_file_id):
+    """
+    Met à jour un ancien fichier avec de nouvelles informations et l'enregistre dans la base de données.
+
+    Args:
+        file (bytes): Les données du fichier.
+        filename (str): Le nom du fichier.
+        extension (str): L'extension du fichier.
+        tags (list): Liste des tags associés au fichier.
+        categories (list): Liste des catégories associées au fichier.
+        id_etat (int): L'ID de l'état du fichier.
+        old_file_id (int): L'ID de l'ancien fichier à mettre à jour.
+
+    Returns:
+        int: L'ID du fichier récemment mis à jour.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     old_file = session.query(FICHIER).filter_by(idFichier=old_file_id).first()
@@ -299,6 +578,15 @@ def update_old_file(file, filename, extension, tags, categories, id_etat, old_fi
     return new_id
 
 def remove_file(id_file):
+    """
+    Supprime un fichier et ses données associées de la base de données.
+
+    Args:
+        id_file (int): L'ID du fichier à supprimer.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     old_versions = session.query(table_HISTORIQUE).filter_by(ancienneVersion=id_file).all()
@@ -317,6 +605,17 @@ def remove_file(id_file):
     session.close()
 
 def update_file_tags(id_file, tags):
+    """
+    Met à jour les tags d'un fichier dans la base de données.
+
+    Args:
+        id_file (int): L'ID du fichier.
+        tags (list): La liste des tags à mettre à jour.
+
+    Returns:
+        None
+    """
+
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
@@ -332,6 +631,16 @@ def update_file_tags(id_file, tags):
     session.close()
 
 def update_file_categories(id_file, categories):
+    """
+    Met à jour les catégories d'un fichier dans la base de données.
+
+    Paramètres:
+        id_file (int): L'ID du fichier à mettre à jour.
+        categories (list): La liste des IDs de catégories à assigner au fichier.
+
+    Retour:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).delete()
@@ -342,6 +651,13 @@ def update_file_categories(id_file, categories):
     session.close()
 
 def add_consulted_file(id_user, id_file):
+    """
+    Ajoute la consultation d'un fichier à la base de données.
+
+    Paramètres:
+        id_user (int): L'ID de l'utilisateur qui a consulté le fichier.
+        id_file (int): L'ID du fichier qui a été consulté.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     date = DATE(laDate=datetime.now())
@@ -352,6 +668,15 @@ def add_consulted_file(id_user, id_file):
     session.close()
     
 def get_category_file(id_file):
+    """
+    Récupère les catégories associées à un ID de fichier donné.
+
+    Args:
+        id_file (int): L'ID du fichier.
+
+    Returns:
+        list: Une liste de catégorie associés au fichier.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_categories = session.query(table_EST_CATEGORIE).filter_by(idFichier=id_file).all()
@@ -363,6 +688,16 @@ def get_category_file(id_file):
     return categories
 
 def is_valide_file(user_id, file_id) :
+    """
+    Vérifie si un fichier est valide pour un utilisateur donné.
+
+    Args:
+        user_id (int): L'ID de l'utilisateur.
+        file_id (int): L'ID du fichier.
+
+    Returns:
+        bool: True si le fichier est valide pour l'utilisateur, False sinon.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     id_etat = session.query(FICHIER.idEtatFichier).filter_by(idFichier=file_id).first()[0]
@@ -379,6 +714,16 @@ def is_valide_file(user_id, file_id) :
     return True
 
 def remove_forbiden_file(file_list, user_id) :
+    """
+    Supprime les fichiers interdits de la liste de fichiers donnée en fonction de l'ID de l'utilisateur.
+
+    Args:
+        file_list (list): Liste des fichiers à vérifier.
+        user_id (int): ID de l'utilisateur.
+
+    Returns:
+        list: Liste des fichiers valides pour l'utilisateur.
+    """
     res = []
     for file in file_list :
         if is_valide_file(user_id, file.idFichier) :
@@ -386,6 +731,15 @@ def remove_forbiden_file(file_list, user_id) :
     return res
 
 def get_file_by_consult(id_user):
+    """
+    Récupère les fichiers consultés par un utilisateur.
+
+    Args:
+        id_user (int): L'ID de l'utilisateur.
+
+    Returns:
+        list: Une liste de fichiers consultés par l'utilisateur.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     all_files = session.query(ACONSULTE).filter_by(idPompier=id_user).order_by(asc(ACONSULTE.dateConsultation)).all()
@@ -396,6 +750,15 @@ def get_file_by_consult(id_user):
     return files
 
 def get_file_by_extension(extension):
+    """
+    Récupère les fichiers de la base de données ayant une extension spécifique.
+
+    Paramètres:
+        extension (str): L'extension des fichiers à récupérer.
+    
+    Returns:
+        list: Une liste de fichiers ayant l'extension donnée.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     files = session.query(FICHIER).filter_by(extensionFichier=extension).all()
@@ -403,6 +766,12 @@ def get_file_by_extension(extension):
     return files
 
 def get_all_extension():
+    """
+    Récupère toutes les extensions de fichier uniques depuis la base de données.
+
+    Returns:
+        list: Une liste d'extensions de fichier uniques.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     extensions = session.query(FICHIER.extensionFichier).distinct().all()
@@ -414,6 +783,16 @@ def get_all_extension():
     return list(extensions_set)
 
 def add_category_to_database(name, parent_id):
+    """
+    Ajoute une catégorie à la base de données.
+
+    Args:
+        name (str): Le nom de la catégorie.
+        parent_id (int): L'ID de la catégorie parente. Si None, la catégorie est une catégorie de premier niveau.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     category = CATEGORIE(nomCategorie=name)
@@ -425,6 +804,16 @@ def add_category_to_database(name, parent_id):
     session.close()
 
 def update_category_from_database(category_id, name):
+    """
+    Met à jour le nom d'une catégorie dans la base de données.
+
+    Args:
+        category_id (int): L'ID de la catégorie à mettre à jour.
+        name (str): Le nouveau nom de la catégorie.
+
+    Returns:
+        None
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     category = session.query(CATEGORIE).filter_by(idCategorie=category_id).first()
@@ -433,6 +822,15 @@ def update_category_from_database(category_id, name):
     session.close()
 
 def remove_category_from_database(category_id):
+    """
+    Supprime une catégorie et declasse ses fichiers associés.
+
+    Args:
+        category_id (int): L'ID de la catégorie à supprimer.
+
+    Returns:
+        None
+    """
     sous_categories = get_liste_sous_categorie(category_id)
     Session = sessionmaker(bind=db.engine)
     session = Session()
@@ -450,6 +848,12 @@ def remove_category_from_database(category_id):
     session.close()
 
 def get_all_roles():
+    """
+    Récupère tous les rôles depuis la base de données.
+
+    Returns:
+        list: Une liste de rôles.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     extensions = session.query(ROLEPOMPIER.idRole,ROLEPOMPIER.nomRole).distinct().all()
@@ -461,6 +865,15 @@ def get_all_roles():
     return list(extensions_set)
 
 def already_exist_mail(mail):
+    """
+    Vérifie si un utilisateur avec l'adresse e-mail donnée existe déjà dans la base de données.
+
+    Args:
+        mail (str): L'adresse e-mail à vérifier.
+
+    Returns:
+        bool: True si l'email existe déjà, False sinon.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     user = session.query(POMPIER).filter_by(emailPompier=mail).first()
@@ -469,6 +882,15 @@ def already_exist_mail(mail):
     return user is not None
 
 def get_user_access(id_user):
+    """
+    Récupère la liste des catégories d'accès pour un utilisateur donné.
+
+    Paramètres:
+        id_user (int): L'ID de l'utilisateur.
+
+    Retourne:
+        list: Une liste d'IDs de catégories d'accès.
+    """
     Session = sessionmaker(bind=db.engine)
     session = Session()
     id_role = session.query(POMPIER.idRole).filter_by(idPompier=id_user).first()[0]
