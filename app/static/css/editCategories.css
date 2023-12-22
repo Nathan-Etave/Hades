@@ -1,0 +1,159 @@
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.category_container {
+    display: flex;
+    flex-direction: column;
+}
+
+.category_list_container {
+    min-width: 70vw;
+    flex-basis: 100%;
+    background-color: #F0F0F0;
+    margin-bottom: 0.5rem;
+    overflow-y: auto;
+}
+
+.category_list_container li {
+    list-style-type: none;
+    margin-bottom: 0.5rem;
+    background-color: #FFFFFF;
+    border : 1px solid #000000;
+    padding: 0.5rem;
+}
+
+.category_list_container ul {
+    padding: 0 1rem 0 1rem;
+}
+
+.category_list_container li:hover {
+    background-color: #EA4E4E;
+}
+
+.main_container {
+    display: flex;
+    margin: 1rem;
+    justify-content: space-around;
+    border: 3px solid #EA4E4E;
+    padding: 1rem;
+    height: 70vh;
+}
+
+.main_container h2 h3{
+    margin: 1rem 0 1rem 0;
+}
+
+.edit_button_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap : 1vh;
+}
+
+.edit_button_container p {
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 0;
+}
+
+.edit_button_container button {
+    color: #FFFFFF;
+    background-color: #004F8A;
+    border-radius: 5rem;
+    font-size: 1rem;
+    padding: 0.1rem 1rem 0.1rem 1rem;
+}
+
+.edit_button_container button:hover {
+    color: #004F8A;
+    background-color: #FFFFFF;
+}
+@media only screen and (max-width: 1000px) {
+    .main_container {
+        flex-direction: column;
+        height: auto;
+    }
+    .main_container h2 {
+        margin-top: 0;
+    }
+    .edit_button_container {
+        margin-top: 1rem;
+    }
+    .edit_button_container p {
+        font-size: 2rem;
+    }
+    .edit_button_container button {
+        font-size: 2rem;
+    }
+    h3 {
+        font-size: 2rem;
+    }
+    .category_list_container {
+        min-width: 20vw;
+        height: 50vh;
+    }
+	.category_list_container li{
+		width: 50rem;
+		font-size: 2rem;
+	}
+    .category_checkbox {
+        width: 2rem;
+        height: 2rem;
+    
+        }
+        .add_category_form> input{
+            width: 50rem;
+            height: 2rem;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        .add_category_button{
+            margin-left: 15rem;
+
+        }
+        @media only screen and (max-width: 535px) {
+            body{
+                overflow: auto;
+            }
+            .category_list_container li{
+                width: 31rem;
+                font-size: 1rem;
+            }
+            .add_category_form> input{
+                width: 30rem;
+                height: 2rem;
+                font-size: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .category_checkbox{
+                width: 1rem;
+                height: 1rem;
+            }
+            h3 {
+                font-size: 1rem;
+            }
+            .edit_button_container p {
+                font-size: 1rem;
+            }
+            .edit_button_container button {
+                font-size: 1rem;
+            }
+            .add_category_form > input {
+                width: 16rem;
+                height: 2rem;
+                font-size: 1rem;
+                margin-bottom: 2rem;
+                margin-left: 1rem;
+            }
+            .add_category_button {
+                margin-left: 2.7rem;
+            }
+        }
+
+    
+}

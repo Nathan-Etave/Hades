@@ -1,0 +1,132 @@
+.Role {
+    list-style-type: none;
+    display: flex;
+    
+}
+select {
+    margin-bottom: 1rem;
+}
+
+
+button,.bouton {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+    color: #004F8A;
+    background-color: #FFFFFF;
+    border: none;
+}
+
+
+h2 {
+    margin: 0;
+    padding: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px; 
+    margin: auto; 
+}
+
+.retirer{
+    background-color: #EA4E4E;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+
+    margin-left: auto;
+}
+
+
+label {
+    margin-bottom: 5px; 
+}
+input, textarea {
+    margin-bottom: 10px;
+}
+
+body {
+	margin: 0;
+    overflow: hidden;
+}
+
+
+
+.Profil_Pompier {
+    border: #000000 1px solid;
+    border-radius: 5px;
+    display: flex;
+    margin-right: 1rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+
+.Pompier {  
+    display: block;
+    overflow: auto;
+    height: 25em;
+    background-color: #FFFFFF;
+    color: #004F8A;
+    border-radius: 1rem;
+    padding-left: 1rem;
+}
+
+.Role li{	
+    background-color: #004F8A;
+	color: #FFFFFF;
+    border-radius: 5px;
+    padding: 1rem;
+    padding-left: 2rem;
+    margin: 0.5rem;
+}
+
+
+.category_container_ajouter,.category_container_modifier {
+    display: flex;
+    flex-direction: column;
+    width: 40em;
+    
+}
+
+
+.category_list_container_ajouter, .category_list_container_modifier {
+    min-width: 20vw;
+    max-width: -webkit-fill-available;
+    max-width: 20vw;
+    min-width: 20vw;
+    height: 36vh;
+    margin-bottom: 0.5rem;
+    overflow-y: auto;
+}
+
+.category_list_container_ajouter li,.category_list_container_modifier li {
+    list-style-type: none;
+    margin-bottom: 0.5rem;
+    border : 1px solid #000000;
+    padding: 0.5rem;
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+.category_list_container_ajouter ul,.category_list_container_modifier ul{
+    padding: 0 1rem 0 1rem;
+}
+
+.category_list_container_ajouter li:hover,.category_list_container_modifier li:hover {
+    background-color: #004F8A;
+    color: #FFFFFF;
+}
+
+textarea {
+    resize: none;
+}
+
