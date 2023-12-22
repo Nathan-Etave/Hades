@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let close = document.querySelector("#close");
     let validerRechercheAvanceButton = document.getElementById("valider_recherche_avance");
     let downloadButtons = document.querySelectorAll(".bouton_telechargement");
-
+    advancedSearchForm  .style.display = "block";
     // Charger les sélections précédentes depuis le stockage local
     function loadSelections() {
         let selectedCategories = JSON.parse(localStorage.getItem('selectedCategories')) || [];
