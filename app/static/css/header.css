@@ -42,6 +42,7 @@ header {
 	border-style: solid;
 	border-color: #004F8A;
 }
+
 .nav_item>li:not(:last-child)>a:hover,.sidenav>ul>li>a:hover{
 	color: #004F8A;
 	background-color: #FFFFFF;
@@ -141,6 +142,12 @@ header {
 	.header_container {
 		justify-content: space-between;
 	}
+
+	.nav_item>li:not(:last-child)>a,.sidenav>ul>li>a{
+		color: #FFFFFF;
+		background-color: #004F8A;
+		font-size: 4rem;
+	}
 }
 @media only screen and (max-width: 535px) {
 	.navbar_container {
@@ -175,6 +182,12 @@ header {
 		margin-top: 0rem;
 	}
     .sidenav li a {
-        font-size: 1rem;
+        font-size: 2rem;
     }
+
+	.nav_item>li:not(:last-child)>a,.sidenav>ul>li>a{
+		color: #FFFFFF;
+		background-color: #004F8A;
+		font-size: 4rem;
+	}
 }

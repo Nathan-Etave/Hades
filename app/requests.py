@@ -102,13 +102,12 @@ def get_role_pompier():
     Returns:
         dict: Un dictionnaire où les clés sont les noms des rôles et les valeurs sont des listes de pompiers ayant ce rôle.
     """
-    pompiers = POMPIER.query.all() 
     role_dict = {}
+    for role in ROLEPOMPIER.query.all():
+        role_dict[role] = []
+    pompiers = POMPIER.query.all() 
     for pompier in pompiers:
-        nomrole = get_role_by_id(pompier.idRole)
-        if nomrole not in role_dict:
-            role_dict[nomrole] = []
-        role_dict[nomrole].append(pompier)
+        role_dict[get_role_by_id(pompier.idRole)].append(pompier)
     return role_dict
 
 def get_user_by_id(id):
@@ -135,7 +134,7 @@ def get_user_by_email(email):
     """
     return POMPIER.query.filter_by(emailPompier=email).first()
 
-def get_user_by_nom(nom, prenom):
+def get_user_by_name(nom, prenom):
     return POMPIER.query.filter_by(nomPompier=nom, prenomPompier=prenom).first()
 
 def get_file_by_id(id):
@@ -481,7 +480,14 @@ def get_category_tree(category_id=None):
             subcategory_tree = get_category_tree(category.idCategorie)
         else:
             subcategory_tree = []
-        category_tree.append([[category, len(get_file_by_categorie(category.idCategorie))], subcategory_tree])
+        a = get_file_by_categorie(category.idCategorie)
+        new_l = []
+        seen_ids = set()
+        for d in a:
+            if d.idFichier not in seen_ids and d.idEtatFichier == 2:
+                seen_ids.add(d.idFichier)
+                new_l.append(d)
+        category_tree.append([[category, len(new_l)], subcategory_tree])
     return category_tree
 
 def add_file_to_database(file, filename, extension, tags, categories, id_etat):
@@ -821,6 +827,13 @@ def update_category_from_database(category_id, name):
     session.commit()
     session.close()
 
+def get_all_est_categorie():
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    all_est_categorie = session.query(table_EST_CATEGORIE).all()
+    session.close()
+    return all_est_categorie
+
 def remove_category_from_database(category_id):
     """
     Supprime une catégorie et declasse ses fichiers associés.
@@ -839,11 +852,24 @@ def remove_category_from_database(category_id):
     files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=category_id).all()
     for file in files:
         other_categories = session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie != category_id).all()
+        temp = other_categories
+        for category in other_categories:
+            if category in get_all_est_categorie():
+                temp.remove(category)
+        other_categories = temp
         if len(other_categories) == 0:
+            session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie == 1).delete()
             session.query(table_EST_CATEGORIE).filter(table_EST_CATEGORIE.c.idFichier == file.idFichier, table_EST_CATEGORIE.c.idCategorie == category_id).update({table_EST_CATEGORIE.c.idCategorie: 1}, synchronize_session=False)
     session.query(table_SOUS_CATEGORIE).filter_by(categorieParent=category_id).delete()
     session.query(table_SOUS_CATEGORIE).filter_by(categorieEnfant=category_id).delete()
     session.query(CATEGORIE).filter_by(idCategorie=category_id).delete()
+    session.commit()
+    files = session.query(table_EST_CATEGORIE).filter_by(idCategorie=1).all()
+    for file in files:
+        file_category = session.query(table_EST_CATEGORIE).filter_by(idFichier=file.idFichier).all()
+        print(file_category)
+        if len(file_category) > 1:
+            session.query(table_EST_CATEGORIE).filter_by(idFichier=file.idFichier, idCategorie=1).delete()
     session.commit()
     session.close()
 
@@ -899,3 +925,99 @@ def get_user_access(id_user):
         list_access.append(row[0])
     session.close()
     return list_access
+
+def check_duplicate_user(first_name, last_name):
+    """Vérifie si il y a deux utilisateurs avec le même nom et prénom
+
+    Args:
+        first_name (String): le prénom
+        last_name (String): le nom
+
+    Returns:
+        Bool : True si il y a deux utilisateurs avec le même nom et prénom, False sinon
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    count = session.query(POMPIER).filter_by(nomPompier=last_name, prenomPompier=first_name).count()
+    session.close()
+    return count >= 2
+
+def get_user_by_role(role):
+    """Récupère tous les utilisateurs ayant un certain rôle
+
+    Args:
+        role (int): l'ID du rôle
+
+    Returns:
+        list: une liste d'utilisateurs
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    users = session.query(POMPIER).filter_by(idRole=role).all()
+    session.close()
+    return users
+
+def update_user_role(id_user, role):
+    """Met à jour le rôle d'un utilisateur
+
+    Args:
+        id_user (int): l'ID de l'utilisateur
+        role (int): l'ID du nouveau rôle
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    user = get_user_by_id(id_user)
+    user.idRole = role
+    session.query(POMPIER).filter_by(idPompier=id_user).update({POMPIER.idRole: role}, synchronize_session=False)
+    session.commit()
+    session.close()
+
+def get_category_by_role(role):
+    """Récupère toutes les catégories accessibles par un certain rôle
+
+    Args:
+        role (int): l'ID du rôle
+
+    Returns:
+        list: une liste de catégories
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    categories = session.query(table_A_ACCES.c.idCategorie).filter_by(idRole=role).all()
+    categories = [category[0] for category in categories]
+    session.close()
+    return categories
+
+def modify_role_categories_database(role, categories):
+    """Modifie les catégories accessibles par un certain rôle
+
+    Args:
+        role (int): l'ID du rôle
+        categories (list): une liste d'IDs de catégories
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    session.query(table_A_ACCES).filter_by(idRole=role).delete()
+    session.commit()
+    for category in categories:
+        session.execute(table_A_ACCES.insert().values(idRole=role, idCategorie=category))
+    session.commit()
+    session.close()
+    
+def add_role_to_databse(name, description, categories) :
+    """Ajoute un rôle à la base de données
+
+    Args:
+        name (String): le nom du rôle
+        description (String): la description du rôle
+        categories (list): une liste d'IDs de catégories
+    """    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+    role = ROLEPOMPIER(nomRole=name, descriptionRole=description)
+    session.add(role)
+    session.commit()
+    for category in categories:
+        session.execute(table_A_ACCES.insert().values(idRole=role.idRole, idCategorie=int(category)))
+    session.commit()
+    session.close()

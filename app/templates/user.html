@@ -1,6 +1,7 @@
 {% extends "baseUser.html" %}
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}" />
+<title>Profil : {{ user.nomPompier }} {{ user.prenomPompier }}</title>
 {% endblock %}
 {% block content %}
     <div class="info">
@@ -30,7 +31,7 @@
     </ul>
     <div class="bouton">
         <input class="modifier" type="button" value="Modifier les informations" onclick="location.href='{{ url_for('editUser') }}'">
-        <input class="modifier" type="button" value="Se déconnecter" onclick="location.href='{{ url_for('logout') }}'">
+        <input class="deconnecter" type="button" value="Se déconnecter" onclick="location.href='{{ url_for('logout') }}'">
     </div>
     <script>
         var motDePasseElement = document.getElementById('mot-de-passe');
