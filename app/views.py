@@ -15,7 +15,8 @@ from app.requests import (get_root_categories, get_user_by_id, get_user_by_email
                           add_category_to_database, update_category_from_database, remove_category_from_database,
                           get_file_category_leaves, update_old_file, remove_file, update_file_categories, update_file_tags,
                           get_file_by_extension, get_all_extension, remove_forbiden_file, desactivate_user, get_all_roles, add_user,
-                          already_exist_mail, get_user_access, get_user_by_name, get_role_pompier)
+                          already_exist_mail, get_user_access, get_user_by_name, get_role_pompier, check_duplicate_user, get_user_by_role,
+                          update_user_role, get_category_by_role, modify_role_categories_database, add_role_to_databse)
 from app.forms import LoginForm, EditUserForm, AddUserForm, EditUserFormStringPassword
 from app import login_manager
 import base64
@@ -530,13 +531,21 @@ def search_user():
             except:
                 try:
                     nom,prenom = request.form['searchNom'],request.form['searchPrenom']
-                    return redirect(url_for('edit_profil_admin', user=get_user_by_nom(nom,prenom).idPompier))
+                    print(nom,prenom)
+                    if check_duplicate_user(prenom,nom):
+                        print("double")
+                        return redirect(url_for('search_user', double=True))
+                    else:
+                        return redirect(url_for('edit_profil_admin', user=get_user_by_name(nom,prenom).idPompier))
                 except:
+                    print("error")
                     return redirect(url_for('search_user', error=True))
     else:
         user = get_user_by_id(current_user.get_id())
         error = request.args.get('error', type=bool, default=False)
-        return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+        double = request.args.get('double', type=bool, default=False)
+        print(double)
+        return render_template("searchUser.html",user = user,error = error,notification_enabled=user_has_notifications(current_user.get_id()),  is_admin =get_user_by_id(current_user.get_id()).idRole == 1, double=double)
     
 @app.route('/edit_profil_admin', methods=['GET', 'POST'])
 @login_required
@@ -574,9 +583,15 @@ def administration():
 @activated_required
 @admin_required
 def edit_role():
-    role = request.args.get('role', type=int, default='')
-    dico_role = get_role_pompier()
-    return render_template('editRole.html', nom_page="Role", dico_role=dico_role, category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+    if request.method == 'POST':
+        role = request.form.getlist('role', '')
+        print(role)
+        return redirect(url_for('edit_role', role=role))
+    else:
+        role = request.args.get('role', type=int, default='')
+        dico_role = get_role_pompier()
+        liste_pompier = get_user_by_role(role)
+        return render_template('editRole.html', nom_page="Role", dico_role=dico_role, category_tree=get_category_tree(), is_admin =get_user_by_id(current_user.get_id()).idRole == 1, pompiers=liste_pompier)
 
 
 @app.route('/del_user')
@@ -603,3 +618,49 @@ def add_user_page():
             add_user(form.prenom.data, form.nom.data, form.mail.data,form.telephone.data,role, password)
             return redirect(url_for('administration'))
     return render_template('addUser.html', form=form,roles=get_all_roles(), notification_enabled=user_has_notifications(current_user.get_id()), is_admin =get_user_by_id(current_user.get_id()).idRole == 1)
+
+@app.route('/edit_user_role', methods=['GET', 'POST'])
+@login_required
+@activated_required
+@admin_required
+def edit_user_role():
+    json = request.get_json()
+    update_user_role(json['idPompier'], json['idRole'])
+    return redirect(url_for('edit_role', role=json['idRole']))
+
+@app.route('/add_user_role', methods=['GET', 'POST'])
+@login_required
+@activated_required
+@admin_required
+def add_user_role():
+    json = request.get_json()
+    pompier = get_user_by_email(json['mail'])
+    if pompier is not None:
+        update_user_role(pompier.idPompier, json['idRole'])
+    return redirect(url_for('edit_role', role=json['idRole']))
+
+@app.route('/get_role_categories', methods=['GET', 'POST'])
+@login_required
+@activated_required
+@admin_required
+def get_role_categories():
+    json = request.get_json()
+    return jsonify(get_category_by_role(json['idRole']))
+
+@app.route('/modify_role_categories', methods=['GET', 'POST'])
+@login_required
+@activated_required
+@admin_required
+def modify_role_categories():
+    json = request.get_json()
+    modify_role_categories_database(json['idRole'], json['categories'])
+    return redirect(url_for('edit_role'))
+
+@app.route('/add_role', methods=['GET', 'POST'])
+@login_required
+@activated_required
+@admin_required
+def add_role():
+    json = request.get_json()
+    add_role_to_databse(json['nomRole'], json['description'], json['categories'])
+    return redirect(url_for('edit_role'))

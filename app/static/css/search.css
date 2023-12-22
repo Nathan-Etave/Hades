@@ -72,8 +72,8 @@ body {
 
 .advanced_search_popup {
 	position: fixed;
-	top: 55%;
-	left: 79%;
+	top: 58%;
+	left: 88%;
 	transform: translate(-50%, -50%);
 	background-color: #004F8A;
 	border-radius: 1rem;
@@ -92,6 +92,7 @@ body {
 
 .advanced_search_popup h5 {
 	font-size: 1.2rem;
+	margin: 1rem 0 1rem 0;
 }
 
 #categorie_button {
@@ -149,8 +150,7 @@ body {
 
 .category_list_container {
     min-width: 20vw;
-    max-width: -webkit-fill-available;
-    height: 20vh;
+	height: 15vh;
     margin-bottom: 0.5rem;
     overflow-y: auto;
 }
@@ -179,6 +179,7 @@ body {
   100% {
 	transform: translateY(1px);
   }
+  
 }
 
 @media only screen and (max-width: 1000px) {
@@ -222,13 +223,62 @@ body {
 		left: 50%;
 		top:  54%;
 		height: 50vh;
+		width: 40vh;;
 		overflow: auto;
+	}
+	#close{
+		width: 4rem;
+		height: 4rem;
+		font-size: 200%;
+	}
+	.advanced_search_popup > h4{
+		font-size: 400%;
+	}
+	.categorie_search > h5{
+		font-size: 300%;
+	}
+	.category_list_container li{
+		width: 100rem;
+		font-size: 2rem;
 	}
 
 	#valider_recherche_avance {
 		font-size: 1rem;
 		margin-left: 4rem;
 		margin-top: 1.5rem;
+	}
+	.category_checkbox {
+	width: 2rem;
+	height: 2rem;
+
+	}
+	.extension_search > h5{
+		font-size: 300%;
+	}
+	.favoris_search > h5{
+		font-size: 300%;
+	}
+	#extension{
+		font-size: 2rem;
+	}
+	#textFav{
+		font-size: 2rem;
+	
+	}
+	#favoris,#date{
+		width: 2rem;
+		height: 2rem;
+	}
+	.date_search > h5{
+		font-size: 300%;
+	}
+	#texteDate{
+		font-size: 2rem;
+	}
+	#valider_recherche_avance{
+		font-size: 4rem;
+		margin-left: 15rem;
+	
 	}
 }
 
@@ -273,4 +323,37 @@ body {
 	.advanced_search_popup {
 		top: 60%;
 	}
+	#close{
+		width: 2rem;
+		height: 2rem;
+		font-size: 100%;
+	}
+	.advanced_search_popup > h4{
+		font-size: 200%;
+	}
+	.categorie_search > h5,.extension_search > h5,.favoris_search > h5,.date_search > h5{
+		font-size: 150%;
+	}
+	.category_list_container li{
+		width: 100rem;
+		font-size: 1rem;
+	}
+	#valider_recherche_avance {
+		font-size: 1rem;
+		margin-left: 1rem;
+		margin-top: 1rem;
+	}
+	.category_checkbox {
+	width: 1rem;
+	height: 1rem;
+
+	}
+	#extension,#textFav,#texteDate{
+		font-size: 1rem;
+	}
+	#favoris,#date{
+		width: 1rem;
+		height: 1rem;
+	}
+
 }
