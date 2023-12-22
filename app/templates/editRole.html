@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/mediaBottomHeader.css') }}" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/editRole.css') }}" />
         <script type="module" src="{{ url_for('static', filename='js/header.js') }}"></script>
-        <script type="module" src="{{ url_for('static', filename='js/manageFiles.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/editRole.js') }}"></script>
         <title>Role</title>
     </head>
 <body>
@@ -20,54 +20,52 @@
             <h2>Role des Pompier</h2>
             <form action="">
                 <select id="SelectRole" name="role">
+                    <option value="" disabled selected>Choisissez un Role</option>
                 {% for role in dico_role.keys() %}
-                        <option value="{{ role.id }}">{{ role.nomRole }}</option>
+                        <option id="Roles" value="{{ role.idRole }}">{{ role.nomRole }}</option>
                 {% endfor %}         
                 </select>
             </form>
             <div class="Pompier">
-                {% for pompiers in dico_role.values() %}
-                    {% for pompier in pompiers %}
-                            {% if role == '' or pompier.idRole.idRole == role %}
-                                <div class="Profil_Pompier">
-                                    <p>{{ pompier.nomPompier }} {{ pompier.prenomPompier }}</p>
-                                    <bouton class="retirer" type="button" id="delete_user_notification">X</bouton>
-                                </div>
-                            {% endif %}
-                    {% endfor %}
+                {% for pompier in pompiers %}          
+                            <div class="Profil_Pompier">
+                                <p><a href="{{ url_for('edit_profil_admin', user=pompier.idPompier) }}">{{ pompier.nomPompier }} {{ pompier.prenomPompier }}</a></p>
+                                <bouton class="retirer" type="button" id="delete_user_role">X</bouton>
+                            </div>
                 {% endfor %}
             </div>
-            <input type="search" name="search" placeholder="Rechercher" aria-label="Rechercher">
-            <input type="submit" class="bouton" value="Rechercher">
+            <input type="search" name="search" placeholder="email" aria-label="A">
+            <input type="submit" class="bouton" value="Ajouter" id="valider">
         </li>
         <li class="modification">
             <h2>Modifier Role</h2>
             <label for="choix">Sélectionnez un Role :</label>
-            <select>
+            <select id="modify_role">
+                <option value="" disabled selected>Choisissez un Role</option>
             {% for role in dico_role.keys() %}
-                    <option value="{{ role.nomRole }}">{{ role.nomRole }}</option>
+                    <option value="{{ role.idRole }}">{{ role.nomRole }}</option>
             {% endfor %}
             </select>
             <div class="category_container_modifier">
                 <h3>Catégories :</h3>
                 <div class="category_list_container_modifier">
                     {% macro render_category_tree(category_tree, parent_id=None) %}
-                        <ul>
-                            {% for category in category_tree %}
-                                <li>
-                                    <details>
-                                        <summary>
-                                            <input type="checkbox" id="{{ category[0].idCategorie }}" value="{{ category[0].idCategorie }}" class="category_checkbox_modifier" data-parent="{{ parent_id }}">
-                                            <label for="{{ category[0].idCategorie }}">{{ category[0].nomCategorie }}</label>
-                                        </summary>
-                                        {% if category[1] %}
-                                            {{ render_category_tree(category[1], category[0].idCategorie) }}
-                                        {% endif %}
-                                    </details>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endmacro %}
+                    <ul>
+                        {% for category in category_tree %}
+                            <li>
+                                <details>
+                                    <summary>
+                                        <input type="checkbox" id="{{ category[0][0].idCategorie }}" value="{{ category[0][0].idCategorie }}" class="category_checkbox" data-parent="{{ parent_id }}">
+                                        <label for="{{ category[0].idCategorie }}">{{ category[0][0].nomCategorie }} ({{ category[0][1]}})</label>
+                                    </summary>
+                                    {% if category[1] %}
+                                        {{ render_category_tree(category[1], category[0][0].idCategorie) }}
+                                    {% endif %}
+                                </details>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endmacro %}
                     {{ render_category_tree(category_tree) }}
                 </div>
             </div>
@@ -87,24 +85,24 @@
                 <div class="category_container_ajouter">
                     <h3>Catégories :</h3>
                     <div class="category_list_container_ajouter">
-                        {% macro render_category_tree(category_tree, parent_id=None) %}
-                            <ul>
-                                {% for category in category_tree %}
-                                    <li>
-                                        <details>
-                                            <summary>
-                                                <input type="checkbox" id="{{ category[0].idCategorie }}" value="{{ category[0].idCategorie }}" class="category_checkbox_ajouter" data-parent="{{ parent_id }}">
-                                                <label for="{{ category[0].idCategorie }}">{{ category[0].nomCategorie }}</label>
-                                            </summary>
-                                            {% if category[1] %}
-                                                {{ render_category_tree(category[1], category[0].idCategorie) }}
-                                            {% endif %}
-                                        </details>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endmacro %}
-                        {{ render_category_tree(category_tree) }}
+                        {% macro render_category_tree_2(category_tree, parent_id=None) %}
+                        <ul>
+                            {% for category in category_tree %}
+                                <li>
+                                    <details>
+                                        <summary>
+                                            <input type="checkbox" id="{{ category[0][0].idCategorie }}" value="{{ category[0][0].idCategorie }}" class="category_checkbox_2" data-parent="{{ parent_id }}">
+                                            <label for="{{ category[0].idCategorie }}">{{ category[0][0].nomCategorie }} ({{ category[0][1]}})</label>
+                                        </summary>
+                                        {% if category[1] %}
+                                            {{ render_category_tree_2(category[1], category[0][0].idCategorie) }}
+                                        {% endif %}
+                                    </details>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endmacro %}
+                        {{ render_category_tree_2(category_tree) }}
                     </div>
                 </div>
             </section>

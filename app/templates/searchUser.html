@@ -19,7 +19,10 @@
     <input type="submit" name="submitPrenom" value="Rechercher">
 </form>
 {% if error %}
-    <p>Element invalide</p>
+    <p>Utilisateur introuvable</p>
+{% endif %}
+{% if double %}
+    <p>Il y a plusieurs utilisateurs avec le même nom/prenom utilisez une autre méthode</p>
 {% endif %}
 
 {% endblock %}
