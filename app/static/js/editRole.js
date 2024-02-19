@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     document.querySelector('#modification_button').addEventListener('click', function(event) {
-        categoryLeaves = getAllSelectedCategoriesModify();
+        let categoryLeaves = getAllSelectedCategoriesModify();
         var selectedOptions = Array.from(document.getElementById("modify_role").options)
                                     .filter(option => option.selected)
                                     .map(option => option.value);
