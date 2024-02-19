@@ -511,6 +511,7 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
     session.add(file)
     session.commit()
     for tag in tags:
+        tag = unidecode(tag.lower())
         existing_tag = session.query(TAG).filter_by(nomTag=tag).first()
         if existing_tag is None:
             new_tag = TAG(nomTag=tag)
@@ -519,6 +520,8 @@ def add_file_to_database(file, filename, extension, tags, categories, id_etat):
         existing_association = session.query(table_A_TAG).filter_by(nomTag=tag, idFichier=file.idFichier).first()
         if existing_association is None:
             session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=file.idFichier))
+    if categories == []:
+        categories = [1]
     for categorie in categories:
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=file.idFichier))
     session.commit()
@@ -571,12 +574,15 @@ def update_old_file(file, filename, extension, tags, categories, id_etat, old_fi
     new_id = new_file.idFichier
     session.execute(table_HISTORIQUE.insert().values(ancienneVersion=old_file.idFichier, nouvelleVersion=new_file.idFichier))
     for tag in tags:
+        tag = unidecode(tag.lower())
         is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
         if not is_tag_exists:
             new_tag = TAG(nomTag=tag)
             session.add(new_tag)
             session.commit()
         session.execute(table_A_TAG.insert().values(nomTag=tag, idFichier=new_file.idFichier))
+    if categories == []:
+        categories = [1]
     for categorie in categories:
         session.execute(table_EST_CATEGORIE.insert().values(idCategorie=categorie, idFichier=new_file.idFichier))
     session.commit()
@@ -627,6 +633,7 @@ def update_file_tags(id_file, tags):
     session.query(table_A_TAG).filter_by(idFichier=id_file).delete()
     session.commit()
     for tag in tags:
+        tag = unidecode(tag.lower())
         is_tag_exists = session.query(TAG.nomTag).filter_by(nomTag=tag).first() is not None
         if not is_tag_exists:
             new_tag = TAG(nomTag=tag)
@@ -716,7 +723,9 @@ def is_valide_file(user_id, file_id) :
         for row in session.query(table_A_ACCES.c.idRole).filter_by(idCategorie=category.idCategorie).all() :
             lst_access.append(row[0])
         if id_role not in lst_access :
+            session.close()
             return False
+    session.close()
     return True
 
 def remove_forbiden_file(file_list, user_id) :

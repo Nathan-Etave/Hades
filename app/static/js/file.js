@@ -133,23 +133,30 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 window.addEventListener('resize', function() {
-	let fileObject = document.querySelector('.file_object');
-	let fileObjectSize = 50;
-	let fileObjectBottom = fileObject.getBoundingClientRect();
-	let windowHeight = window.innerHeight;
-	let windowWidth = window.innerWidth;
-	let windowHeightMinus = null;
-	if (windowWidth > 1000) {
-		windowHeightMinus = 75
-	} else if (windowWidth < 1000 && windowWidth > 535) {
-		windowHeightMinus = 150
-	} else {
-		windowHeightMinus = 200
-	}
-	while (fileObjectBottom.bottom < windowHeight - windowHeightMinus) {
-		fileObject.style.height = fileObjectSize + 'vh';
-		fileObjectSize += 5;
-		fileObjectBottom = fileObject.getBoundingClientRect();
-	}
+    let fileObject = document.querySelector('.file_object');
+    let fileObjectSize = 50;
+    let fileObjectBottom = fileObject.getBoundingClientRect();
+    let windowHeight = window.innerHeight;
+    let windowWidth = window.innerWidth;
+    let windowHeightMinus = null;
+    if (windowWidth > 1000) {
+        windowHeightMinus = 75
+    } else if (windowWidth < 1000 && windowWidth > 535) {
+        windowHeightMinus = 150
+    } else {
+        windowHeightMinus = 200
+    }
+
+    function adjustHeight() {
+        if (fileObjectBottom.bottom < windowHeight - windowHeightMinus) {
+            fileObject.style.height = fileObjectSize + 'vh';
+            fileObjectSize += 5;
+            fileObjectBottom = fileObject.getBoundingClientRect();
+            requestAnimationFrame(adjustHeight);
+        }
+    }
+
+    adjustHeight();
 });
+
 window.dispatchEvent(new Event('resize'));

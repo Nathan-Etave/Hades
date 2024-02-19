@@ -19,8 +19,8 @@
         {{ dropzone.load_js() }}
         {{ dropzone.config() }}
         <div class="button_container">
-            <button id="upload_button" onclick="window.location.href='{{ url_for('manageFiles') }}';">Réviser les fichiers un par un</button>
-            <button id="auto_upload_button">Réviser les fichiers automatiquement*</button>
+            <button id="upload_button" onclick="window.location.href='{{ url_for('manageFiles') }}';">Visualiser les fichiers un par un</button>
+            <button id="auto_upload_button">Ajouter les fichiers automatiquement*</button>
         </div>
         <p>* : Les tags de recherche seront générés automatiquement mais les fichiers seront non catégorisés.</p>
     </main>
