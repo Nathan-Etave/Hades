@@ -1,9 +1,9 @@
 from app import app, db
-from app.models import (TAG, ETATFICHIER, FICHIER, NOTIFICATION, CATEGORIE, ROLEPOMPIER, POMPIER, SIGNALEMENT,
-                        DATE, ACONSULTE, ANOTIFICATION, table_FAVORI, table_SOUS_CATEGORIE, table_EST_CATEGORIE,
-                        table_HISTORIQUE, table_A_TAG, table_A_ACCES)
+from app.models import (DATA, DOSSIER, RECHERCHE, ROLE, TAG,
+                        t_A_ACCES, FICHIER, t_SOUS_DOSSIER,
+                        UTILISATEUR, t_A_RECHERCHE, ATAG, 
+                        t_FAVORIS, NOTIFICATION)
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
 import csv
 import sys
 
@@ -24,149 +24,94 @@ def init_database():
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
-    #Table TAG
-    with open('app/static/csv/TAG.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/DATA.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            tag = TAG(nomTag=row[0])
-            db.session.add(tag)
-    db.session.commit()
+            data = DATA(id_Data=row[0], data=row[1])
+            session.add(data)
+    session.commit()
 
-    #Table ETAT_FICHIER
-    with open('app/static/csv/ETAT_FICHIER.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/DOSSIER.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            etat = ETATFICHIER(nomEtatFichier=row[1], descriptionEtatFichier=row[2])
-            db.session.add(etat)
-    db.session.commit()
+            dossier = DOSSIER(id_Dossier=row[0], nom_Dossier=row[1], priorite_Dossier=row[2], couleur=row[3])
+            session.add(dossier)
+    session.commit()
 
-    #Table FICHIER
-    with open('app/static/csv/FICHIER.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/RECHERCHE.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            fichier = FICHIER(nomFichier=row[1], data=bytes(row[2], 'utf-8'), extensionFichier=row[3], idEtatFichier=row[4])
-            db.session.add(fichier)
-    db.session.commit()
+            recherche = RECHERCHE(champ_Recherche=row[0], date_Heure_Recherche=row[1])
+            session.add(recherche)
+    session.commit()
 
-    #Table NOTIFICATION
-    with open('app/static/csv/NOTIFICATION.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/ROLE.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            notif = NOTIFICATION(texteNotification=row[1], typeChange=row[2], raisonNotification=row[3])
-            db.session.add(notif)
-    db.session.commit()
+            role = ROLE(id_Role=row[0], nom_Role=row[1])
+            session.add(role)
+    session.commit()
 
-    #Table CATEGORIE
-    with open('app/static/csv/CATEGORIE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/TAG.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            categorie = CATEGORIE(nomCategorie=row[1])
-            db.session.add(categorie)
-    db.session.commit()
+            tag = TAG(nom_Tag=row[0])
+            session.add(tag)
+    session.commit()
 
-    #Table ROLE_POMPIER
-    with open('app/static/csv/ROLE_POMPIER.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/A_ACCES.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            role = ROLEPOMPIER(nomRole=row[1], descriptionRole=row[2])
-            db.session.add(role)
-    db.session.commit()
+            a_acces = t_A_ACCES.insert().values(id_Role=row[0], id_Dossier=row[1])
+            session.execute(a_acces)
+    session.commit()
 
-    #Table POMPIER
-    with open('app/static/csv/POMPIER.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/FICHIER.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            pompier = POMPIER(nomPompier=row[1], prenomPompier=row[2], emailPompier=row[3], telephonePompier=row[4], mdpPompier=row[5], photoPompier=bytes(row[6], 'utf-8'), idRole=row[7])
-            db.session.add(pompier)
-    db.session.commit()
+            fichier = FICHIER(id_Fichier=row[0], nom_Fichier=row[1], date_Heure_Fichier=row[2], id_Dossier=row[3], id_Data=row[4])
+            session.add(fichier)
+    session.commit()
 
-    #Table SIGNALEMENT
-    with open('app/static/csv/SIGNALEMENT.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/SOUS_DOSSIER.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            signalement = SIGNALEMENT(idFichier=row[0], idPompier=row[1], idDate=row[2], descriptionSignalement=row[3])
-            db.session.add(signalement)
-    db.session.commit()
+            sous_dossier = t_SOUS_DOSSIER(id_Dossier_Parent=row[0], id_Dossier_Enfant=row[1])
+            session.add(sous_dossier)
+    session.commit()
 
-    #Table FAVORI
-    with open('app/static/csv/FAVORI.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/UTILISATEUR.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            session.execute(table_FAVORI.insert().values(idFichier=row[0], idPompier=row[1]))
-            session.commit()
+            utilisateur = UTILISATEUR(id_Utilisateur=row[0], nom_Utilisateur=row[1], prenom_Utilisateur=row[2], email_Utilisateur=row[3], mdp_Utilisateur=row[4], telephone_Utilisateur=row[5], est_Actif_Utilisateur=row[6], id_Role=row[7])
+            session.add(utilisateur)
+    session.commit()
 
-    #Table DATE
-    with open('app/static/csv/DATE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/A_RECHERCHE.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            date = DATE(laDate=datetime.fromisoformat(row[1]))
-            db.session.add(date)
-    db.session.commit()
+            a_recherche = t_A_RECHERCHE.insert().values(id_Utilisateur=row[0], champ_Recherche=row[1])
+            session.execute(a_recherche)
+    session.commit()
 
-    #Table A_CONSULTE
-    with open('app/static/csv/A_CONSULTE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/ATAG.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            a_consulte = ACONSULTE(idFichier=row[0], idPompier=row[1], idDate=row[2])
-            db.session.add(a_consulte)
-    db.session.commit()
+            atag = ATAG(id_Fichier=row[0], nom_Tag=row[1])
+            session.add(atag)
+    session.commit()
 
-    #Table SOUS_CATEGORIE
-    with open('app/static/csv/SOUS_CATEGORIE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/FAVORIS.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            session.execute(table_SOUS_CATEGORIE.insert().values(categorieParent=row[0], categorieEnfant=row[1]))
-            session.commit()
+            favoris = t_FAVORIS.insert().values(id_Utilisateur=row[0], id_Fichier=row[1])
+            session.execute(favoris)
+    session.commit()
 
-    #Table EST_CATEGORIE
-    with open('app/static/csv/EST_CATEGORIE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
+    with open('app/static/csv/NOTIFICATION.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            session.execute(table_EST_CATEGORIE.insert().values(idCategorie=row[0], idFichier=row[1]))
-            session.commit()
-
-    #Table HISTORIQUE
-    with open('app/static/csv/HISTORIQUE.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            session.execute(table_HISTORIQUE.insert().values(nouvelleVersion=row[0], ancienneVersion=row[1]))
-            session.commit()
-
-    #Table A_TAG
-    with open('app/static/csv/A_TAG.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            session.execute(table_A_TAG.insert().values(nomTag=row[0], idFichier=row[1]))
-            session.commit()
-
-    #Table A_NOTIFICATION
-    with open('app/static/csv/A_NOTIFICATION.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            a_notif = ANOTIFICATION(idNotification=row[0], idPompier=row[1], idFichier=row[2], idDate=row[3])
-            db.session.add(a_notif)
-    db.session.commit()
-
-    #Table A_ACCES
-    with open('app/static/csv/A_ACCES.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            session.execute(table_A_ACCES.insert().values(idCategorie=row[0], idRole=row[1]))
-            session.commit()
+            notification = NOTIFICATION(id_Notification=row[0], id_Utilisateur=row[1], message_Notification=row[2], date_Heure_Notification=row[3])
+            session.add(notification)
+    session.commit()
+    session.close()
