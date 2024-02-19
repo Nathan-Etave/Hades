@@ -128,4 +128,4 @@ def process_nlp(text, batch_size=100000):
         for batch in executor.map(process_batch, batches):
             word_frequencies.update(batch)
     word_frequencies = sorted(word_frequencies.items(), key=lambda x: x[1], reverse=True)
-    return [word for word, frequency in word_frequencies if frequency > 1]
+    return [word for word, frequency in word_frequencies]
