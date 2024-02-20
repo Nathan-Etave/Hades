@@ -62,7 +62,7 @@ def background_recherche(job_id, application):
                     'extension': fichier.extension_Fichier
                 })
             job_statuses[job_id][dossier.id_Dossier]['status'] = True
-        
+
 @app.route('/recherche', methods=['GET', 'POST'])
 def recherche():
     if request.method == 'POST':
@@ -80,3 +80,15 @@ def status(job_id):
         return jsonify({'job': job_statuses[job_id]})
     else:
         return jsonify({'job': 'inconnu'}), 404
+    
+@app.route('/administration', methods=['GET'])
+def administration():
+    return render_template('administration.html', dossiers=get_root_dossiers())
+
+@app.route('/administration/dossier/<id_dossier>', methods=['PUT'])
+def update_dossier_api(id_dossier):
+    nom = request.json.get('nom', None)
+    priorite = request.json.get('priorite', None)
+    couleur = request.json.get('couleur', None)
+    update_dossier(id_dossier, nom, couleur, priorite)
+    return Response(status=204)
