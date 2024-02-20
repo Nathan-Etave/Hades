@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <script type="module" src="{{ url_for('static', filename='js/recherche.js') }}"></script>
+        <script>
+            var job_id = "{{ job_id }}";
+        </script>
+    </head>
+    {% include "components/header.html" %}
+<body>
+    <div class="recherche-container">
+    </div>
+</body>
+</html>
