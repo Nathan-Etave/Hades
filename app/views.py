@@ -35,3 +35,22 @@ def admin_required(f):
         else:
             return redirect(url_for('home'))
     return decorated_function
+
+@app.route('/')
+def home():
+    liste_fav = get_files_favoris(1)
+    return render_template('index.html', liste_fav=liste_fav)
+
+@app.route('/unfavorize', methods=['POST'])
+def unfavorize():
+    json = request.get_json()
+    id_file = json['id']
+    unfavorite_file(id_file, 1)
+    return jsonify({'status': 'ok'})
+
+@app.route('/favorize', methods=['POST'])
+def favorize():
+    json = request.get_json()
+    id_file = json['id']
+    favorite_file(id_file, 1)
+    return jsonify({'status': 'ok'})
