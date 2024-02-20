@@ -1,6 +1,6 @@
 import os
 from app import app, nlp, job_statuses
-from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify, Response
+from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify, Response, current_app
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_bcrypt import generate_password_hash, check_password_hash
 from functools import wraps
@@ -59,8 +59,7 @@ def background_recherche(job_id, application):
                 job_statuses[job_id][dossier.id_Dossier]['fichiers'].append({
                     'id': fichier.id_Fichier,
                     'nom': fichier.nom_Fichier,
-                    'extension': fichier.extension_Fichier,
-                    'data': fichier.DATA_.data
+                    'extension': fichier.extension_Fichier
                 })
             job_statuses[job_id][dossier.id_Dossier]['status'] = True
         
