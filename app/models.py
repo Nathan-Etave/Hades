@@ -23,7 +23,7 @@ class DOSSIER(Base):
     id_Dossier = mapped_column(Integer, primary_key=True)
     nom_Dossier = mapped_column(String(255))
     priorite_Dossier = mapped_column(Integer)
-    couleur = mapped_column(String(255))
+    couleur_Dossier = mapped_column(String(255))
 
     ROLE: Mapped['ROLE'] = relationship('ROLE', secondary='A_ACCES', back_populates='DOSSIER_')
     DOSSIER: Mapped['DOSSIER'] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == t_SOUS_DOSSIER.c.id_Dossier_Enfant, secondaryjoin=lambda: DOSSIER.id_Dossier == t_SOUS_DOSSIER.c.id_Dossier_Parent, back_populates='DOSSIER_')

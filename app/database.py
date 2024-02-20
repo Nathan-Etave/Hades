@@ -34,7 +34,7 @@ def init_database():
     with open('app/static/csv/DOSSIER.csv', 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
         for row in reader:
-            dossier = DOSSIER(id_Dossier=row[0], nom_Dossier=row[1], priorite_Dossier=row[2], couleur=row[3])
+            dossier = DOSSIER(id_Dossier=row[0], nom_Dossier=row[1], priorite_Dossier=row[2], couleur_Dossier=row[3])
             session.add(dossier)
     session.commit()
 
