@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from app.requests import *
 from app.forms import *
 from app import login_manager
+from io import BytesIO
 
 process_functions = {
     'pdf': nlp.process_pdf,
@@ -54,3 +55,30 @@ def favorize():
     id_file = json['id']
     favorite_file(id_file, 1)
     return jsonify({'status': 'ok'})
+
+@app.route('/download', methods=['POST'])
+def download():
+    json = request.get_json()
+    id_file = json['id']
+    print(id_file)
+    data = get_data_from_file_id(id_file)
+    return make_response(send_file(BytesIO(data.data), mimetype='application/octet-stream'))
+
+@app.route('/add_multiview', methods=['POST'])
+def add_multiview():
+    multiview_list = request.cookies.get('multiview_list')
+    file_id = request.get_json()['id']
+    if f';{file_id};' not in multiview_list:
+        multiview_list += f'{file_id};'
+    response = app.make_response(redirect(url_for('home')))
+    response.set_cookie('multiview_list', multiview_list)
+    return response
+
+@app.route('/unmultiview', methods=['POST'])
+def unmultiview():
+    multiview_list = request.cookies.get('multiview_list')
+    file_id = request.get_json()['id']
+    multiview_list = multiview_list.replace(f';{file_id};', ';')
+    response = app.make_response(redirect(url_for('home')))
+    response.set_cookie('multiview_list', multiview_list)
+    return response
