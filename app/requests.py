@@ -37,3 +37,20 @@ def update_dossier(id_dossier, nom = None, couleur = None, priorite = None):
     if priorite is not None:
         dossier.priorite_Dossier = priorite
     db.session.commit()
+
+def add_file(file, filename, extension, tags, id_dossier):
+    data = DATA(data=file)
+    db.session.add(data)
+    db.session.commit()
+    file = FICHIER(nom_Fichier=filename, extension_Fichier=extension, id_Dossier=id_dossier, id_Data=data.id_Data)
+    db.session.add(file)
+    db.session.commit()
+    for tag in tags:
+        if not TAG.query.filter_by(nom_Tag=tag[0]).first():
+            new_tag = TAG(nom_Tag=tag[0])
+            db.session.add(new_tag)
+            db.session.commit()
+        a_tag = ATAG(id_Fichier=file.id_Fichier, nom_Tag=tag[0], nb_Occurrence=tag[1])
+        db.session.add(a_tag)
+        db.session.commit()
+    return file.id_Fichier
