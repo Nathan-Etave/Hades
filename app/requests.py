@@ -58,3 +58,15 @@ def favorite_file(file_id, user_id):
     session.execute(new_favorite)
     session.commit()
     session.close()
+
+def get_data_from_file_id(file_id: int):
+    """
+    Récupère les données d'un fichier en fonction de son identifiant.
+
+    Args:
+        file_id (int): L'identifiant du fichier.
+
+    Returns:
+        dict: Un dictionnaire contenant les informations du fichier.
+    """
+    db.session.query(DATA).join(FICHIER).filter(FICHIER.id_Fichier == file_id).first()
