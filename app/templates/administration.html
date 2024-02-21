@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/administration.css') }}">
         <script type="module" src="{{ url_for('static', filename='js/administration.js') }}"></script>
     </head>
 <body>
     <div class="administration-container">
         {% for dossier in dossiers %}
-            <div class="dossier" draggable="true" style="background-color: {{ dossier.couleur_Dossier }}; font-size: 2rem;">
-                <span contenteditable="true">{{ dossier.nom_Dossier }}</span> <span>({{ dossier.priorite_Dossier }})</span>
-                <span class="dossier-id" style="display: none;">{{ dossier.id_Dossier }}</span>
+            <div class="dossier" draggable="true" style="background-color: {{ dossier.couleur_Dossier }};">
+                <div style="font-size: 2rem;">
+                    <span contenteditable="true">{{ dossier.nom_Dossier }}</span> <span>({{ dossier.priorite_Dossier }})</span>
+                    <span class="dossier-id" style="display: none;">{{ dossier.id_Dossier }}</span>
+                </div>
+                <div>
+                    <form method="post" class="form-fichier" enctype="multipart/form-data">
+                        <label for="fichier-input-folder{{ dossier.id_Dossier }}" class="fichier-input-folder">
+                            <input type="file" id="fichier-input-folder{{ dossier.id_Dossier }}" name="fichiers[]" class="fichier-input" multiple webkitdirectory style="display: none;"/>
+                            Dossier(s)
+                        </label>
+                        <label for="fichier-input-file{{ dossier.id_Dossier }}" class="fichier-input-file">
+                            <input type="file" id="fichier-input-file{{ dossier.id_Dossier }}" name="fichiers[]" class="fichier-input" multiple style="display: none;"/>
+                            Fichier(s)
+                        </label>
+                    </form>
+                </div>
             </div>
         {% endfor %}
     </div>
     <div class="dossier-placeholder hidden" style=".hidden { display: none; }"></div>
+    <div id="progress-bar-container">
+        <div id="progress-bar">0/0</div>
+    </div>
 </body>
 </html>
