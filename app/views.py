@@ -1,3 +1,4 @@
+import base64
 import os
 from app import app, nlp, job_statuses
 from flask import render_template, request, redirect, url_for, make_response, send_file, jsonify, Response, current_app
@@ -92,3 +93,28 @@ def update_dossier_api(id_dossier):
     couleur = request.json.get('couleur', None)
     update_dossier(id_dossier, nom, couleur, priorite)
     return Response(status=204)
+
+@app.route('/administration/dossier/<id_dossier>/fichier', methods=['POST'])
+def add_file_api(id_dossier):
+    if not os.path.exists(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}'):
+        os.makedirs(f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}')
+    filename = secure_filename(request.get_json()['nom'])
+    extension = filename.split('.')[-1]
+    data_file = request.get_json()['data']
+    file_path = f'{app.config["UPLOADED_TEMP_DEST"]}/{current_user.get_id()}/{filename}'
+    base64_data = data_file.split(',')[1]
+    decoded_data = base64.b64decode(base64_data)
+    with open(file_path, 'wb') as file:
+        file.write(decoded_data)
+    if extension in process_functions:
+        tags = process_functions[extension](file_path)
+    else:
+        tags = []
+    add_file(base64.b64encode(open(file_path, 'rb').read()), filename, extension, tags, id_dossier)
+    os.remove(file_path)
+    return Response(status=200)
+
+
+@app.route('/home', methods=['GET', 'POST'])
+def home():
+    return render_template('recherche.html')

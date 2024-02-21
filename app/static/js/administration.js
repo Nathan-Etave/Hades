@@ -23,6 +23,7 @@ function dragEnd(event) {
 }
 
 function dragEnter(event) {
+    event.stopPropagation();
     let referenceNode = event.target;
     while (referenceNode.parentNode !== container) {
         referenceNode = referenceNode.parentNode;
@@ -75,10 +76,9 @@ function defineScope(dossiers) {
     }
 }
 
-let dossier_name = document.querySelectorAll('.dossier > span:first-child');
+let dossier_name = document.querySelectorAll('.dossier > div > span:first-child');
 for (let dossier of dossier_name) {
     dossier.addEventListener('input', function(event) {
-        console.log(event.target.innerText);
         fetch('/administration/dossier/' + event.target.parentElement.querySelector('span:last-child').innerText, {
             headers: {
                 'Content-Type': 'application/json'
@@ -86,5 +86,44 @@ for (let dossier of dossier_name) {
             method: 'PUT',
             body: JSON.stringify({nom: event.target.innerText})
         });
+    });
+}
+
+let fichier_input = document.querySelectorAll('.fichier-input');
+let total_fichier = 0;
+let upload_fichier = 0;
+for (let input of fichier_input) {
+    input.addEventListener('change', async function(event) {
+        let dossier_id = input.parentElement.parentElement.parentElement.parentElement.querySelector('span:last-child').innerText;
+        let files = input.files;
+        total_fichier += files.length;
+        for (let file of files) {
+            await new Promise((resolve, reject) => {
+                let reader = new FileReader();
+                reader.onload = async function(e) {
+                    let progress_bar = document.getElementById('progress-bar');
+                    progress_bar.innerHTML = upload_fichier + '/' + total_fichier;
+                    let response = await fetch('/administration/dossier/' + dossier_id + '/fichier', {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'POST',
+                        body: JSON.stringify({
+                            nom: file.name,
+                            data: e.target.result
+                        })
+                    });
+                    let status = await response.status;
+                    if (status === 200) {
+                        upload_fichier++;
+                        progress_bar.style.width = (upload_fichier / total_fichier) * 100 + '%';
+                        progress_bar.innerHTML = upload_fichier + '/' + total_fichier;
+                    }
+                    resolve();
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+        input.parentElement.parentElement.reset();
     });
 }
