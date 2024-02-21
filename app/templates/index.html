@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    <script src="{{ url_for('static', filename='js/boutonRecherche.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+        <script src="{{ url_for('static', filename='js/boutonRecherche.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+        <title>Accueil</title>
+    </head>
     {% include "components/header.html" %}
     <body>
         <div class="barre_de_recherche">
@@ -26,19 +28,24 @@
                 </section>
             </div>
         </div>
+        <h2>Recherches Précédentes</h2>
+        <form method="POST" action="{{ url_for('recherche') }}" class="recherches_precedentes">
+            {% for recherche in liste_recherche %}
+                <div><i></i>
+                    <input type="hidden" name="search" value="{{ recherche.champ_Recherche }}">
+                    <button type="submit"><i>{{ recherche.date_Heure_Recherche.strftime('%d/%m/%Y %H:%M') }} </i> {{ recherche.champ_Recherche}}</button>
+                </div>
+            {% endfor %}
+        </form>
+        <h2>Favoris</h2>
         <section class="favoris">
             {% for fichier in liste_fav %}
             <div class="fichier">
                 <a href="#" id="bouton_fichier">{{ fichier.nom_Fichier }}</a>
-                <div>
-                    <a href="#" id="{{ fichier.id_Fichier }}" class="bouton_telechargement">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" class="svg_telechargement">
-                            <circle cx="12" cy="12" r="8" stroke="#0A0A30" stroke-width="1.5"/>
-                            <path class="slide" fill="#265BFF" d="M12.75 8.75a.75.75 0 00-1.5 0h1.5zm-1.5 6a.75.75 0 001.5 0h-1.5zm-1.22-2.53a.75.75 0 10-1.06 1.06l1.06-1.06zM12 15.25l-.53.53a.75.75 0 001.06 0l-.53-.53zm3.03-1.97a.75.75 0 10-1.06-1.06l1.06 1.06zm-3.78-4.53v6h1.5v-6h-1.5zm-2.28 4.53l2.5 2.5 1.06-1.06-2.5-2.5-1.06 1.06zm3.56 2.5l2.5-2.5-1.06-1.06-2.5 2.5 1.06 1.06z"/>
-                        </svg>
-                    </a>
+                <div class="bob">
+                    <img src="{{url_for('static', filename='img/telechargement.png')}}" alt="telechargement" class="telechargement" id="{{ fichier.id_Fichier }}">
+                    <img src="{{url_for('static', filename='img/moins.png')}}" alt="multiview" class="multiview" id="id {{ fichier.id_Fichier }}">
                     <img src="{{url_for('static', filename='img/etoile_pleine.png')}}" alt="etoile" class="etoile" id="{{ fichier.id_Fichier }}">
-                    <img src="{{url_for('static', filename='img/etoile_vide.png')}}" alt="multiview" class="multiview" id="id {{ fichier.id_Fichier }}">
                 </div>
             </div>
             {% endfor %}
