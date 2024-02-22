@@ -27,7 +27,7 @@ function checkStatus() {
 
 function createDetails(dossier) {
     return /*html*/`
-        <details>
+        <details open>
             <summary style="background-color: ${dossier['couleur']}; font-size: 2rem;">
                 ${dossier['nom']}
                 <span id="${dossier['id']}" style="display: none;">
