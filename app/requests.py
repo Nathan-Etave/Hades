@@ -3,6 +3,7 @@ from app.models import (DATA, DOSSIER, RECHERCHE, ROLE, TAG,
                         t_A_ACCES, FICHIER, t_SOUS_DOSSIER,
                         UTILISATEUR, t_A_RECHERCHE, ATAG, 
                         t_FAVORIS, NOTIFICATION)
+from unidecode import unidecode
 
 def get_user_by_id(id):
     return UTILISATEUR.query.filter_by(id_Utilisateur=id).first()
@@ -46,11 +47,12 @@ def add_file(file, filename, extension, tags, id_dossier):
     db.session.add(file)
     db.session.commit()
     for tag in tags:
-        if not TAG.query.filter_by(nom_Tag=tag[0]).first():
+        tag = unidecode(tag.lower())
+        if not TAG.query.filter_by(nom_Tag=unidecode(tag[0].lower())).first():
             new_tag = TAG(nom_Tag=tag[0])
             db.session.add(new_tag)
             db.session.commit()
-        a_tag = ATAG(id_Fichier=file.id_Fichier, nom_Tag=tag[0], nb_Occurrence=tag[1])
+        a_tag = ATAG(id_Fichier=file.id_Fichier, nom_Tag=unidecode(tag[0].lower()), nb_Occurrence=tag[1])
         db.session.add(a_tag)
         db.session.commit()
     return file.id_Fichier
