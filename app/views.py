@@ -113,8 +113,3 @@ def add_file_api(id_dossier):
     add_file(base64.b64encode(open(file_path, 'rb').read()), filename, extension, tags, id_dossier)
     os.remove(file_path)
     return Response(status=200)
-
-
-@app.route('/home', methods=['GET', 'POST'])
-def home():
-    return render_template('recherche.html')
