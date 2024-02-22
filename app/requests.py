@@ -47,12 +47,27 @@ def add_file(file, filename, extension, tags, id_dossier):
     db.session.add(file)
     db.session.commit()
     for tag in tags:
-        tag = unidecode(tag.lower())
         if not TAG.query.filter_by(nom_Tag=unidecode(tag[0].lower())).first():
-            new_tag = TAG(nom_Tag=tag[0])
+            new_tag = TAG(nom_Tag=unidecode(tag[0].lower()))
             db.session.add(new_tag)
             db.session.commit()
         a_tag = ATAG(id_Fichier=file.id_Fichier, nom_Tag=unidecode(tag[0].lower()), nb_Occurrence=tag[1])
         db.session.add(a_tag)
         db.session.commit()
     return file.id_Fichier
+
+def get_root_dossiers_by_role(id_role):
+    """ permet de récupérer les dossiers racines en fonction du rôle
+
+    Args:
+        id_role (int): id du rôle
+
+    Returns:
+        List : liste des dossiers racines
+    """    
+    all_dossiers = DOSSIER.query.all()
+    root_dossiers = []
+    for dossier in all_dossiers:
+        if dossier.DOSSIER is None and db.session.query(t_A_ACCES).filter(t_A_ACCES.c.id_Dossier == dossier.id_Dossier, t_A_ACCES.c.id_Role == id_role).first():
+            root_dossiers.append(dossier)
+    return root_dossiers

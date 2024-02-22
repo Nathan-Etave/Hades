@@ -11,6 +11,7 @@ from app.forms import *
 from app import login_manager
 from threading import Thread
 import uuid
+from unidecode import unidecode
 
 process_functions = {
     'pdf': nlp.process_pdf,
@@ -39,9 +40,9 @@ def admin_required(f):
             return redirect(url_for('home'))
     return decorated_function
 
-def background_recherche(job_id, application):
+def background_recherche(job_id, application, recherche):
     with application.app_context():
-        dossiers = get_root_dossiers()
+        dossiers = get_root_dossiers_by_role(1) #current_user.get_id())
         dossiers.sort(key=lambda x: x.priorite_Dossier)
         for dossier in dossiers:
             if job_id not in job_statuses:
@@ -54,24 +55,44 @@ def background_recherche(job_id, application):
                 'fichiers': [],
                 'status': False
             }
-        # tri des dossiers selon la recherche
         for dossier in dossiers:
             for fichier in dossier.FICHIER:
-                job_statuses[job_id][dossier.id_Dossier]['fichiers'].append({
-                    'id': fichier.id_Fichier,
-                    'nom': fichier.nom_Fichier,
-                    'extension': fichier.extension_Fichier
-                })
+                if file_meets_conditions(fichier, process_recherche(recherche)):
+                    job_statuses[job_id][dossier.id_Dossier]['fichiers'].append({
+                        'id': fichier.id_Fichier,
+                        'nom': fichier.nom_Fichier,
+                        'extension': fichier.extension_Fichier
+                    })
             job_statuses[job_id][dossier.id_Dossier]['status'] = True
+
+def process_recherche(recherche):
+    or_conditions = recherche.split('|')
+    conditions = [condition.split('&') for condition in or_conditions]
+    conditions = [sublist for sublist in [[condition.strip() for condition in sublist if condition.strip()] for sublist in conditions] if sublist]
+    return conditions
+
+def file_meets_conditions(fichier, conditions):
+    if len(conditions) == 0:
+        return True
+    elif len(conditions) == 1:
+        bools = [is_any_tag(fichier, tag) for tag in conditions[0]]
+        return all(bools)
+    else:
+        bools = [file_meets_conditions(fichier, [condition]) for condition in conditions]
+        return any(bools)
+
+def is_any_tag(fichier, nom_tag):
+    return nom_tag in unidecode(fichier.nom_Fichier.lower()) or any(tag.nom_Tag == nom_tag for tag in fichier.A_TAG)
 
 @app.route('/recherche', methods=['GET', 'POST'])
 def recherche():
     if request.method == 'POST':
-            job_id = str(uuid.uuid4())
-            application = current_app._get_current_object()
-            thread = Thread(target=background_recherche, args=(job_id,application))
-            thread.start()
-            return render_template('recherche.html', job_id=job_id)
+        recherche = request.form['search']
+        job_id = str(uuid.uuid4())
+        application = current_app._get_current_object()
+        thread = Thread(target=background_recherche, args=(job_id, application, unidecode(recherche.lower())))
+        thread.start()
+        return render_template('recherche.html', job_id=job_id)
     else:
         return render_template('recherche.html')
 
