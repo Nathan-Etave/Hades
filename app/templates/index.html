@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+        <script src="{{ url_for('static', filename='js/boutonRecherche.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+        <title>Accueil</title>
+    </head>
+    {% include "components/header.html" %}
+    <body>
+        <div class="barre_de_recherche">
+            <form class="recherche" role="search" method="POST" action="{{ url_for('recherche') }}">
+                <input type="search" name="search" placeholder="Rechercher ..." aria-label="Rechercher ..." id="barreRecherche">
+                <button type="submit"><img src="{{url_for('static', filename='img/loupe.png')}}" alt="loupe" class="loupe"></button>
+            </form>
+            <div class="buttons">
+                <div>
+                    <button id="buttonRecherche1">"</button>
+                    <button id="buttonRecherche2">&</button>
+                    <button id="buttonRecherche3">|</button>
+                </div>
+                <section id="infoButton"><img src="{{url_for('static', filename='img/info.png')}}" alt="info" class="info"></section>
+                <section id="infoBox" class="infoBoxClosed">
+                    <h2>Fonctionnement de la barre de recherche</h2>
+                    <p>& : Cet élément sert à faire une recherche où les deux tags sont présents.</p>
+                    <p>| : Cet élément sert à rechercher les fichiers où l'un des deux tags sont présents. Peut aussi être remplacé par un espace.</p>
+                    <p>" " : Les mots contenus entre guillemets servent à rechercher des tags constitués de plusieurs mots.</p>
+                </section>
+            </div>
+        </div>
+        <h2>Recherches Précédentes</h2>
+        <form method="POST" action="{{ url_for('recherche') }}" class="recherches_precedentes">
+            {% for recherche in liste_recherche %}
+                <div><i></i>
+                    <input type="hidden" name="search" value="{{ recherche.champ_Recherche }}">
+                    <button type="submit"><i>{{ recherche.date_Heure_Recherche.strftime('%d/%m/%Y %H:%M') }} </i> {{ recherche.champ_Recherche}}</button>
+                </div>
+            {% endfor %}
+        </form>
+        <h2>Favoris</h2>
+        <section class="favoris">
+            {% for fichier in liste_fav %}
+            <div class="fichier">
+                <a href="#" id="bouton_fichier">{{ fichier.nom_Fichier }}</a>
+                <div class="bob">
+                    <img src="{{url_for('static', filename='img/telechargement.png')}}" alt="telechargement" class="telechargement" id="{{ fichier.id_Fichier }}">
+                    <img src="{{url_for('static', filename='img/moins.png')}}" alt="multiview" class="multiview" id="id {{ fichier.id_Fichier }}">
+                    <img src="{{url_for('static', filename='img/etoile_pleine.png')}}" alt="etoile" class="etoile" id="{{ fichier.id_Fichier }}">
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </body>
+</html>
