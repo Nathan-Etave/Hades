@@ -20,6 +20,21 @@ function dragStart(event) {
 
 function dragEnd(event) {
     target_dossier.classList.remove('onDrag');
+    let administation_container = document.querySelector('.administration-container');
+    Array.from(administation_container.children).forEach((child, index) => {
+        let priority = child.querySelector('span:first-child').nextElementSibling;
+        priority.innerText = '(' + (index + 1) + ')';
+    });
+    fetch('/administration/dossiers', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            dossiers: Array.from(administation_container.children).map(child => child.querySelector('span:last-child').innerText)
+        })
+    });
+
 }
 
 function dragEnter(event) {
@@ -127,3 +142,40 @@ for (let input of fichier_input) {
         input.parentElement.parentElement.reset();
     });
 }
+
+let boutonsup = document.querySelectorAll('.retirer');
+boutonsup.forEach(function(button) {    
+    button.addEventListener('click', function(event) {
+        let id = button.id;
+        fetch('/administration', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then( response => {
+            button.parentElement.parentElement.remove();
+        });
+    });
+});
+
+
+let checkboxes = document.querySelectorAll('.desactiver');
+checkboxes.forEach(function(checkbox) {
+    checkbox.addEventListener('change', function(event) {
+        let id = checkbox.id;
+        fetch('/administration', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        });
+    });
+});
+

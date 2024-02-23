@@ -1,9 +1,18 @@
-document.addEventListener('DOMContentLoaded', function() {
+function fonctionnementBoutons() {
     let multiview_cookie = document.cookie.match(/multiview_list="([^"]*)"/)[1].split('\\073');
 
     let starButtons = document.querySelectorAll('.etoile');
     starButtons.forEach(function(button) {
         let id = button.id;
+        let favori = button.getAttribute('is-fav');
+        if(favori === 'true') {
+            button.src = '/static/img/etoile_pleine.png';
+            button.className = 'etoile_pleine';
+        }
+        else {
+            button.src = '/static/img/etoile_vide.png';
+            button.className = 'etoile_vide';
+        }
         button.addEventListener('click', function(event) {
             if(button.className === 'etoile_vide'){
                 event.preventDefault();
@@ -17,12 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 })
                 .then( response => {
-                    console.log(response.status);
                     button.src = '/static/img/etoile_pleine.png';
-                    button.className = 'etoile';
+                    button.className = 'etoile_pleine';
                 });
             }
-            else{
+            else if(button.className === 'etoile_pleine'){
                 event.preventDefault();
                 fetch('/unfavorize', {
                     method: 'POST',
@@ -91,8 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     downloadButtons.forEach(function(button) {
         let id = button.id;
         button.addEventListener('click', function(event) {
-            event.preventDefault();
-            fetch('/download', {
+            fetch('download', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -107,11 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 blob.text().then(function(result) {
                     let file_data = result;
                     downloadLink.href = 'data:application/octet-stream;base64,' + file_data;
-                    downloadLink.download = 'test';
+                    downloadLink.download = id;
                     downloadLink.click();
                     downloadLink.remove();
                 });
             });
         });
     });
-});
+}

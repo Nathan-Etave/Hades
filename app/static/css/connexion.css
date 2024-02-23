@@ -1,149 +1,120 @@
 main{
-    display:flex;
-    justify-content: center;
-}
-body{
-    overflow: hidden;
-}
-.page_connexion {
-    background: #004F8A;
     display: flex;
-    flex-wrap: wrap;
-    margin-top: 2rem;
-    flex-basis: calc(100%/3);
-    border-radius: 5rem;
+    justify-content: space-around;
+    padding: 2rem;
 }
-.email>p, .password>p {
+
+form{
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 2rem;
+    border-radius: .5rem;
+    overflow: hidden;
+    align-items: center;
+}
+
+form.page_connexion{
+    width: 35rem;
+    background-color: #004F8A;
     color: white;
-    font-size: 200%;
-
-}
-.email>input, .password>input {
-    border: none;
-    border-radius: 2rem;
-    padding: 0.5rem;
-    width: 50%;
-}
-.connexion>input {
-    margin-top: 0%;
-    font-size: 150%;
-    background: white;
-    border: none;
-    border-radius: 2rem;
-    padding-top: 0%;
-    color:  #004F8A;
-    cursor: pointer;
-    padding:1rem;
 }
 
-
-.connexion>input:hover {
-    color: rgb(253, 0, 0);
-    transition: 0.5s;
+form.page_inscription{
+    width: 25rem;
+    border: .2rem solid #004F8A;
+    color: #004F8A;
 }
 
-.email, .password,.connexion{
-    padding-right: 0rem;
-    flex-basis: 100%;
+form h1{
     text-align: center;
-  
-}
-.connexion{
-    margin-top: 4rem;
-    margin-bottom: 4rem;
-    margin-left: 1rem;
+    padding: 1rem;
+    margin-top: 0;
 }
 
-    
-   
-body{
-    margin: 0%;
+.page_connexion>input{
+    width: 80%;
+    padding: .5rem 2%;
+    margin: 0 0 1rem  0;
+    border-radius: .5rem;
+    border: none;
 }
 
-
-
-@media only screen and (max-width: 1000px) {
-    .connexion>button{
-        margin-right: 0rem;}
-        
-        main{
-            flex-grow: 1;
-        }
-        .page_connexion {
-            flex-basis: 100%;
-            border-radius: 0%;
-            margin-left: 0%;
-            padding-bottom: 30%;
-            margin-bottom: 0%;
-            padding-bottom: 150%;
-    }
-    .email>p, .password>p {
-        color: white;
-        font-size: 400%;
-    
-    }
-    .email>input, .password>input {
-        border: none;
-        border-radius: 2rem;
-        padding: 0.5rem;
-        width: 75%;
-        height: 50%;
-        border-radius: 5rem;
-        font-size: 200%;
-    }
-    .email, .password,.connexion{
-        margin-top: 10rem;
-    }
-    .connexion>input {
-        width: 47%;
-        height: 47%;
-        margin-top: 30%;
-        font-size: 300%;
-        border-radius: 5rem;
-    }
+.page_inscription input{
+    width: 90%;
+    padding: .5rem 2%;
+    margin: 0 0 1rem  0;
+    border-radius: .5rem;
+    border: none;
+    size: 10rem;
+    background-color: #004F8A30;
 }
-    @media only screen and (max-width: 535px) {
-        .connexion>button{
-            margin-right: 0rem;}
-            
-            main{
-                flex-grow: 1;
-            }
-            .page_connexion {
-                flex-basis: 100%;
-                border-radius: 0%;
-                margin-left: 0%;
-                padding-bottom: 0%;
-                margin-bottom: 0%;
-                margin-top: 1rem;
-        }
-        .email>p, .password>p {
-            color: white;
-            font-size: 200%;
-        
-        }
-        .email>input, .password>input {
-            border: none;
-            border-radius: 2rem;
-            padding: 0.5rem;
-            width: 75%;
-            height: 20%;
-            border-radius: 5rem;
-            font-size: 100%;
-            margin-top:1rem
-        }
-        .email, .password,.connexion{
-            margin-top: 0rem;
-        }
-        .connexion>input {
-            width: 40%;
-            height: 40%;
-            margin-top: 32%;
-            font-size: 100%;
-            border-radius: 5rem;
-            margin-right: 1rem;
-        }
-    
-    }
 
+.page_connexion input[type="submit"]{
+    background-color: white;
+    color: #004F8A;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 1rem;
+    width: 30%;
+}
 
+.page_inscription input[type="submit"]{
+    background-color: #004F8A;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 1rem;
+    width: 30%;
+}
+
+form a{
+    color: #EA4E4E;
+    text-align: right;
+    text-decoration: none;
+    margin-top: 5rem;
+    border: none;
+    background-color: #004F8A;
+    cursor: pointer;
+}
+
+form a:hover{
+    text-decoration: underline;
+}
+
+.mdp_oublie{
+    position: fixed;
+    opacity: 100%;
+    top: 25%;
+    left: 15%;
+    height: 40%;
+    color: white;
+    background-color: #004F8A;
+    border: .2rem solid white;
+}
+
+.mdp_oublie input{
+    width: 90%;
+    padding: .5rem 2%;
+    margin: 0 0 1rem  0;
+    border-radius: .5rem;
+    border: none;
+}
+
+.mdp_oublie input[type="submit"]{
+    background-color: #EA4E4E;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 1rem;
+}
+
+.mdp_oublie_hidden{
+    position: fixed;
+    top: 100%;
+    left: 100%;
+    opacity: 0;
+}
+
+.mdp_oublie a{
+    margin: 0;
+}
