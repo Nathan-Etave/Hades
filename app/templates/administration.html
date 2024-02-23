@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
         <link rel="stylesheet" href="{{ url_for('static', filename='css/administration.css') }}">
         <script type="module" src="{{ url_for('static', filename='js/administration.js') }}"></script>
     </head>
+    {% include "components/header.html" %}
 <body>
     <div class="administration-container">
         {% for dossier in dossiers %}
@@ -30,6 +33,31 @@
     <div class="dossier-placeholder hidden" style=".hidden { display: none; }"></div>
     <div id="progress-bar-container">
         <div id="progress-bar">0/0</div>
+    </div>
+    <h1>Utilisateur</h1>
+    <div class="utilisateur-container">
+        {% for utilisateur in utilisateurs %}
+            <div class="utilisateur">
+                <p>{{ utilisateur.nom_Utilisateur }}</p>
+                <p>{{ utilisateur.prenom_Utilisateur }}</p>
+                <p>{{ utilisateur.email_Utilisateur }}</p>
+                <div class="bouton-utilisateur">
+                    {% if utilisateur.id_Role != 1 %}
+                        <p>Supprimer: </p>
+                        <bouton class="retirer" type="button" id="{{ utilisateur.id_Utilisateur }}">X</bouton>
+                    {% endif %}
+                    <p>Desactiver: </p>
+                    <label class="switch">
+                        {% if utilisateur.est_Actif_Utilisateur == 1 %}
+                            <input type="checkbox" class="desactiver" id="{{ utilisateur.id_Utilisateur }}" checked>
+                        {% else %}
+                            <input type="checkbox" class="desactiver" id="{{ utilisateur.id_Utilisateur }}">
+                        {% endif %}
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 </body>
 </html>
