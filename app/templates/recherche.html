@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Recherche</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/recherche.css') }}">
+        <script src="{{ url_for('static', filename='js/boutonsFichier.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/recherche.js') }}"></script>
+        <script>var job_id = "{{ job_id }}";</script>
+    </head>
+    {% include "components/header.html" %}
+<body>
+    <div class="recherche-container">
+    </div>
+    <section class="preview_big_box">
+        <h2>Prévisualisation</h2>
+        <div id="preview_box"></div>
+    </section>
+</body>
+</html>
