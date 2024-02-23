@@ -35,9 +35,8 @@ class RECHERCHE(Base):
     __tablename__ = 'RECHERCHE'
 
     champ_Recherche = mapped_column(String(255), primary_key=True)
-    date_Heure_Recherche = mapped_column(DateTime)
 
-    UTILISATEUR: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', secondary='A_RECHERCHE', back_populates='RECHERCHE_')
+    A_RECHERCHE: Mapped[List['ARECHERCHE']] = relationship('ARECHERCHE', uselist=True, back_populates='RECHERCHE_')
 
 
 class ROLE(Base):
@@ -93,7 +92,7 @@ class FICHIER(Base):
 
     DATA_: Mapped[Optional['DATA']] = relationship('DATA', back_populates='FICHIER')
     DOSSIER_: Mapped[Optional['DOSSIER']] = relationship('DOSSIER', back_populates='FICHIER')
-    UTILISATEUR: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')
+    UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')
     A_TAG: Mapped[List['ATAG']] = relationship('ATAG', uselist=True, back_populates='FICHIER_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='FICHIER_')
 
@@ -127,20 +126,26 @@ class UTILISATEUR(Base, UserMixin):
     def get_id(self):
         return self.id_Utilisateur
 
-    RECHERCHE_: Mapped['RECHERCHE'] = relationship('RECHERCHE', secondary='A_RECHERCHE', back_populates='UTILISATEUR')
-    FICHIER_: Mapped['FICHIER'] = relationship('FICHIER', secondary='FAVORIS', back_populates='UTILISATEUR')
+    FICHIER_: Mapped[List['FICHIER']] = relationship('FICHIER', secondary='FAVORIS', back_populates='UTILISATEUR_')
     ROLE_: Mapped[Optional['ROLE']] = relationship('ROLE', back_populates='UTILISATEUR')
+    A_RECHERCHE: Mapped[List['ARECHERCHE']] = relationship('ARECHERCHE', uselist=True, back_populates='UTILISATEUR_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='UTILISATEUR_')
 
 
-t_A_RECHERCHE = Table(
-    'A_RECHERCHE', metadata,
-    Column('id_Utilisateur', Integer, primary_key=True, nullable=False),
-    Column('champ_Recherche', String(255), primary_key=True, nullable=False),
-    ForeignKeyConstraint(['champ_Recherche'], ['RECHERCHE.champ_Recherche'], name='fk_A_Recherche_Recherche'),
-    ForeignKeyConstraint(['id_Utilisateur'], ['UTILISATEUR.id_Utilisateur'], name='fk_A_Recherche_Utilisateur'),
-    Index('fk_A_Recherche_Recherche', 'champ_Recherche')
-)
+class ARECHERCHE(Base):
+    __tablename__ = 'A_RECHERCHE'
+    __table_args__ = (
+        ForeignKeyConstraint(['champ_Recherche'], ['RECHERCHE.champ_Recherche'], name='fk_A_Recherche_Recherche'),
+        ForeignKeyConstraint(['id_Utilisateur'], ['UTILISATEUR.id_Utilisateur'], name='fk_A_Recherche_Utilisateur'),
+        Index('fk_A_Recherche_Recherche', 'champ_Recherche')
+    )
+
+    id_Utilisateur = mapped_column(Integer, primary_key=True, nullable=False)
+    champ_Recherche = mapped_column(String(255), primary_key=True, nullable=False)
+    date_Heure_Recherche = mapped_column(DateTime, primary_key=True, nullable=False)
+
+    RECHERCHE_: Mapped['RECHERCHE'] = relationship('RECHERCHE', back_populates='A_RECHERCHE')
+    UTILISATEUR_: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', back_populates='A_RECHERCHE')
 
 
 class ATAG(Base):
