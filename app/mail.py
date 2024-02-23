@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-def mailInscription(destinataire, mdp):
+def mail_inscription(destinataire, mdp):
     msg = MIMEMultipart()
     msg['From'] = 'pinpinpinponponpon45@gmail.com'
     msg['To'] = destinataire
@@ -35,7 +35,7 @@ def mailInscription(destinataire, mdp):
     mailserver.quit()
 
 
-def mailOublie(destinataire, mdp):
+def mail_oublie(destinataire, mdp):
     msg = MIMEMultipart()
     msg['From'] = 'pinpinpinponponpon45@gmail.com'
     msg['To'] = destinataire
@@ -70,7 +70,7 @@ def mailOublie(destinataire, mdp):
                         msg.as_string())
     mailserver.quit()
 
-def mailRefusé(destinataire):
+def mail_refuse(destinataire):
     msg = MIMEMultipart()
     msg['From'] = 'pinpinpinponponpon45@gmail.com'
     msg['To'] = destinataire
