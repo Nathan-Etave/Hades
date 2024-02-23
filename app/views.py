@@ -11,7 +11,7 @@ from app.requests import *
 from app.forms import *
 from app import login_manager
 from threading import Thread
-from app.mail import mailInscription, mailOublie
+from app.mail import mail_inscription, mail_oublie, mail_refuse
 from datetime import datetime
 from io import BytesIO
 
@@ -46,22 +46,28 @@ def admin_required(f):
 def connexion():
     form_mdp = MdpOublieForm()
     form_login = LoginForm()
+    form_mdp_oublier = MdpOublieForm()
     user = get_user_by_email(form_login.mail.data)
     form_inscription = InscriptionForm()
     if form_inscription.validate_on_submit():
-        passe= generate_password()
-        password = generate_password_hash(passe).decode('utf-8')
+        password = None
         role = None
         est_Actif_Utilisateur=0
+        
         if not already_exist_mail(form_inscription.mail.data):
             add_user(form_inscription.prenom.data, form_inscription.nom.data, form_inscription.mail.data,form_inscription.telephone.data,role, password,est_Actif_Utilisateur)
             create_notification(get_user_by_email(form_inscription.mail.data).id_Utilisateur, None, datetime.now(), "Inscription")
-            # mailInscription(form_inscription.mail.data, passe)
-    if form_login.validate_on_submit():
+    elif form_login.validate_on_submit():
         if user:
-            if check_password_hash(user.mdp_Utilisateur, form_login.mdp.data) and user.est_Actif_Utilisateur == 1:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+            if check_password_hash(user.mdp_Utilisateur, form_login.mdp.data) and user.est_Actif_Utilisateur==1:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
                 login_user(user, remember=True)
                 return redirect(url_for('home'))
+    elif form_mdp_oublier.validate_on_submit():
+        passe= generate_password()
+        password = generate_password_hash(passe).decode('utf-8')
+        id_utilisateur = get_user_by_email(form_mdp_oublier.mail.data).id_Utilisateur
+        change_password(id_utilisateur, password)
+        mail_oublie(form_mdp_oublier.mail.data, passe)
     return render_template('connexion.html', form_login=form_login, form_inscription=form_inscription, form_mdp=form_mdp)
 
 @app.route('/deconnexion')
@@ -268,5 +274,30 @@ def user():
 
 @app.route('/notifications')
 @login_required
-def notifications():
-    return
+def notification():
+    notif_inscription = get_notifications_inscription_user()
+    role=get_role()
+    return render_template('notification.html', liste_notifications_inscription=notif_inscription,roles=role)
+
+@app.route('/utilisateurAccepter', methods=['POST'])
+def utilisateurAccepter():
+    json = request.get_json()
+    id_notif = json['id']
+    role = json['role']
+    userId = json['userId']
+    passe= generate_password()
+    password = generate_password_hash(passe).decode('utf-8')
+    ok_inscrit(userId, role, id_notif, password)
+    email = get_user_by_id(userId).email_Utilisateur
+    mail_inscription(email, passe)
+    return jsonify({'status': 'ok'})
+
+@app.route('/utilisateurRefuser', methods=['POST'])
+def utilisateurRefuser():
+    json = request.get_json()
+    id_notif = json['id']
+    userId = json['userId']
+    email=get_user_by_id(userId).email_Utilisateur
+    refus_inscrit(userId, id_notif)
+    mail_refuse(email)
+    return jsonify({'status': 'ok'})
