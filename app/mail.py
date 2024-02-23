@@ -70,7 +70,6 @@ def mailOublie(destinataire, mdp):
                         msg.as_string())
     mailserver.quit()
 
-
 def mailRefusé(destinataire):
     msg = MIMEMultipart()
     msg['From'] = 'pinpinpinponponpon45@gmail.com'

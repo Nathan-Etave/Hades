@@ -351,7 +351,7 @@ def change_role(id_utilisateur, nom_role):
     utilisateur.id_Role = role.id_Role
     db.session.commit()
 
-def ok_inscrit(id_utilisateur,nom_role,id_Notification):
+def ok_inscrit(id_utilisateur,nom_role,id_Notification, password):
     """ permet de passer un utilisateur de inscrit à actif
 
     Args:
@@ -360,6 +360,7 @@ def ok_inscrit(id_utilisateur,nom_role,id_Notification):
     passif_to_actif(id_utilisateur)
     delete_notification(id_Notification)
     change_role(id_utilisateur,nom_role)
+    change_password(id_utilisateur,password)
 
 def get_data_by_file_id(file_id):
     return DATA.query.join(FICHIER).filter(FICHIER.id_Fichier == file_id).first()
@@ -380,3 +381,23 @@ def is_favorite_file(file_id, user_id):
     favorite = session.query(t_FAVORIS).filter(t_FAVORIS.c.id_Utilisateur == user_id, t_FAVORIS.c.id_Fichier == file_id).first()
     session.close()
     return favorite is not None
+
+def change_password(id_utilisateur,mdp):
+    """ permet de changer le mot de passe d'un utilisateur
+
+    Args:
+        id_utilisateur (int): id de l'utilisateur
+        mdp (str): mot de passe
+    """    
+    utilisateur = UTILISATEUR.query.filter_by(id_Utilisateur=id_utilisateur).first()
+    utilisateur.mdp_Utilisateur = mdp
+    db.session.commit()
+
+def refus_inscrit(id_utilisateur,id_Notification):
+    """ permet de refuser l'inscription d'un utilisateur
+
+    Args:
+        id_utilisateur (int): id de l'utilisateur
+    """    
+    delete_utilisateur(id_utilisateur)
+    delete_notification(id_Notification)
