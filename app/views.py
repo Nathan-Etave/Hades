@@ -34,7 +34,7 @@ def load_user(user_id):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if get_user_by_id(current_user.get_id()).idRole == 1:
+        if current_user.id_Role == 1:
             return f(*args, **kwargs)
         else:
             return redirect(url_for('home'))
@@ -42,7 +42,7 @@ def admin_required(f):
 
 def background_recherche(job_id, application, recherche):
     with application.app_context():
-        dossiers = get_root_dossiers_by_role(1) #current_user.get_id())
+        dossiers = get_root_dossiers_by_role(current_user.id_Role)
         dossiers.sort(key=lambda x: x.priorite_Dossier)
         for dossier in dossiers:
             if job_id not in job_statuses:
@@ -61,7 +61,8 @@ def background_recherche(job_id, application, recherche):
                     job_statuses[job_id][dossier.id_Dossier]['fichiers'].append({
                         'id': fichier.id_Fichier,
                         'nom': fichier.nom_Fichier,
-                        'extension': fichier.extension_Fichier
+                        'extension': fichier.extension_Fichier,
+                        'favori': current_user.get_id() in [user.id_Utilisateur for user in fichier.UTILISATEUR_]
                     })
             job_statuses[job_id][dossier.id_Dossier]['status'] = True
 

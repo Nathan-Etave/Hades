@@ -1,8 +1,8 @@
 from app import db
 from app.models import (DATA, DOSSIER, RECHERCHE, ROLE, TAG,
                         t_A_ACCES, FICHIER, t_SOUS_DOSSIER,
-                        UTILISATEUR, t_A_RECHERCHE, ATAG, 
-                        t_FAVORIS, NOTIFICATION)
+                        UTILISATEUR, ARECHERCHE, ATAG, 
+                        t_FAVORIS, NOTIFICATION, ARECHERCHE)
 from unidecode import unidecode
 
 def get_user_by_id(id):
