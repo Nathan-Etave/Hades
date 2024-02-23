@@ -11,7 +11,7 @@ from app.requests import *
 from app.forms import *
 from app import login_manager
 from threading import Thread
-from app.mail import mailInscription, mailOublie, mailRefusé
+from app.mail import mail_inscription, mail_oublie, mail_refuse
 from datetime import datetime
 from io import BytesIO
 
@@ -57,7 +57,6 @@ def connexion():
         if not already_exist_mail(form_inscription.mail.data):
             add_user(form_inscription.prenom.data, form_inscription.nom.data, form_inscription.mail.data,form_inscription.telephone.data,role, password,est_Actif_Utilisateur)
             create_notification(get_user_by_email(form_inscription.mail.data).id_Utilisateur, None, datetime.now(), "Inscription")
-            # mailInscription(form_inscription.mail.data, passe)
     elif form_login.validate_on_submit():
         if user:
             if check_password_hash(user.mdp_Utilisateur, form_login.mdp.data) and user.est_Actif_Utilisateur==1:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
@@ -68,7 +67,7 @@ def connexion():
         password = generate_password_hash(passe).decode('utf-8')
         id_utilisateur = get_user_by_email(form_mdp_oublier.mail.data).id_Utilisateur
         change_password(id_utilisateur, password)
-        mailOublie(form_mdp_oublier.mail.data, passe)
+        mail_oublie(form_mdp_oublier.mail.data, passe)
     return render_template('connexion.html', form_login=form_login, form_inscription=form_inscription, form_mdp=form_mdp)
 
 @app.route('/deconnexion')
@@ -290,7 +289,7 @@ def utilisateurAccepter():
     password = generate_password_hash(passe).decode('utf-8')
     ok_inscrit(userId, role, id_notif, password)
     email = get_user_by_id(userId).email_Utilisateur
-    mailInscription(email, passe)
+    mail_inscription(email, passe)
     return jsonify({'status': 'ok'})
 
 @app.route('/utilisateurRefuser', methods=['POST'])
@@ -300,5 +299,5 @@ def utilisateurRefuser():
     userId = json['userId']
     email=get_user_by_id(userId).email_Utilisateur
     refus_inscrit(userId, id_notif)
-    mailRefusé(email)
+    mail_refuse(email)
     return jsonify({'status': 'ok'})
