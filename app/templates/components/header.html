@@ -27,7 +27,7 @@
                     </li>
                 {% endif %}
                 <li>
-                    <a href="{{ url_for('notifications') }}" aria-label="Notifications">
+                    <a href="{{ url_for('notification') }}" aria-label="Notifications">
                         <span class="notification_enabler" style="display: none;">{{ notification_enabled }}</span>
                         <svg class="logo_notification" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <style>
@@ -74,7 +74,7 @@
             <navbar>
                 <ul class="notification_burger_container">
                     <li>
-                        <a href="{{ url_for('notifications') }}" aria-label="Notifications">
+                        <a href="{{ url_for('notification') }}" aria-label="Notifications">
                             <span class="notification_enabler" style="display: none;">{{ notification_enabled }}</span>
                             <svg class="logo_notification" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <style>
