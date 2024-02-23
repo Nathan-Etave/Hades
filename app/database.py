@@ -1,7 +1,7 @@
 from app import app, db
 from app.models import (DATA, DOSSIER, RECHERCHE, ROLE, TAG,
                         t_A_ACCES, FICHIER, t_SOUS_DOSSIER,
-                        UTILISATEUR, t_A_RECHERCHE, ATAG, 
+                        UTILISATEUR, ARECHERCHE, ATAG, 
                         t_FAVORIS, NOTIFICATION)
 from sqlalchemy.orm import sessionmaker
 import csv
@@ -90,8 +90,8 @@ def init_database():
     with open('app/static/csv/A_RECHERCHE.csv', 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
         for row in reader:
-            a_recherche = t_A_RECHERCHE.insert().values(id_Utilisateur=row[0], champ_Recherche=row[1])
-            session.execute(a_recherche)
+            arecherche = ARECHERCHE(id_Utilisateur=row[0], champ_Recherche=row[1], date_Heure_Recherche=row[2])
+            session.add(arecherche)
     session.commit()
 
     with open('app/static/csv/ATAG.csv', 'r', encoding='utf-8') as file:
