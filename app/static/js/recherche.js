@@ -16,9 +16,11 @@ function checkStatus() {
                         let div = createDiv(dossier['fichiers'][fichier], dossier['couleur']);
                         details.insertAdjacentHTML('beforeend', div);
                     }
+                    previewButton(document);
                 }
                 all_loaded = all_loaded && dossier['status'];
             }
+            fonctionnementBoutons();
             if (all_loaded) {
                 clearInterval(interval_check);
             }
@@ -41,12 +43,26 @@ function createDiv(fichier, couleur) {
     return /*html*/`
         <div class="fichier" id="${fichier['id']}" style="background-color: ${couleur}">
             <a class="bouton_fichier" id="${fichier['id']}">${fichier['nom']}</a>
-            <div class="bob">
+            <div class="images_box">
                 <img src="static/img/telechargement.png" alt="telechargement" class="telechargement" id="${fichier['id']}">
                 <img src="static/img/moins.png" alt="multiview" class="multiview" id="id ${fichier['id']}">
-                <img src="static/img/etoile_pleine.png" alt="etoile" class="etoile" id="${fichier['id']}">
+                <img src="static/img/etoile_pleine.png" alt="etoile" class="etoile" id="${fichier['id']}" is-fav="${fichier['favori']}">
             </div>
             <span id="type_${fichier['id']}" style="display: none;">${fichier['extension']}</span>
         </div>
         `;
 }
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    var elementPosition = document.getElementsByClassName('preview_big_box')
+    //if scrolling, make top:0 
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 100) {
+            elementPosition[0].style.top = '0px';
+        }
+        else {
+            elementPosition[0].style.top = '10vh';
+        }
+    });
+});

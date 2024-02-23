@@ -2,8 +2,10 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+        <script src="{{ url_for('static', filename='js/boutonsFichier.js') }}"></script>
         <script src="{{ url_for('static', filename='js/boutonRecherche.js') }}"></script>
         <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
         <title>Accueil</title>
     </head>
     {% include "components/header.html" %}
@@ -15,7 +17,6 @@
             </form>
             <div class="buttons">
                 <div>
-                    <button id="buttonRecherche1">"</button>
                     <button id="buttonRecherche2">&</button>
                     <button id="buttonRecherche3">|</button>
                 </div>
@@ -23,32 +24,40 @@
                 <section id="infoBox" class="infoBoxClosed">
                     <h2>Fonctionnement de la barre de recherche</h2>
                     <p>& : Cet élément sert à faire une recherche où les deux tags sont présents.</p>
-                    <p>| : Cet élément sert à rechercher les fichiers où l'un des deux tags sont présents. Peut aussi être remplacé par un espace.</p>
-                    <p>" " : Les mots contenus entre guillemets servent à rechercher des tags constitués de plusieurs mots.</p>
+                    <p>| : Cet élément sert à rechercher les fichiers où l'un des deux tags est présent.</p>
                 </section>
             </div>
         </div>
-        <h2>Recherches Précédentes</h2>
         <form method="POST" action="{{ url_for('recherche') }}" class="recherches_precedentes">
+            <h2>Recherches Précédentes</h2>
             {% for recherche in liste_recherche %}
-                <div><i></i>
+                <div>
                     <input type="hidden" name="search" value="{{ recherche.champ_Recherche }}">
                     <button type="submit"><i>{{ recherche.date_Heure_Recherche.strftime('%d/%m/%Y %H:%M') }} </i> {{ recherche.champ_Recherche}}</button>
                 </div>
             {% endfor %}
         </form>
-        <h2>Favoris</h2>
-        <section class="favoris">
-            {% for fichier in liste_fav %}
-            <div class="fichier">
-                <a href="#" id="bouton_fichier">{{ fichier.nom_Fichier }}</a>
-                <div class="bob">
-                    <img src="{{url_for('static', filename='img/telechargement.png')}}" alt="telechargement" class="telechargement" id="{{ fichier.id_Fichier }}">
-                    <img src="{{url_for('static', filename='img/moins.png')}}" alt="multiview" class="multiview" id="id {{ fichier.id_Fichier }}">
-                    <img src="{{url_for('static', filename='img/etoile_pleine.png')}}" alt="etoile" class="etoile" id="{{ fichier.id_Fichier }}">
+        <div class="fav_box">
+            <section class="favoris">
+            <h2>Favoris</h2>
+            <div class="favoris_box">
+                {% for fichier in liste_fav %}
+                <div class="fichier" id="{{ fichier.id_Fichier }}">
+                    <a class="bouton_fichier" id="{{ fichier.id_Fichier }}">{{ fichier.nom_Fichier }}</a>
+                    <div class="images_box">
+                        <img src="{{url_for('static', filename='img/telechargement.png')}}" alt="telechargement" class="telechargement" id="{{ fichier.id_Fichier }}">
+                        <img src="{{url_for('static', filename='img/moins.png')}}" alt="multiview" class="multiview" id="id {{ fichier.id_Fichier }}">
+                        <img src="{{url_for('static', filename='img/etoile_pleine.png')}}" alt="etoile" class="etoile" id="{{ fichier.id_Fichier }}" is-fav="true">
+                    </div>
+                    <span id="type_{{ fichier.id_Fichier }}" style="display: none;">{{ fichier.extension_Fichier }}</span>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </section>
+            </section>
+            <section class="preview_big_box">
+                <h2>Prévisualisation</h2>
+                <div id="preview_box"></div>
+            </section>
+        </div>
     </body>
 </html>

@@ -23,7 +23,7 @@ db = SQLAlchemy(app)
 # dropzone = Dropzone(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'connexion'
 job_statuses = {}
 toolbar = DebugToolbarExtension(app)
 
@@ -33,3 +33,4 @@ from app import database
 from app import requests
 from app import forms
 from app import nlp
+from app import mail
