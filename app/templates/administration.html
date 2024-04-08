@@ -1,193 +1,63 @@
-<!doctype html>
-    <html lang="fr">
-        <head>
-            <meta charset="utf-8">
-            <meta name="admin">
-            <link rel="stylesheet" href="{{ url_for('static',filename='css/administration.css')}}">
-            <link rel="stylesheet" href="{{ url_for('static',filename='css/bottomHeader.css')}}">
-            <link rel="stylesheet" href="{{ url_for('static',filename='css/mediaBottomHeader.css')}}">
-            <link rel="stylesheet" href="{{ url_for('static',filename='css/header.css')}}">
-            <script type="module" src="{{ url_for('static', filename='js/header.js')}}"></script>
-            <title>Administration</title>
-        </head>
-        <body> 
-            {% include "components/header.html" %}
-            {% include "components/bottomHeader.html" %}
-            <main>
-            <a class="gestionFic">
-                <div class="fichier">
-                <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512.000000 512.000000"
-                    preserveAspectRatio="xMidYMid meet">
-                   <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-                   fill="#004F8A" stroke="none">
-                   <path d="M955 5106 c-84 -21 -147 -57 -211 -121 -65 -65 -105 -136 -123 -223
-                   -16 -76 -16 -4329 0 -4404 37 -172 175 -310 347 -347 75 -16 3108 -16 3184 0
-                   170 36 311 178 347 347 8 38 11 545 11 1748 0 1532 -2 1698 -16 1727 -22 44
-                   -1220 1244 -1266 1268 -36 18 -68 19 -1130 18 -839 -1 -1105 -4 -1143 -13z
-                   m2055 -681 c0 -256 4 -413 11 -447 37 -172 175 -310 347 -347 34 -7 191 -11
-                   447 -11 l395 0 0 -1600 c0 -1585 0 -1601 -20 -1640 -13 -26 -34 -47 -60 -60
-                   -39 -20 -56 -20 -1571 -20 l-1531 0 -40 22 c-24 14 -48 38 -59 60 -18 36 -19
-                   95 -19 2180 1 2044 2 2145 19 2177 10 18 35 44 57 57 l39 24 993 0 992 0 0
-                   -395z m699 -503 c-275 -2 -281 -2 -321 20 -75 42 -78 58 -78 380 l0 283 340
-                   -340 340 -340 -281 -3z"/>
-                   <path d="M1588 2979 c-43 -22 -78 -81 -78 -129 0 -50 35 -107 80 -130 38 -20
-                   57 -20 970 -20 913 0 932 0 970 20 45 23 80 80 80 130 0 50 -35 107 -80 130
-                   -38 20 -56 20 -972 20 -909 -1 -934 -1 -970 -21z"/>
-                   <path d="M1588 2379 c-43 -22 -78 -81 -78 -129 0 -50 35 -107 80 -130 38 -20
-                   57 -20 970 -20 913 0 932 0 970 20 45 23 80 80 80 130 0 50 -35 107 -80 130
-                   -38 20 -56 20 -972 20 -909 -1 -934 -1 -970 -21z"/>
-                   <path d="M1588 1779 c-43 -22 -78 -81 -78 -129 0 -50 35 -107 80 -130 38 -20
-                   57 -20 970 -20 913 0 932 0 970 20 45 23 80 80 80 130 0 50 -35 107 -80 130
-                   -38 20 -56 20 -972 20 -909 -1 -934 -1 -970 -21z"/>
-                   <path d="M1588 1179 c-43 -22 -78 -81 -78 -129 0 -50 35 -107 80 -130 38 -19
-                   58 -20 670 -20 612 0 632 1 670 20 45 23 80 80 80 130 0 50 -35 107 -80 130
-                   -38 19 -57 20 -672 20 -610 -1 -634 -2 -670 -21z"/>
-                   </g>
-                   </svg>
-                <h2 class="nomGestion">Gérer fichiers</h2>
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/administration.css') }}">
+        <script type="module" src="{{ url_for('static', filename='js/administration.js') }}"></script>
+    </head>
+    {% include "components/header.html" %}
+<body>
+    <div class="administration-container">
+        {% for dossier in dossiers %}
+            <div class="dossier" draggable="true" style="background-color: {{ dossier.couleur_Dossier }};">
+                <div style="font-size: 2rem;">
+                    <span contenteditable="true">{{ dossier.nom_Dossier }}</span> <span>({{ dossier.priorite_Dossier }})</span>
+                    <span class="dossier-id" style="display: none;">{{ dossier.id_Dossier }}</span>
                 </div>
-            </a>
-            <a class="gestionUser">
-                <div class="user">
-                <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 512.000000 512.000000"
-                    preserveAspectRatio="xMidYMid meet">
-                   <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-                   fill="#004F8A" stroke="none">
-                   <path d="M2375 4793 c-921 -80 -1710 -724 -1963 -1603 -68 -235 -87 -373 -86
-                   -635 0 -249 16 -372 78 -597 165 -600 591 -1117 1154 -1402 178 -90 427 -169
-                   652 -208 170 -29 511 -32 675 -5 511 84 939 305 1286 664 270 280 459 617 554
-                   987 57 226 70 325 69 571 0 238 -16 365 -69 569 -192 739 -777 1345 -1517
-                   1570 -247 76 -580 111 -833 89z m390 -323 c450 -52 874 -260 1177 -579 561
-                   -589 695 -1438 343 -2167 -66 -136 -203 -351 -215 -337 -4 4 -36 51 -70 103
-                   -88 132 -301 342 -440 436 -268 181 -548 280 -871 307 -436 36 -887 -106
-                   -1241 -391 -103 -84 -240 -231 -315 -338 -34 -49 -68 -98 -76 -108 -13 -18
-                   -19 -11 -90 95 -380 572 -432 1286 -137 1898 296 611 872 1015 1550 1084 79 8
-                   301 6 385 -3z"/>
-                   <path d="M2415 4146 c-218 -43 -405 -168 -525 -353 -89 -136 -125 -259 -125
-                   -433 0 -174 36 -297 124 -432 243 -371 737 -478 1104 -238 370 241 477 737
-                   237 1103 -112 173 -272 287 -480 343 -78 22 -250 26 -335 10z"/>
-                   </g>
-                   </svg>
-                <h2 class="nomGestion">Gérer utilisateurs</h2>
+                <div>
+                    <form method="post" class="form-fichier" enctype="multipart/form-data">
+                        <label for="fichier-input-folder{{ dossier.id_Dossier }}" class="fichier-input-folder">
+                            <input type="file" id="fichier-input-folder{{ dossier.id_Dossier }}" name="fichiers[]" class="fichier-input" multiple webkitdirectory style="display: none;"/>
+                            Dossier(s)
+                        </label>
+                        <label for="fichier-input-file{{ dossier.id_Dossier }}" class="fichier-input-file">
+                            <input type="file" id="fichier-input-file{{ dossier.id_Dossier }}" name="fichiers[]" class="fichier-input" multiple style="display: none;"/>
+                            Fichier(s)
+                        </label>
+                    </form>
                 </div>
-            </a>
-           <a class="gestion" href="{{url_for('edit_categories')}}">
-               <div class="categorie">
-                   <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                   viewBox="0 0 512.000000 512.000000"
-                   preserveAspectRatio="xMidYMid meet">
-                  
-                  <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-                  fill="#004F8A" stroke="none">
-                  <path d="M1043 5112 c-29 -18 -33 -70 -33 -397 l0 -334 -220 -3 c-213 -3 -220
-                  -4 -242 -26 l-23 -23 -3 -613 -3 -613 -74 -6 c-141 -10 -254 -87 -312 -212
-                  l-28 -60 0 -1270 0 -1270 31 -65 c40 -82 92 -134 174 -174 l65 -31 2155 -3
-                  c2258 -3 2217 -4 2303 40 57 29 125 101 155 166 l27 57 0 1565 0 1565 -28 53
-                  c-15 29 -44 70 -63 92 -37 41 -142 100 -178 100 -45 0 -45 -1 -48 348 -3 330
-                  -3 332 -26 354 -22 22 -29 23 -242 26 l-220 3 0 334 c0 327 -4 379 -33 397 -7
-                  4 -712 8 -1567 8 -855 0 -1560 -4 -1567 -8z m3007 -792 l0 -660 -165 0 -164 0
-                  -3 335 c-3 333 -3 335 -26 357 l-23 23 -1249 3 -1250 2 0 300 0 300 1440 0
-                  1440 0 0 -660z m-482 -377 l-3 -278 -430 -5 -430 -5 -57 -27 c-116 -54 -193
-                  -165 -208 -302 -5 -39 -14 -84 -20 -101 -16 -42 -58 -84 -105 -106 -38 -17
-                  -78 -19 -652 -19 -436 0 -619 -3 -637 -11 -49 -23 -53 -104 -7 -129 15 -7 214
-                  -10 663 -8 l643 3 55 26 c66 31 140 102 170 164 12 25 26 75 32 113 16 107 27
-                  140 61 179 67 76 31 73 785 73 735 0 712 2 776 -58 16 -15 37 -45 47 -67 18
-                  -38 19 -102 19 -1548 0 -1652 4 -1545 -58 -1610 -64 -67 105 -62 -1917 -65
-                  -1358 -2 -1844 0 -1884 8 -70 16 -132 75 -149 142 -16 61 -17 2424 -2 2479 16
-                  56 51 101 100 129 43 24 54 25 237 28 l193 4 20 25 c27 34 25 69 -5 98 -19 20
-                  -34 25 -75 25 l-50 0 0 560 0 560 1445 0 1445 0 -2 -277z m972 -463 c0 -806 0
-                  -802 54 -816 44 -11 76 4 92 41 11 28 14 107 14 415 0 359 1 380 18 380 28 0
-                  95 -48 122 -88 l25 -36 3 -1520 c3 -1698 8 -1571 -68 -1640 -54 -48 -91 -56
-                  -277 -56 l-162 0 24 53 c13 28 27 69 30 90 l7 37 114 0 c128 0 147 9 159 72 3
-                  18 4 486 3 1039 -3 974 -4 1008 -22 1028 -26 29 -86 29 -112 0 -18 -20 -19
-                  -54 -22 -1005 l-2 -984 -60 0 -60 0 -2 1453 -3 1452 -22 48 c-32 68 -76 121
-                  -134 158 l-49 32 0 294 0 293 165 0 165 0 0 -740z"/>
-                  <path d="M1031 3963 c-11 -10 -24 -32 -27 -50 -5 -26 -1 -37 19 -57 l26 -26
-                  938 0 c1021 0 973 -3 987 55 7 29 -15 79 -39 89 -9 3 -437 6 -950 6 -874 0
-                  -934 -1 -954 -17z"/>
-                  <path d="M1031 3583 c-11 -10 -24 -32 -27 -50 -5 -26 -1 -37 19 -57 l26 -26
-                  545 0 c299 0 552 3 561 6 26 10 45 63 34 93 -20 52 -5 50 -590 51 -506 0 -548
-                  -1 -568 -17z"/>
-                  <path d="M2370 2677 c-48 -24 -50 -40 -48 -359 3 -295 3 -298 26 -320 l23 -23
-                  819 0 819 0 23 23 c23 23 23 23 23 333 l0 311 -28 24 -28 24 -802 0 c-623 0
-                  -808 -3 -827 -13z m1538 -344 l2 -203 -715 0 -715 0 0 205 0 205 713 -2 712
-                  -3 3 -202z"/>
-                  </g>
-                  </svg>
-                <h2 class="nomGestion">Gérer catégories</h2>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="dossier-placeholder hidden" style=".hidden { display: none; }"></div>
+    <div id="progress-bar-container">
+        <div id="progress-bar">0/0</div>
+    </div>
+    <h1>Utilisateur</h1>
+    <div class="utilisateur-container">
+        {% for utilisateur in utilisateurs %}
+            <div class="utilisateur">
+                <p>{{ utilisateur.nom_Utilisateur }}</p>
+                <p>{{ utilisateur.prenom_Utilisateur }}</p>
+                <p>{{ utilisateur.email_Utilisateur }}</p>
+                <div class="bouton-utilisateur">
+                    {% if utilisateur.id_Role != 1 %}
+                        <p>Supprimer: </p>
+                        <bouton class="retirer" type="button" id="{{ utilisateur.id_Utilisateur }}">X</bouton>
+                    {% endif %}
+                    <p>Desactiver: </p>
+                    <label class="switch">
+                        {% if utilisateur.est_Actif_Utilisateur == 1 %}
+                            <input type="checkbox" class="desactiver" id="{{ utilisateur.id_Utilisateur }}" checked>
+                        {% else %}
+                            <input type="checkbox" class="desactiver" id="{{ utilisateur.id_Utilisateur }}">
+                        {% endif %}
+                        <span class="slider round"></span>
+                    </label>
                 </div>
-            </a>
-            <a class="gestion" href="{{url_for('edit_role')}}">
-                <div class="role">
-                <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512.000000 512.000000"
-                    preserveAspectRatio="xMidYMid meet">
-                   <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
-                   fill="#004F8A" stroke="none">
-                   <path d="M2245 4835 c-244 -44 -472 -168 -643 -349 -403 -426 -429 -1083 -61
-                   -1540 480 -597 1398 -577 1856 41 170 229 253 527 223 803 -30 284 -142 520
-                   -340 720 -166 168 -389 285 -618 325 -102 18 -320 18 -417 0z"/>
-                   <path d="M3686 2500 c-41 -13 -94 -68 -106 -110 -5 -19 -10 -85 -10 -147 l0
-                   -111 -67 -22 c-38 -13 -94 -36 -126 -53 l-58 -30 -87 85 c-100 99 -118 110
-                   -177 110 -91 0 -157 -66 -157 -157 0 -59 11 -77 110 -177 l85 -87 -30 -58
-                   c-17 -32 -40 -88 -53 -125 l-22 -68 -111 0 c-62 0 -128 -5 -149 -10 -49 -14
-                   -104 -76 -113 -129 -9 -53 25 -126 74 -158 31 -21 46 -23 167 -23 l133 0 16
-                   -58 c9 -31 33 -90 52 -130 l36 -73 -91 -92 c-98 -99 -116 -136 -101 -206 20
-                   -96 132 -149 223 -106 17 8 69 53 114 98 l83 83 73 -37 c40 -20 96 -42 124
-                   -50 l52 -13 0 -121 c0 -105 3 -126 23 -165 41 -83 130 -113 213 -74 67 32 78
-                   62 84 217 l5 139 72 23 c40 12 96 36 126 53 l54 30 84 -85 c46 -47 98 -91 116
-                   -99 133 -57 266 76 209 209 -8 18 -52 70 -99 116 l-85 84 30 54 c17 30 41 86
-                   53 126 l23 72 139 5 c155 6 185 17 217 84 39 83 9 172 -74 214 -39 19 -60 22
-                   -165 22 l-121 0 -13 52 c-8 28 -30 84 -50 124 l-37 73 83 83 c45 45 90 97 98
-                   114 43 91 -10 203 -106 223 -70 15 -107 -3 -206 -101 l-92 -91 -73 36 c-40 19
-                   -99 43 -130 52 l-58 16 0 133 c0 121 -2 136 -23 167 -23 36 -97 80 -132 78
-                   -11 0 -33 -5 -49 -9z m227 -712 c65 -31 165 -121 201 -182 67 -115 75 -278 19
-                   -399 -44 -93 -118 -169 -211 -214 -64 -32 -85 -37 -161 -41 -147 -7 -243 31
-                   -343 136 -90 94 -120 172 -120 304 1 184 101 329 279 404 52 22 70 24 168 22
-                   94 -3 118 -7 168 -30z"/>
-                   <path d="M2090 2309 c-414 -36 -807 -139 -1125 -294 -165 -81 -296 -168 -403
-                   -269 -137 -130 -214 -244 -263 -391 -23 -67 -24 -83 -24 -340 l0 -270 27 -57
-                   c34 -73 98 -137 174 -174 l59 -29 1113 -3 1113 -2 -25 37 c-37 56 -60 155 -52
-                   228 7 69 49 162 99 220 l35 40 -79 11 c-142 21 -250 98 -307 222 -22 48 -27
-                   71 -27 147 0 80 3 97 31 155 61 128 179 209 320 218 l74 5 -49 53 c-112 122
-                   -130 298 -47 437 l33 55 -30 6 c-43 9 -535 5 -647 -5z"/>
-                   </g>
-                   </svg>
-                <h2 class="nomGestion">Gérer rôles</h2>
-                </div>
-                </a>
-                <div id="popup" class="popup">
-                    <button class="close-btn" onclick="closePopup()">X</button>
-                    <p>Que souhaitez-vous faire sur les fichiers?</p>
-                    <a id="ajouterFic" href="{{url_for('upload')}}">Ajouter</a>
-                    <a id="supFic" href="{{url_for('search')}}">Modifier</a>
-                </div>
-                <div id="popup2" class="popup">
-                    <button class="close-btn" onclick="closePopup2()">X</button>
-                    <p>Que souhaitez-vous faire sur les utilisateurs?</p>
-                    <a id="ajouterUser" href="{{url_for('add_user_page')}}">Ajouter</a>
-                    <a id="supUser" href="{{url_for('search_user')}}">Modifier</a>
-                </div>
-                <script>
-                    function closePopup() {
-                        var modal = document.getElementById('popup');
-                        modal.style.display = 'none';
-                    }
-                    function closePopup2() {
-                        var modal = document.getElementById('popup2');
-                        modal.style.display = 'none';
-                    }
-        
-                    document.querySelector('.gestionFic').addEventListener('click', function () {
-                        var modal = document.getElementById('popup');
-                        modal.style.display = 'block';
-                    });
-                    document.querySelector('.gestionUser').addEventListener('click', function () {
-                        var modal = document.getElementById('popup2');
-                        modal.style.display = 'block';
-                    });
-                </script>
-            </main>
-        </body>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
