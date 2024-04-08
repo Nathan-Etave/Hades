@@ -1,156 +1,130 @@
-body {
-	margin: 0;
-
+.dossier {
+  display: flex;
+  align-items: center;
 }
-main{
+
+.fichier-input-folder, .fichier-input-file {
+padding: 0.2rem;
+border: 1px solid white;
+margin: 0.2rem;
+display: inline-block;
+cursor: pointer;
+}
+
+.dossier {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+#progress-bar-container {
+width: 100%; 
+background-color: #f3f3f3;
+position: fixed;
+bottom: 0;
+z-index: 1;
+}
+
+#progress-bar {
+width: 0%;
+height: 30px;
+background-color: #4CAF50;
+text-align: center;
+}
+
+
+.utilisateur {
+    border: 2px solid #004F8A;
+    border-radius: 0.5rem;
+    color: black;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.gestion,.gestionUser,.gestionFic{
-    flex-basis: 40%;
-}
-.gestion>div,.gestionUser>div,.gestionFic>div {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 2rem;
-    border: solid 0.5rem #004F8A;
-    border-radius: 1rem;
-
+    margin: 5px;
+    justify-content: space-between;
 }
 
-.gestion>div>svg,.gestionUser>div>svg,.gestionFic>div>svg{
-	height: 5rem;
-    width: 5rem;
-    margin: 2rem;
-    flex-basis: 100%;
-    margin-top: 3rem
-
-
-}
-.nomGestion {
-    font-size: 200%;
-    margin: 3em;
-    margin-top: 0rem;
-    text-align: center;
-    color: #004F8A;
-    flex-basis: 100%;
-    margin-bottom: 3rem;
+.utilisateur p{
+    margin: 5px;
+  
 }
 
-.gestion{
-    text-decoration: none;
+.utilisateur-container {
+    height: 15rem;
+    overflow-y: scroll;
 }
 
-.popup {
-    display: none;
-    position: fixed;
-    width: 30%;
-    height: 30%;
-    content: center;
-    background-color: #fefefe;
-    border: solid 0.5rem #004F8A;
-    border-radius: 1rem;
-    z-index: 2rem;
-    margin-top: 10%;
-
-  }
-
-#ajouterFic, #supFic,#ajouterUser,#supUser{
-    margin: 2rem;
-    padding: 0.5rem;
-    border: solid 0.2rem #004F8A;
-    border-radius: 1rem;
-    align-items: center;
-    text-align: center;
-    text-decoration: none;
-    color: #004F8A;
-}
-.popup>#ajouterFic:hover, .popup>#supFic:hover, .popup>#ajouterUser:hover, .popup>#supUser:hover {
-    background-color: #004F8A;
+.retirer {
+    background-color: #ff0000;
+    border: none;
     color: white;
-}
-  .popup>p{
-    font-size: 200%;
     text-align: center;
-    color: #004F8A;
-  }
-  .close-btn{
-    position: absolute;
-    right: 0;
-    background-color: #EA4E4E;
-    width: 2rem;
-    height: 2rem;
+    display: inline-block;
+    font-size: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    justify-content: center;
-    align-items: right;
-    cursor: pointer;
-    content: right;
-  }
-  #ajouterFic,#ajouterUser{
-    margin-left: 10rem;
-  }
-
-@media only screen and (max-width: 1000px) {
-    .gestion,.gestionUser,.gestionFic{
-        flex-basis: 100%;
-    }
-    #ajouterFic, #supFic,#ajouterUser,#supUser{
-        font-size: 300%;
-        margin-left: 0rem;
-        border: 0.5rem solid #004F8A;
-        align-items: center;
-        text-align: center;
-        
-    }
-    .popup {
-        width: 50rem;
-        height: 30rem;
-        margin-top: 10%;
-    }
-    .popup>p{
-        font-size: 300%;
-    }
-    .close-btn{
-        width: 4rem;
-        height: 4rem;
-        font-size: 200%;
-    }
-    #ajouterFic,#ajouterUser{
-        margin-left: 1rem;
-    }
-
-
+    margin-top: 7px;
 }
-@media only screen and (max-width: 535px) {
-    
-    .nomGestion{
-        font-size: 100%;}
-    .gestion>div>svg,.gestionUser>div>svg,.gestionFic>div>svg{
-        height: 3rem;
-        width: 3rem;
-        margin: 1rem;
-    }
-    .popup {
-        width: 50%;
-        height: 30%;
-        margin-top: 10%;
-    }
-    .close-btn{
-        width: 1rem;
-        height: 1rem;
-        font-size: 50%;
-    }
-    .popup>p{
-        font-size: 100%;
-    }
-    #ajouterFic, #supFic,#ajouterUser,#supUser{
-        font-size: 50%;
-        margin: 0rem;
-        margin-left: 0rem;
-        border: 0.2rem solid #004F8A;
-        align-items: center;
-        text-align: center;
-        z-index: 2rem;
-    }
+
+.retirer:hover {
+    background-color: #ff6666;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-top: 7px;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #f32121;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 10px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px; 
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #21f32c;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #21f32c;
+  }
+
+.bouton-utilisateur {
+    display: flex;
+    justify-content: center;
+    margin: 5px;
 }
