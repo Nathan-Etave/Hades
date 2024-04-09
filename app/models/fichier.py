@@ -12,12 +12,11 @@ class FICHIER(db.Model):
     id_Fichier = mapped_column(Integer, primary_key=True)
     id_Dossier = mapped_column(Integer)
     URI_Fichier = mapped_column(String(255))
+    
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     DOSSIER_: Mapped[Optional['DOSSIER']] = relationship('DOSSIER', back_populates='FICHIER')
     UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')
     A_TAG: Mapped[List['A_TAG']] = relationship('A_TAG', uselist=True, back_populates='FICHIER_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='FICHIER_')
-
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
