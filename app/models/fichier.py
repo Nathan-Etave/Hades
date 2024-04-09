@@ -1,6 +1,5 @@
-from typing import List, Optional
 from sqlalchemy import Integer, String, ForeignKeyConstraint, Index
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped
 from app.extensions import db
 
 class FICHIER(db.Model):
@@ -13,6 +12,9 @@ class FICHIER(db.Model):
     id_Fichier = mapped_column(Integer, primary_key=True)
     id_Dossier = mapped_column(Integer)
     URI_Fichier = mapped_column(String(255))
+    
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     DOSSIER_: Mapped[Optional['DOSSIER']] = relationship('DOSSIER', back_populates='FICHIER')
     UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')

@@ -21,6 +21,7 @@ crsf = CSRFProtect()
 
 def create_app(config_class = Config):
     from app.register import bp as register_bp
+    from app.api import bp as api_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -29,6 +30,7 @@ def create_app(config_class = Config):
     with app.app_context():
         db.create_all()
 
+    app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')
 
     return app
