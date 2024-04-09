@@ -2,7 +2,6 @@ from typing import List, Optional
 from sqlalchemy import Integer, String, ForeignKeyConstraint, Index
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.extensions import db
-from app.models.a_tag import A_TAG
 
 class FICHIER(db.Model):
     __tablename__ = 'FICHIER'
@@ -15,4 +14,7 @@ class FICHIER(db.Model):
     id_Dossier = mapped_column(Integer)
     URI_Fichier = mapped_column(String(255))
 
+    DOSSIER_: Mapped[Optional['DOSSIER']] = relationship('DOSSIER', back_populates='FICHIER')
+    UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')
     A_TAG: Mapped[List['A_TAG']] = relationship('A_TAG', uselist=True, back_populates='FICHIER_')
+    NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='FICHIER_')
