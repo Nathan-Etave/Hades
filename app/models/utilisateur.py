@@ -2,9 +2,6 @@ from typing import List, Optional
 from sqlalchemy import Index, Integer, String, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.extensions import db
-from app.models.fichier import FICHIER
-from app.models.role import ROLE
-from app.models.a_recherche import A_RECHERCHE
 from flask_login import UserMixin
 
 class UTILISATEUR(db.Model, UserMixin):

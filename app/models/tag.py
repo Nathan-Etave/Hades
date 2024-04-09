@@ -2,7 +2,6 @@ from typing import List
 from sqlalchemy import String
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.extensions import db
-from app.models.a_tag import A_TAG
 
 class TAG(db.Model):
     __tablename__ = 'TAG'
