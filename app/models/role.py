@@ -11,3 +11,4 @@ class ROLE(db.Model):
 
     DOSSIER_: Mapped['DOSSIER'] = relationship('DOSSIER', secondary='A_ACCES', back_populates='ROLE')
     UTILISATEUR: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', uselist=True, back_populates='ROLE_')
+

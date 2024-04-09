@@ -1,6 +1,5 @@
-from typing import List, Optional
 from sqlalchemy import Integer, String, ForeignKeyConstraint, Index
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped
 from app.extensions import db
 
 class FICHIER(db.Model):
@@ -18,3 +17,7 @@ class FICHIER(db.Model):
     UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')
     A_TAG: Mapped[List['A_TAG']] = relationship('A_TAG', uselist=True, back_populates='FICHIER_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='FICHIER_')
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
