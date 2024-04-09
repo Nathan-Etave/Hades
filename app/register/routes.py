@@ -1,5 +1,6 @@
 from app.register import bp
 from app.extensions import db
+from app.mail.mail import send_registration_request_email
 from flask import render_template, redirect, url_for, flash
 from datetime import datetime
 from app.forms.registration_form import RegistrationForm
@@ -24,6 +25,7 @@ def register():
             notification = NOTIFICATION(datetime_Notification=datetime.now(), type_Notification='Inscription', id_Utilisateur=user.id_Utilisateur)
             db.session.add(notification)
             db.session.commit()
+            send_registration_request_email(user.email_Utilisateur)
             flash('Demande d\'inscription envoyée avec succès.', 'success')
         return redirect(url_for('register.register'))
     return render_template('register/index.html', form=form)
