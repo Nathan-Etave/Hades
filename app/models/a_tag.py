@@ -13,3 +13,6 @@ class A_TAG(db.Model):
     id_Fichier = mapped_column(Integer, primary_key=True, nullable=False)
     nom_Tag = mapped_column(String(255), primary_key=True, nullable=False)
     nb_Occurrence = mapped_column(Integer)
+
+    FICHIER_: Mapped['FICHIER'] = relationship('FICHIER', back_populates='A_TAG')
+    TAG_: Mapped['TAG'] = relationship('TAG', back_populates='A_TAG')
