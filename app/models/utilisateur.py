@@ -2,9 +2,6 @@ from typing import List, Optional
 from sqlalchemy import Index, Integer, String, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.extensions import db
-from app.models.fichier import FICHIER
-from app.models.role import ROLE
-from app.models.a_recherche import A_RECHERCHE
 from flask_login import UserMixin
 
 class UTILISATEUR(db.Model, UserMixin):
@@ -26,7 +23,7 @@ class UTILISATEUR(db.Model, UserMixin):
     def get_id(self):
         return self.id_Utilisateur
 
-    FICHIER_: Mapped[List['FICHIER']] = relationship('FICHIER', secondary='FAVORIS', back_populates='UTILISATEUR_')
-    ROLE_: Mapped[Optional['ROLE']] = relationship('ROLE', back_populates='UTILISATEUR')
-    A_RECHERCHE: Mapped[List['A_RECHERCHE']] = relationship('A_RECHERCHE', uselist=True, back_populates='UTILISATEUR_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='UTILISATEUR_')
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
