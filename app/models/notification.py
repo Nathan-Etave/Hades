@@ -2,7 +2,6 @@ from sqlalchemy import Integer, String, DateTime, Index, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from typing import Optional
 from app import db
-from app.models.utilisateur import UTILISATEUR
 
 
 class NOTIFICATION(db.Model):
