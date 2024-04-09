@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center" style="height: 75vh;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <h2 class="text-center">Demande d'inscription</h2>
+            <form method="POST" action="{{ url_for('register.register') }}">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.first_name.label(class="form-label") }}
+                    {{ form.first_name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.last_name.label(class="form-label") }}
+                    {{ form.last_name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(id="email", class="form-control") }}
+                </div>
+                <p class="text-muted">Un email de confirmation vous sera envoyé.</p>
+                <div class="form-group text-center">
+                    <input type="submit" value="Demander l'inscription" class="btn btn-primary">
+                </div>
+            </form>
+            {% if form.email.errors %}
+            <div class="alert alert-dismissible alert-danger mt-4">
+                <strong>Erreur lors de la soumission du formulaire.</strong><br>
+                {% for error in form.email.errors %}
+                <a href="#email" class="alert-link">{{ error }}</a><br>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+{% endblock %}
