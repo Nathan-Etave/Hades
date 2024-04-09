@@ -16,4 +16,3 @@ class A_RECHERCHE(db.Model):
 
     RECHERCHE_: Mapped['RECHERCHE'] = relationship('RECHERCHE', back_populates='A_RECHERCHE')
     UTILISATEUR_: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', back_populates='A_RECHERCHE')
-

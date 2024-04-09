@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 from app.extensions import db
 
@@ -15,15 +16,21 @@ from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 
+crsf = CSRFProtect()
+
 
 def create_app(config_class = Config):
+    from app.register import bp as register_bp
     from app.api import bp as api_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
+    crsf.init_app(app)
     db.init_app(app)
     with app.app_context():
         db.create_all()
+
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(register_bp, url_prefix='/inscription')
 
     return app
