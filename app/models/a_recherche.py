@@ -14,3 +14,6 @@ class A_RECHERCHE(db.Model):
     champ_Recherche = mapped_column(String(255), primary_key=True, nullable=False)
     datetime_Recherche = mapped_column(DateTime, primary_key=True, nullable=False)
 
+    RECHERCHE_: Mapped['RECHERCHE'] = relationship('RECHERCHE', back_populates='A_RECHERCHE')
+    UTILISATEUR_: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', back_populates='A_RECHERCHE')
+

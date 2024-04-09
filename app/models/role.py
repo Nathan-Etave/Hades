@@ -9,3 +9,6 @@ class ROLE(db.Model):
     id_Role = mapped_column(Integer, primary_key=True)
     nom_Role = mapped_column(String(255))
 
+    DOSSIER_: Mapped['DOSSIER'] = relationship('DOSSIER', secondary='A_ACCES', back_populates='ROLE')
+    UTILISATEUR: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', uselist=True, back_populates='ROLE_')
+
