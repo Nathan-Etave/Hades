@@ -1,5 +1,5 @@
 from sqlalchemy import DateTime, ForeignKeyConstraint, Index, Integer, String
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import mapped_column
 from app.extensions import db
 
 class A_RECHERCHE(db.Model):
@@ -16,3 +16,4 @@ class A_RECHERCHE(db.Model):
 
     RECHERCHE_: Mapped['RECHERCHE'] = relationship('RECHERCHE', back_populates='A_RECHERCHE')
     UTILISATEUR_: Mapped['UTILISATEUR'] = relationship('UTILISATEUR', back_populates='A_RECHERCHE')
+
