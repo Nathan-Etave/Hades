@@ -2,8 +2,6 @@ from sqlalchemy import Integer, String, DateTime, Index, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from typing import Optional
 from app import db
-from app.models.fichier import FICHIER
-from app.models.utilisateur import UTILISATEUR
 
 
 class NOTIFICATION(db.Model):
@@ -21,5 +19,4 @@ class NOTIFICATION(db.Model):
     id_Utilisateur = mapped_column(Integer)
     id_Fichier = mapped_column(Integer)
 
-    FICHIER_: Mapped[Optional['FICHIER']] = relationship('FICHIER', back_populates='NOTIFICATION')
     UTILISATEUR_: Mapped[Optional['UTILISATEUR']] = relationship('UTILISATEUR', back_populates='NOTIFICATION')
