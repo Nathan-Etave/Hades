@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container d-flex align-items-center" style="height: 75vh;">
     <div class="row justify-content-center w-100">
-        <div class="col-md-6">
+        <div class="col-md-6 shadow-lg p-5 bg-secondary rounded">
             <h2 class="text-center">Demande d'inscription</h2>
             <form method="POST" action="{{ url_for('register.register') }}">
                 {{ form.csrf_token }}
