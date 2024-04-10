@@ -10,6 +10,7 @@ from flask import jsonify, request
 from app.api import bp
 from sqlalchemy.orm import sessionmaker
 from unidecode import unidecode
+from datetime import datetime
 
 # --------------------------------------------Fichier--------------------------------------------
 
@@ -181,19 +182,19 @@ def favorite_file(id):
     db.session.commit()
     return jsonify(user.to_dict())
 
-# ----------Notification----------
+# --------------------------------------------notification--------------------------------------------
 
-# -----DELETE-----
+# -----POST-----
 
-@bp.route('/utilisateur/<int:id>/notifications', methods=['DELETE'])
-def delete_notification(id):
-    notif_id = request.json.get('notif_id')
-    user = UTILISATEUR.query.filter_by(id_Utilisateur=id).first()
-    if user is None:
+@bp.route('/notification', methods=['POST'])
+def add_notification() :
+    current_date = datetime.now()
+    type = request.json.get('type')
+    email_user = request.json.get('email_user')
+    id_user = UTILISATEUR.query.filter_by(email_Utilisateur=email_user).first().id_Utilisateur
+    if id_user is None:
         return jsonify({'error': 'user not found'}), 404
-    notif = NOTIFICATION.query.filter_by(id_Notification=notif_id).first()
-    if notif is None:
-        return jsonify({'error': 'notification not found'}), 404
-    db.session.delete(notif)
+    notification = NOTIFICATION(datetime_Notification=current_date, type_Notification=type, id_Utilisateur=id_user)
+    db.session.add(notification)
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify(notification.to_dict()), 200

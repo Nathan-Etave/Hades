@@ -40,7 +40,7 @@
                 {% endif %}
                 {% else %}
                 <li>
-                    <a href="#">Connexion</a>
+                    <a href="{{ url_for('login.login') }}">Connexion</a>
                 </li>
                 <li>
                     <a href="{{ url_for('register.register') }}">Inscription</a>
