@@ -19,4 +19,5 @@ class NOTIFICATION(db.Model):
     id_Utilisateur = mapped_column(Integer)
     id_Fichier = mapped_column(Integer)
 
+    FICHIER_: Mapped[Optional['FICHIER']] = relationship('FICHIER', back_populates='NOTIFICATION')
     UTILISATEUR_: Mapped[Optional['UTILISATEUR']] = relationship('UTILISATEUR', back_populates='NOTIFICATION')

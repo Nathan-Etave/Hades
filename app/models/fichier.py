@@ -1,5 +1,6 @@
+from typing import List, Optional
 from sqlalchemy import Integer, String, ForeignKeyConstraint, Index
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.extensions import db
 
 class FICHIER(db.Model):
