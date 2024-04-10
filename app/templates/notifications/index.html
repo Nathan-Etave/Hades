@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% macro card(notification, header, roles) %}
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            {{ header }}
+        </div>
+        <div class="card-body">
+            <p class="card-subtitle text-muted">
+                {% if notification.type_Notification == 'Inscription' %}
+                    Demande d'inscription
+                {% elif notification.type_Notification == 'Reactivation' %}
+                    Demande de réactivation
+                {% endif %}
+                <span class="fw-bold">{{ notification.UTILISATEUR_.prenom_Utilisateur }} {{ notification.UTILISATEUR_.nom_Utilisateur }}</span> ({{ notification.UTILISATEUR_.email_Utilisateur }})</p>
+            <p class="card-text  mb-2">Date: {{ notification.datetime_Notification.strftime('%Y-%m-%d %H:%M') }}</p>
+            <label for="role-select-{{ notification.id_Notification }}" class="form-label">Rôle</label>
+            <select id="role-select-{{ notification.id_Notification }}" class="form-select mb-2">
+                {% if notification.UTILISATEUR_.id_Role is none %}
+                    <option value="" selected>Choisir un rôle...</option>
+                {% endif %}
+                {% for role in roles %}
+                    {% if role.id_Role == notification.UTILISATEUR_.id_Role %}
+                        <option value="{{ role.id_Role }}" selected>{{ role.nom_Role }}</option>
+                    {% else %}
+                        <option value="{{ role.id_Role }}">{{ role.nom_Role }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary mt-2 me-2 accept-button" data-user-id="{{ notification.UTILISATEUR_.id_Utilisateur }}" data-notification-type="{{ notification.type_Notification }}" data-notification-id="{{ notification.id_Notification }}" disabled>Accepter</button>
+                <button class="btn btn-danger mt-2 reject-button" data-user-id="{{ notification.UTILISATEUR_.id_Utilisateur }}" data-notification-type="{{ notification.type_Notification }}" data-notification-id="{{ notification.id_Notification }}">Rejeter</button>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block head %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-start justify-content-center pt-5" style="height: 75vh; overflow: auto;">
+    <div class="container">
+        <h1 class="text-center">Notifications</h1>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for notification in notifications %}
+                <div class="col">
+                    {% if notification.type_Notification == 'Inscription' %}
+                        {{ card(notification, 'Demande d\'inscription', roles) }}
+                    {% elif notification.type_Notification == 'Reactivation' %}
+                        {{ card(notification, 'Demande de réactivation', roles) }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

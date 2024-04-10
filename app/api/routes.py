@@ -1,3 +1,4 @@
+from datetime import datetime
 from app import db
 from app.models.fichier import FICHIER
 from app.models.dossier import DOSSIER
@@ -147,7 +148,7 @@ def update_user(id):
     if actif is not None:
         user.est_Actif_Utilisateur = actif
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify(user.to_dict()), 200
 
 # ----------Favoris----------
 
@@ -185,6 +186,15 @@ def favorite_file(id):
 # --------------------------------------------notification--------------------------------------------
 
 # -----POST-----
+
+@bp.route('/notification/<int:id>', methods=['DELETE'])
+def delete_notification(id):
+    notification = NOTIFICATION.query.filter_by(id_Notification=id).first()
+    if notification is None:
+        return jsonify({'error': 'notification not found'}), 404
+    db.session.delete(notification)
+    db.session.commit()
+    return jsonify({'success': 'notification deleted'}), 200
 
 @bp.route('/notification', methods=['POST'])
 def add_notification() :
