@@ -38,7 +38,7 @@ def accept(id_notification):
             db.session.commit()
         except (SMTPException, ConnectionError, TimeoutError):
             db.session.rollback()
-            return jsonify({'error': 'Erreur lors de l\'envoi du mail. Veuillez réessayer ultérieurement.'}), 500
+            return jsonify({'error': f'{user.email_Utilisateur} : Erreur lors de l\'envoi du mail de confirmation d\'inscription. Veuillez réessayer ultérieurement.'}), 500
     elif notification.type_Notification == 'Reactivation':
         user = UTILISATEUR.query.get(notification.id_Utilisateur)
         user.id_Role = request.json.get('role_id')
@@ -49,8 +49,11 @@ def accept(id_notification):
             db.session.commit()
         except (SMTPException, ConnectionError, TimeoutError):
             db.session.rollback()
-            return jsonify({'error': 'Erreur lors de l\'envoi du mail. Veuillez réessayer ultérieurement.'}), 500
-    return render_template('notifications/index.html', is_authenticated=True, is_admin=True), 200
+            return jsonify({'error': f'{user.email_Utilisateur} : Erreur lors de l\'envoi du mail de réactivation. Veuillez réessayer ultérieurement.'}), 500
+    if notification.type_Notification == 'Inscription':
+        return jsonify({'message': f'{user.email_Utilisateur} : Inscription validée.'}), 200
+    elif notification.type_Notification == 'Reactivation':
+        return jsonify({'message': f'{user.email_Utilisateur} : Réactivation validée.'}), 200
 
 @bp.route('/<int:id_notification>/reject', methods=['GET', 'POST'])
 @login_required
@@ -76,4 +79,7 @@ def reject(id_notification):
         except (SMTPException, ConnectionError, TimeoutError):
             db.session.rollback()
             return jsonify({'error': 'Erreur lors de l\'envoi du mail. Veuillez réessayer ultérieurement.'}), 500
-    return render_template('notifications/index.html', is_authenticated=True, is_admin=True), 200
+    if notification.type_Notification == 'Inscription':
+        return jsonify({'message': f'{user.email_Utilisateur} : Inscription refusée.'}), 200
+    elif notification.type_Notification == 'Reactivation':
+        return jsonify({'message': f'{user.email_Utilisateur} : Réactivation refusée.'}), 200
