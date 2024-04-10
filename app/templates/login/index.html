@@ -2,6 +2,11 @@
 
 {% block title %}Connexion{% endblock %}
 
+{% block head %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
 {% block content %}
 <div class="container d-flex align-items-center" style="height: 75vh;">
     <div class="row justify-content-center w-100">
@@ -17,7 +22,7 @@
                     {{ form.password.label(class="form-label") }}
                     {{ form.password(class="form-control") }}
                 </div>
-                <div class="form-group text-center">
+                <div class="form-group text-center" style="margin-top: 3vh;">
                     <input type="submit" value="Connexion" class="btn btn-primary">
                 </div>
             </form>
@@ -32,9 +37,20 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible mt-4">
-                            {{ message }}
-                        </div>
+                        {% if category == 'info' %}
+                            <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                                {{ message }}
+                                <div class="d-flex justify-content-center mt-3">
+                                    <input type="button" class="btn btn-secondary" value="Demander une réactivation" id="btn_reactivation">
+                                </div>
+                            </div>
+                        {% else %}
+                            {% if message != 'Please log in to access this page.' %}
+                                <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             {% endwith %}
