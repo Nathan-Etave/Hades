@@ -30,19 +30,18 @@ def login():
         if user:
             if user.est_Actif_Utilisateur != 1:
                 if user.id_Role:
-                    flash("Votre compte est désactivé", "info")
+                    flash("Votre compte est désactivé.", "info")
                 else:
-                    flash("Votre compte n'est pas encore activé", "danger")
+                    flash("Votre compte n'est pas encore activé.", "danger")
                 form.email.data = form.email.data
                 return render_template("login/index.html", form=form)
             if check_password_hash(user.mdp_Utilisateur, form.password.data):
                 login_user(user)
-                flash("Connexion réussie", "success")
                 return redirect(url_for("home.index"))
-            flash("Mot de passe incorrect", "danger")
+            flash("Mot de passe incorrect.", "danger")
             form.email.data = form.email.data
             return render_template("login/index.html", form=form)
-        flash("Adresse email inconnu", "danger")
+        flash("Adresse email inconnu.", "danger")
         form.email.data = form.email.data
         return render_template("login/index.html", form=form)
     return render_template("login/index.html", form=form)
