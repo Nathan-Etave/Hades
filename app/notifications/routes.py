@@ -7,10 +7,12 @@ from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
 from flask import render_template, request
 from flask_bcrypt import generate_password_hash
+from flask_login import login_required
 import secrets
 import string
 
 @bp.route('/', methods=['GET'])
+@login_required
 def notifications():
     notifications = NOTIFICATION.query.all()
     notifications = sorted(notifications, key=lambda x: x.datetime_Notification, reverse=True)
@@ -18,6 +20,7 @@ def notifications():
     return render_template('notifications/index.html', notifications=notifications, roles=roles, is_authenticated=True, is_admin=True)
 
 @bp.route('/<int:id_notification>/accept', methods=['GET', 'POST'])
+@login_required
 def accept(id_notification):
     notification = NOTIFICATION.query.get(id_notification)
     if notification.type_Notification == 'Inscription':
