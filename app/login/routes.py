@@ -8,6 +8,11 @@ from flask_bcrypt import check_password_hash
 from app.login import bp
 from app.models.utilisateur import UTILISATEUR
 from app.forms.login_form import LoginForm
+from app import login_manager
+
+@login_manager.user_loader
+def load_user(user):
+    return user
 
 
 @bp.route("/", methods=["GET", "POST"])
