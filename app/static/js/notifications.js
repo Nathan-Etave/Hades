@@ -1,122 +1,55 @@
 document.addEventListener('DOMContentLoaded', function () {
-    let acceptButtons = document.querySelectorAll('.accept-button');
-    let rejectButtons = document.querySelectorAll('.reject-button');
-    let select = document.querySelectorAll('select');
-    // isFetching implique que les boutons accepter et rejeter soit désactivés pendant la requête, il
-    // faut régler ce problème en utilisant un flash (cf erreur mail) pour afficher un message disant
-    // que telle chose est terminée. (Plus de boutons désactivés (seulement le bouton cliqué et son opposé))
-    // Liste de flash avec un timer de 5sec ? S'affiche un a un ? Ou un seul flash qui s'actualise ?
-    let isFetching = false;
+    const acceptButtons = document.querySelectorAll('.accept-button');
+    const rejectButtons = document.querySelectorAll('.reject-button');
+    const selectElements = document.querySelectorAll('select');
 
-    select.forEach(function (select) {
+    selectElements.forEach(select => {
         select.addEventListener('change', function (event) {
-            if (isFetching) {
-                return;
-            }
-            if (select.value != '') {
-                select.parentElement.parentElement.querySelector('.accept-button').disabled = false;
-            }
-            else {
-                select.parentElement.parentElement.querySelector('.accept-button').disabled = true;
-            }
+            const acceptButton = select.parentElement.parentElement.querySelector('.accept-button');
+            acceptButton.disabled = select.value === '';
         });
         select.dispatchEvent(new Event('change'));
     });
 
+    const handleButtonClick = async (event, action) => {
+        const button = event.target;
+        const selectId = button.parentElement.parentElement.querySelector('select').value;
+        const notificationType = button.dataset.notificationType;
+        const notificationId = button.dataset.notificationId;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        if (!['Inscription', 'Reactivation'].includes(notificationType)) {
+            alert(`Impossible de procéder à l'action demandée, la page va être rechargée.`);
+            return window.location.reload();
+        }
+
+        try {
+            button.disabled = true;
+            button.parentElement.lastElementChild === button ? button.parentElement.firstElementChild.disabled = true : button.parentElement.lastElementChild.disabled = true;
+            button.innerHTML = `${action} en cours...`;
+            const response = await sendRequest(`/notifications/${notificationId}/${action}`, 'POST', csrfToken, { 'role_id': selectId });
+
+            if (response.status !== 200) {
+                throw new Error((await response.json()).error);
+            }
+
+            let json = await response.json();
+            createFlashMessage(json.message, notificationId, action);
+            button.parentElement.parentElement.parentElement.parentElement.remove();
+        } catch (error) {
+            createFlashMessage(error.message, notificationId, 'error');
+            button.disabled = false;
+            button.parentElement.lastElementChild === button ? button.parentElement.firstElementChild.disabled = false : button.parentElement.lastElementChild.disabled = false;
+            button.innerHTML = action === 'accept' ? 'Accepter' : 'Rejeter';
+        }
+    };
+
     acceptButtons.forEach(button => {
-        button.addEventListener('click', async function (event) {
-            let selectId = event.target.parentElement.parentElement.querySelector('select').value;
-            let notificationType = event.target.dataset.notificationType;
-            let notificationId = event.target.dataset.notificationId;
-            let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-            if (selectId === '') {
-                return alert('Veuillez sélectionner un rôle avant de valider.');
-            }
-
-            if (!['Inscription', 'Reactivation'].includes(notificationType)) {
-                alert('Erreur lors de la validation.');
-                return window.location.reload();
-            }
-
-            try {
-                isFetching = true;
-                acceptButtons.forEach(button => button.disabled = true);
-                rejectButtons.forEach(button => button.disabled = true);
-                event.target.innerHTML = 'Validation en cours...';
-                let response = await sendRequest(`/notifications/${notificationId}/accept`, 'POST', csrfToken, {
-                    'role_id': selectId
-                });
-            
-                if (response.status === 200) {
-                    isFetching = false;
-                    alert(notificationType === 'Inscription' ? 'Validation effectuée avec succès.' : 'Réactivation effectuée avec succès.');
-                    window.location.reload();
-                }
-                else {
-                    isFetching = false;
-                    let data = await response.json();
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                let flash = `<div class="alert alert-danger alert-dismissible mt-4">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    ${error.message}
-                    </div>`
-                document.querySelector('.flash').innerHTML = flash;
-                document.querySelector('.flash').querySelector('.btn-close').addEventListener('click', function () {
-                    document.querySelector('.flash').innerHTML = '';
-                });
-                acceptButtons.forEach(button => selectId === '' ? button.disabled = true : button.disabled = false);
-                rejectButtons.forEach(button => button.disabled = false);
-                event.target.innerHTML = 'Accepter';
-            }
-        });
+        button.addEventListener('click', event => handleButtonClick(event, 'accept'));
     });
 
     rejectButtons.forEach(button => {
-        button.addEventListener('click', async function (event) {
-            let notificationId = event.target.dataset.notificationId;
-            let notificationType = event.target.dataset.notificationType;
-            let selectId = event.target.parentElement.parentElement.querySelector('select').value;
-            let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-            if (!['Inscription', 'Reactivation'].includes(notificationType)) {
-                alert('Erreur lors du rejet.');
-                return window.location.reload();
-            }
-
-            try {
-                isFetching = true;
-                acceptButtons.forEach(button => button.disabled = true);
-                rejectButtons.forEach(button => button.disabled = true);
-                event.target.innerHTML = 'Rejet en cours...';
-                let response = await sendRequest(`/notifications/${notificationId}/reject`, 'POST', csrfToken);
-            
-                if (response.status === 200) {
-                    isFetching = false;
-                    alert(notificationType === 'Inscription' ? 'Rejet effectué avec succès.' : 'Désactivation effectuée avec succès.');
-                    window.location.reload();
-                }
-                else {
-                    isFetching = false;
-                    let data = await response.json();
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                let flash = `<div class="alert alert-danger alert-dismissible mt-4">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    ${error.message}
-                    </div>`
-                document.querySelector('.flash').innerHTML = flash;
-                document.querySelector('.flash').querySelector('.btn-close').addEventListener('click', function () {
-                    document.querySelector('.flash').innerHTML = '';
-                });
-                acceptButtons.forEach(button => selectId === '' ? button.disabled = true : button.disabled = false);
-                rejectButtons.forEach(button => button.disabled = false);
-                event.target.innerHTML = 'Rejeter';
-            }
-        });
+        button.addEventListener('click', event => handleButtonClick(event, 'reject'));
     });
 });
 
@@ -129,4 +62,21 @@ async function sendRequest(url, method, csrfToken, body = null) {
         },
         body: body ? JSON.stringify(body) : null
     });
+}
+
+function createFlashMessage(message, notificationId, type) {
+    const flash = document.createElement('div');
+    flash.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible mt-4`;
+    const button = document.createElement('button');
+    button.type = "button";
+    button.className = "btn-close";
+    button.setAttribute('data-bs-dismiss', 'alert');
+    button.setAttribute('data-notification-id', notificationId);
+    button.addEventListener('click', function () {
+        this.parentElement.remove();
+    });
+    flash.appendChild(button);
+    const text = document.createTextNode(message);
+    flash.appendChild(text);
+    document.querySelector('.flash').appendChild(flash);
 }
