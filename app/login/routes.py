@@ -16,7 +16,7 @@ from flask import jsonify, request
 
 @login_manager.user_loader
 def load_user(user):
-    return user
+    return UTILISATEUR.query.get(user)
 
 
 @bp.route("/", methods=["GET", "POST"])
