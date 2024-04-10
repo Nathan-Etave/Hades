@@ -1,3 +1,4 @@
+from datetime import datetime
 from app import db
 from app.models.fichier import FICHIER
 from app.models.dossier import DOSSIER
@@ -146,7 +147,7 @@ def update_user(id):
     if actif is not None:
         user.est_Actif_Utilisateur = actif
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify(user.to_dict()), 200
 
 # ----------Favoris----------
 
@@ -185,15 +186,21 @@ def favorite_file(id):
 
 # -----DELETE-----
 
-@bp.route('/utilisateur/<int:id>/notifications', methods=['DELETE'])
+@bp.route('/notification/<int:id>', methods=['DELETE'])
 def delete_notification(id):
-    notif_id = request.json.get('notif_id')
-    user = UTILISATEUR.query.filter_by(id_Utilisateur=id).first()
-    if user is None:
-        return jsonify({'error': 'user not found'}), 404
-    notif = NOTIFICATION.query.filter_by(id_Notification=notif_id).first()
-    if notif is None:
+    notification = NOTIFICATION.query.filter_by(id_Notification=id).first()
+    if notification is None:
         return jsonify({'error': 'notification not found'}), 404
-    db.session.delete(notif)
+    db.session.delete(notification)
     db.session.commit()
-    return jsonify(user.to_dict())
+    return jsonify({'success': 'notification deleted'}), 200
+
+@bp.route('/notifications', methods=['POST'])
+def add_notification() :
+    current_date = datetime.now()
+    type = request.json.get('type')
+    id_user = request.json.get('id_user')
+    notification = NOTIFICATION(datetime_Notification=current_date, type_Notification=type, id_Utilisateur=id_user)
+    db.session.add(notification)
+    db.session.commit()
+    return jsonify(notification.to_dict())
