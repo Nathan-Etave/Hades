@@ -9,7 +9,6 @@ from app.mail.mail import send_registration_request_email
 from app.forms.registration_form import RegistrationForm
 from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
-from flask_login import login_required
 
 @bp.route("/", methods=["GET", "POST"])
 def register() -> any:
