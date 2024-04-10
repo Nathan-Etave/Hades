@@ -10,7 +10,6 @@ from app.forms.registration_form import RegistrationForm
 from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
 
-
 @bp.route("/", methods=["GET", "POST"])
 def register() -> any:
     """Route to register a new user.
