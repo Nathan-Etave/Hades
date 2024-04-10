@@ -20,19 +20,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json().then(data => ({status: response.status, body: data})))
         .then(response => {
             if (response.status === 200) {
-                alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée");
+                alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.");
                 window.location.href = "/connexion";
             }
             if (response.status === 404) {
                 console.log(response.body.error);
-                if (response.body.error === "User not found") {
-                    alert("Aucun utilisateur n'est associé à cet email");
+                if (response.body.error === "user not found") {
+                    alert("Aucun utilisateur n'est associé à cet email.");
                 }
                 else if (response.body.error === "user already have a notification") {
-                    alert("Vous avez déjà une demande de réactivation en cours");
+                    alert("Vous avez déjà une demande de réactivation en cours.");
                 }
                 else {
-                    alert("Une erreur est survenue");
+                    alert("Une erreur est survenue.");
                 }
                 window.location.href = "/connexion";
             }
