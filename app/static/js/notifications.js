@@ -13,10 +13,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const handleButtonClick = async (event, action) => {
         const button = event.target;
-        const selectId = button.parentElement.parentElement.querySelector('select').value;
+        let selectId = button.parentElement.parentElement.querySelector('select').value;
         const notificationType = button.dataset.notificationType;
         const notificationId = button.dataset.notificationId;
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        button.parentElement.parentElement.querySelector('select').addEventListener('change', function (event) {
+            selectId = event.target.value;
+        });
 
         if (!['Inscription', 'Reactivation'].includes(notificationType)) {
             alert(`Impossible de procéder à l'action demandée, la page va être rechargée.`);
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             button.disabled = true;
             button.parentElement.lastElementChild === button ? button.parentElement.firstElementChild.disabled = true : button.parentElement.lastElementChild.disabled = true;
-            button.innerHTML = `${action} en cours...`;
+            button.innerHTML = action === 'accept' ? 'Acceptation en cours...' : 'Rejet en cours...';
             const response = await sendRequest(`/notifications/${notificationId}/${action}`, 'POST', csrfToken, { 'role_id': selectId });
 
             if (response.status !== 200) {
@@ -38,8 +42,14 @@ document.addEventListener('DOMContentLoaded', function () {
             button.parentElement.parentElement.parentElement.parentElement.remove();
         } catch (error) {
             createFlashMessage(error.message, notificationId, 'error');
-            button.disabled = false;
-            button.parentElement.lastElementChild === button ? button.parentElement.firstElementChild.disabled = false : button.parentElement.lastElementChild.disabled = false;
+            if (button.parentElement.lastElementChild === button) {
+                button.disabled = false;
+                selectId == '' ? button.parentElement.firstElementChild.disabled = true : button.parentElement.firstElementChild.disabled = false;
+            }
+            else {
+                selectId == '' ? button.disabled = true : button.disabled = false;
+                button.parentElement.lastElementChild.disabled = false;
+            }
             button.innerHTML = action === 'accept' ? 'Accepter' : 'Rejeter';
         }
     };
