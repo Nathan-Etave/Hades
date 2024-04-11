@@ -17,7 +17,6 @@ from flask import jsonify, request
 import secrets
 import string
 from app.mail.mail import send_forgotten_password_email
-from smtplib import SMTPException
 
 
 @login_manager.user_loader
@@ -28,7 +27,17 @@ def load_user(user):
 @bp.route("/", methods=["GET", "POST"])
 def login():
     """
-    Login route handler.
+    Handles the login functionality.
+
+    This function validates the login form and performs the necessary actions based on the form data.
+    If the form is valid, it checks if the user exists and if the password is correct.
+    If the user is inactive, appropriate flash messages are displayed.
+    If the password is incorrect, a flash message is displayed.
+    If the user does not exist, a flash message is displayed.
+    If the forgotten password form is submitted, it sends a email with new pasword to the user's email address.
+
+    Returns:
+        The rendered login template with the login form and forgotten password form.
     """
     form = LoginForm()
     mdp_form = ForgottenPasswordForm()
@@ -68,6 +77,12 @@ def login():
 
 @bp.route("/notification", methods=["POST"])
 def add_notification():
+    """
+    Add a notification for a user.
+
+    Returns:
+        JSON: The created notification in JSON format.
+    """
     current_date = datetime.now()
     type = request.json.get("type")
     email_user = request.json.get("email_user")
@@ -90,6 +105,15 @@ def add_notification():
 
 
 def forgot_password(email):
+    """
+    Sends a forgotten password email to the user and updates their password in the database.
+
+    Args:
+        email (str): The email address of the user.
+
+    Returns:
+        list: A list containing a message and a status indicating the result of the operation.
+    """
     user = UTILISATEUR.query.filter_by(email_Utilisateur=email).first()
     password = "".join(
         secrets.choice(string.ascii_letters + string.digits + string.punctuation)

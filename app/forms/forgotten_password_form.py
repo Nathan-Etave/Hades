@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import SubmitField, EmailField
 from wtforms.validators import DataRequired, Email
 
+
 class ForgottenPasswordForm(FlaskForm):
     """
     Represents a forgotten password form.
