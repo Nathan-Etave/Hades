@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center flex-column" style="margin-top: 30vh;">
+    <form class="d-flex flex-column mb-3" method="POST" action="{{ url_for('home.home') }}">
+        {{ form.hidden_tag() }}
+        <div class="d-flex">
+            {{ form.search(class="form-control me-sm-2 mb-3", placeholder="Recherche") }}
+            <button type="submit" class="btn btn-secondary btn-sm my-2 my-sm-0">Rechercher</button>
+        </div>
+        <div class="d-flex">
+            <button type="button" class="btn btn-primary me-2" id="btn_and">ET</button>
+            <button type="button" class="btn btn-primary" id="btn_or">OU</button>
+        </div>
+    </form>
+</div>
+
+<button class="btn btn-primary position-fixed bottom-0 start-0 mb-3 ms-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#detail_offcanvas" aria-controls="detail_offcanvas">
+    Détail
+</button>  
+
+<div class="offcanvas offcanvas-start bg-light" tabindex="-1" id="detail_offcanvas" aria-labelledby="detail_offcanvasLabel">
+    <div class="offcanvas-header">
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <h5 class="mt-3">Ancienne recherches :</h5>
+      <div class="list-group mt-3">
+          {% for research in researches %}
+          <a href="#" class="list-group-item list-group-item-action">{{ research.datetime_Recherche.strftime("%Y-%m-%d %H:%M") }} : {{ research.champ_Recherche }}</a>
+          {% endfor %}
+      </div>
+      <h5 class="mt-3">Mes favoris :</h5>
+      <div class="list-group mt-3">
+          {% for favori in favorite_files %}
+          <div class="list-group-item list-group-item-action">
+            {{ favori.URI_Fichier }} 
+            <a href="#">
+                <i class="fa-regular fa-star fa-lg"></i>
+                <!-- Faire le JS pour les favoris en se basant sur ce que j'ai fait avant, utiliser https://fontawesome.com/search?q=favorite&o=r pour l'image -->
+            </a>
+          </div>
+          {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
