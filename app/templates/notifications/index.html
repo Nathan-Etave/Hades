@@ -43,9 +43,10 @@
 {% endblock %}
 
 {% block content %}
+<h1 class="text-center">Notifications</h1>
 <div class="d-flex align-items-start justify-content-center pt-5" style="height: 75vh; overflow: auto;">
     <div class="container">
-        <h1 class="text-center">Notifications</h1>
+        <div class="flash"></div>
         <div class="row row-cols-1 row-cols-md-2 g-4">
             {% for notification in notifications %}
                 <div class="col">
