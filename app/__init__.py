@@ -25,6 +25,7 @@ def create_app(config_class = Config):
     from app.api import bp as api_bp
     from app.notifications import bp as notifications_bp
     from app.login import bp as login_bp
+    from app.home import bp as home_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -40,5 +41,6 @@ def create_app(config_class = Config):
     app.register_blueprint(register_bp, url_prefix='/inscription')
     app.register_blueprint(notifications_bp, url_prefix='/notifications')
     app.register_blueprint(login_bp, url_prefix='/connexion')
+    app.register_blueprint(home_bp, url_prefix='/')
 
     return app
