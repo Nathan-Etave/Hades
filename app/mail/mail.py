@@ -49,3 +49,10 @@ def send_reactivation_rejection_email(email):
     recipients = email
     html_body = f'<p>Bonjour, la réactivation de votre compte a été refusée.</p>'
     send_email(subject, sender, recipients, html_body)
+
+def send_forgotten_password_email(email, new_password):
+    subject = 'Réinitialisation de votre mot de passe'
+    sender = f'NOM_DE_LA_PLATEFORME <{os.environ.get("MAIL_USERNAME")}>'
+    recipients = email
+    html_body = f'<p>Bonjour, votre mot de passe a été réinitialisé. \n Votre nouveau mot de passe est: {new_password}</p>'
+    send_email(subject, sender, recipients, html_body)
