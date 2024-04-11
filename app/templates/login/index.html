@@ -3,6 +3,8 @@
 {% block title %}Connexion{% endblock %}
 
 {% block head %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
@@ -22,6 +24,7 @@
                     {{ form.password.label(class="form-label") }}
                     {{ form.password(class="form-control") }}
                 </div>
+                <a href="#" class="text-muted" id="mdp_oublie" data-bs-toggle="modal" data-bs-target="#mdp_oublie_modal">Mot de passe oublié</a>
                 <div class="form-group text-center" style="margin-top: 3vh;">
                     <input type="submit" value="Connexion" class="btn btn-primary">
                 </div>
@@ -57,4 +60,35 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal" id="mdp_oublie_modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Mot de passe oublié</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <form method="POST" action="{{ url_for('login.login') }}">
+            {{ mdp_form.csrf_token }}
+            <div class="modal-body">
+                <div class="form-group">
+                    {{ mdp_form.email.label(class="form-label") }}
+                    {{ mdp_form.email(class="form-control") }}
+                </div>
+            </div>
+            <div class="modal-footer">
+              <div class="form-group text-center">
+                  <input type="submit" value="Valider" class="btn btn-primary">
+              </div>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  
 {% endblock %}
