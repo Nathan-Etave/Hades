@@ -12,7 +12,8 @@ class FICHIER(db.Model):
 
     id_Fichier = mapped_column(Integer, primary_key=True)
     id_Dossier = mapped_column(Integer)
-    URI_Fichier = mapped_column(String(255))
+    nom_Fichier = mapped_column(String(255))
+    extension_Fichier = mapped_column(String(255))
     
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
