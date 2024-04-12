@@ -1,4 +1,10 @@
 from threading import Lock
+from whoosh.fields import Schema, TEXT, STORED, KEYWORD, ID
+from whoosh.index import create_in, open_dir
+from whoosh.query import *
+from whoosh.analysis import StandardAnalyzer
+import os.path
+from flask import current_app
 from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
 from spacy.lang.fr.stop_words import STOP_WORDS as fr_stop
@@ -18,13 +24,28 @@ class SingletonMeta(type):
     """
     _instances = {}
     _lock = Lock()
-
+    
     def __call__(cls, *args, **kwargs):
         with cls._lock:
             if cls not in cls._instances:
                 instance = super().__call__(*args, **kwargs)
                 cls._instances[cls] = instance
         return cls._instances[cls]
+    
+
+class Whoosh(metaclass=SingletonMeta):
+    def __init__(self):
+        analyzer = StandardAnalyzer(stoplist=None)
+        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(stored=True, commas=True, scorable=True, analyzer=analyzer), id=STORED)
+        with current_app.app_context():
+            if not os.path.exists(f'{current_app.root_path}/storage/index') :
+                os.mkdir(f'{current_app.root_path}/storage/index')
+                create_in(f'{current_app.root_path}/storage/index', schema)
+            open_index = open_dir(f'{current_app.root_path}/storage/index')
+
+        self.writer = open_index.writer()
+        self.searcher = open_index.searcher()
+    
 
 class NLPProcessor(metaclass=SingletonMeta):
     def __init__(self, batch_size=100000):
