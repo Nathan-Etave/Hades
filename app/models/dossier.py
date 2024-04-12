@@ -13,6 +13,6 @@ class DOSSIER(db.Model):
     couleur_Dossier = mapped_column(String(255))
 
     ROLE: Mapped['ROLE'] = relationship('ROLE', secondary='A_ACCES', back_populates='DOSSIER_')
-    DOSSIER: Mapped['DOSSIER'] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, back_populates='DOSSIER_')
-    DOSSIER_: Mapped['DOSSIER'] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, back_populates='DOSSIER')
+    DOSSIER: Mapped[List['DOSSIER']] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, back_populates='DOSSIER_',uselist=True)
+    DOSSIER_: Mapped[List['DOSSIER']] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, back_populates='DOSSIER', uselist=True)
     FICHIER: Mapped[List['FICHIER']] = relationship('FICHIER', uselist=True, back_populates='DOSSIER_')

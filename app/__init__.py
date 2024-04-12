@@ -1,9 +1,9 @@
-from flask import Flask
+import os
+from flask import Flask, current_app
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from config import Config
 from app.extensions import db
-
 from app.models.a_acces import A_ACCES
 from app.models.a_recherche import A_RECHERCHE
 from app.models.a_tag import A_TAG
@@ -25,6 +25,7 @@ def create_app(config_class = Config):
     from app.api import bp as api_bp
     from app.notifications import bp as notifications_bp
     from app.login import bp as login_bp
+    from app.administration import bp as administration_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -32,6 +33,8 @@ def create_app(config_class = Config):
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        if not os.path.exists(f'{current_app.root_path}/storage'):
+            os.makedirs(f'{current_app.root_path}/storage')
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
@@ -40,5 +43,6 @@ def create_app(config_class = Config):
     app.register_blueprint(register_bp, url_prefix='/inscription')
     app.register_blueprint(notifications_bp, url_prefix='/notifications')
     app.register_blueprint(login_bp, url_prefix='/connexion')
+    app.register_blueprint(administration_bp, url_prefix='/administration')
 
     return app
