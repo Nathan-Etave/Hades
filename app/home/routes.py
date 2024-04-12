@@ -1,6 +1,6 @@
 from app.home import bp
 from flask_login import login_required, current_user
-from flask import render_template
+from flask import render_template, request, jsonify
 from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
@@ -15,9 +15,14 @@ def home():
     researches = get_user_researches(current_user.id_Utilisateur)
     form = SearchForm()
     if form.validate_on_submit():
-        print("Ok")
         add_research(current_user.id_Utilisateur, form.search.data)
     return render_template("home/index.html", is_authenticated=True, is_admin=current_user.id_Role == 1, favorite_files=favorite_files, researches=researches, form=form)
+
+@bp.route('/favori/<int:id_file>', methods=['DELETE'])
+@login_required
+def unfavorize(id_file):
+    unfavorite_file(id_file, current_user.get_id())
+    return jsonify({'status': 'ok'})
 
 
 def get_files_favoris(user_id):
@@ -56,4 +61,16 @@ def add_research(user_id, search):
     """
     research = A_RECHERCHE(id_Utilisateur=user_id, champ_Recherche=search, datetime_Recherche=datetime.now())
     db.session.add(research)
+    db.session.commit()
+
+def unfavorite_file(file_id, user_id):
+    """
+    Remove a file from the favorites of a user.
+
+    Args:
+        file_id (int): The ID of the file.
+        user_id (int): The ID of the user.
+    """
+    print(file_id, user_id)
+    db.session.query(FAVORIS).filter(FAVORIS.c.id_Fichier == file_id, FAVORIS.c.id_Utilisateur == user_id).delete()
     db.session.commit()
