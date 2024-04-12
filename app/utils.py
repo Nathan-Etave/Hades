@@ -45,6 +45,16 @@ class Whoosh(metaclass=SingletonMeta):
 
         self.writer = open_index.writer()
         self.searcher = open_index.searcher()
+
+    def add_document(self, title, content, path, tags, id):
+        self.writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
+        self.writer.commit()
+
+    def search(self, query, path):
+        or_conditions = query.split("|")
+        conditions = [condition.split('&') for condition in or_conditions]
+        subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", ""))]) for condition in condition_list]) for condition_list in conditions])])
+        return self.searcher.search(subquery)
     
 
 class NLPProcessor(metaclass=SingletonMeta):
