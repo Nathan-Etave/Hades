@@ -8,6 +8,7 @@ from app.decorators import admin_required
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.fichier import FICHIER
+from app.utils import Whoosh, NLPProcessor, FileReader
 
 @bp.route("/")
 @login_required
@@ -32,6 +33,8 @@ def upload():
     db.session.add(file)
     db.session.commit()
     file_path = os.path.join(storage_directory, folder_id, f'{file.id_Fichier}.{file.extension_Fichier}')
-    with open(file_path, "wb") as file:
-        file.write(b64decode(file_data.split(",")[1]))
+    with open(file_path, "wb") as new_file:
+        new_file.write(b64decode(file_data.split(",")[1]))
+        print(file_path)
+    print(FileReader().read(file_path, file.extension_Fichier))
     return Response(status=200)
