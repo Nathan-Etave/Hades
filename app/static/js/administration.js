@@ -43,4 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
             event.target.value = '';
         });
     });
+    window.onbeforeunload = function() {
+        return '';
+     };
 });
