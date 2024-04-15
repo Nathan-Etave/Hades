@@ -1,6 +1,7 @@
 import os
 from base64 import b64decode
 from app.administration import bp
+from unidecode import unidecode
 from flask import render_template, request, current_app, Response, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_login import login_required
@@ -25,7 +26,7 @@ def upload():
     json = request.get_json()
     folder_id = json.get("folderId")
     file_data = json.get("data")
-    filename = secure_filename(json.get("filename"))
+    filename = unidecode(secure_filename(json.get("filename"))).lower()
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -35,6 +36,7 @@ def upload():
     file_path = os.path.join(storage_directory, folder_id, f'{file.id_Fichier}.{file.extension_Fichier}')
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-        print(file_path)
-    print(FileReader().read(file_path, file.extension_Fichier))
+    file_text = FileReader().read(file_path, file.extension_Fichier)
+    file_tags = ' '.join(NLPProcessor().tokenize(file_text))
+    Whoosh().add_document(filename, file_text, f'{folder_id}', file_tags, file.id_Fichier)
     return Response(status=200)

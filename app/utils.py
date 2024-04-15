@@ -22,6 +22,7 @@ from xlrd import open_workbook
 from pptx import Presentation
 from pdf2image import convert_from_path
 import os
+from chardet import detect
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -46,25 +47,27 @@ class SingletonMeta(type):
 class Whoosh(metaclass=SingletonMeta):
     def __init__(self):
         analyzer = StandardAnalyzer(stoplist=None)
-        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(stored=True, commas=True, scorable=True, analyzer=analyzer), id=STORED)
+        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=STORED)
         with current_app.app_context():
             if not os.path.exists(f'{current_app.root_path}/storage/index') :
                 os.mkdir(f'{current_app.root_path}/storage/index')
                 create_in(f'{current_app.root_path}/storage/index', schema)
-            open_index = open_dir(f'{current_app.root_path}/storage/index')
-
-        self.writer = open_index.writer()
-        self.searcher = open_index.searcher()
+            self.open_index = open_dir(f'{current_app.root_path}/storage/index')
 
     def add_document(self, title, content, path, tags, id):
-        self.writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
-        self.writer.commit()
+        writer = self.open_index.writer()
+        try:
+            writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
+        finally:
+            writer.commit()
 
     def search(self, query, path):
         or_conditions = query.split("|")
         conditions = [condition.split('&') for condition in or_conditions]
         subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", ""))]) for condition in condition_list]) for condition_list in conditions])])
-        return self.searcher.search(subquery)
+        with self.open_index.searcher() as searcher:
+            results = searcher.search(subquery)
+        return results
 
 
 class NLPProcessor(metaclass=SingletonMeta):
@@ -82,9 +85,9 @@ class NLPProcessor(metaclass=SingletonMeta):
 
     def clean(self, text):
         return [
-            unidecode(token.text)
+            unidecode(token.text).lower()
             for token in self.tokenizer_nlp(text)
-            if not unidecode(token.text) in self.stop_words
+            if not unidecode(token.text).lower() in self.stop_words
             and len(token) >= 3
             and not token.is_stop
             and not token.is_punct
@@ -177,14 +180,15 @@ class FileReader(metaclass=SingletonMeta):
         for page in file:
             text += page.get_text()
             text.replace("\n", " ")
-        if text == "":
+        cleaned_text = ''.join([i for i in text if i.isprintable() and not i.isspace()])
+        if cleaned_text == "":
             images = convert_from_path(file_path)
             for image in images:
                 text += pytesseract.image_to_string(image, lang="fra")
         return text
 
     def read_txt(self, file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(file_path, "r", encoding=detect(open(file_path, "rb").read())["encoding"]) as file:
             return file.read()
 
     def read_xlsx(self, file_path):
