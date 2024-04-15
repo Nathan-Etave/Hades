@@ -7,6 +7,7 @@ from app.models.fichier import FICHIER
 from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
+from app.utils import Whoosh
 
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
