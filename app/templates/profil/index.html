@@ -13,6 +13,7 @@
 {% block content %}
 <section>
     <div class="d-flex justify-content-center align-items-center flex-column mt-5">
+        {% if not edit_mode %}
         <div class="card border-secondary mb-3" style="width: 65vw;" id="profil">
             <div class="card-header d-flex justify-content-center align-items-center flex-column">
                 <h1>Mon compte</h1>
@@ -30,12 +31,14 @@
                 </button>
             </div>
         </div>
-        <div class="card border-secondary mb-3 d-none" style="width: 65vw;" id="profil_edit">
+        {% endif %}
+        {% if edit_mode %}
+        <div class="card border-secondary mb-3" style="width: 65vw;" id="profil_edit">
             <div class="card-header d-flex justify-content-center align-items-center flex-column">
                 <h1>Mon compte</h1>
             </div>
             <div class="card-body info">
-                <form method="POST" action="{{ url_for('profil.profil') }}">
+                <form method="POST" action="{{ url_for('profil.edit') }}">
                     {{ form.csrf_token }}
                     <div>
                         {{ form.first_name.label(class="form-label") }}
@@ -63,6 +66,7 @@
                 </form>
             </div>
         </div>
+        {% endif %}
     </div>
 </section>
 
