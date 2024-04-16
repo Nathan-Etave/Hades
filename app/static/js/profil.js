@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 let profilEdit = document.getElementById("profil_edit");
                 profil.classList.add("d-none");
                 profilEdit.classList.remove("d-none");
+                
+                let closeBtn = document.getElementById("close");
+                closeBtn.click();
             }
             else {
                 let alertMdp = document.getElementById("alert_mdp");
