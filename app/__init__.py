@@ -4,8 +4,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from config import Config
-from rq import Queue
-from redis import Redis
+from celery import Celery
 from app.extensions import db
 from app.models.a_acces import A_ACCES
 from app.models.a_recherche import A_RECHERCHE
@@ -23,7 +22,7 @@ from app.models.utilisateur import UTILISATEUR
 crsf = CSRFProtect()
 login_manager = LoginManager()
 socketio = SocketIO()
-rq = Queue(connection=Redis())
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND, include=['app.tasks'])
 
 def create_app(config_class = Config):
     from app.register import bp as register_bp
@@ -47,8 +46,7 @@ def create_app(config_class = Config):
 
     socketio.init_app(app)
 
-    if rq.connection.get("total_files_processed") is None:
-        rq.connection.set("total_files_processed", 0)
+    celery.conf.update(app.config)
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')

@@ -161,3 +161,4 @@ cython_debug/
 
 app.db
 storage/
+whoosh.lock
