@@ -61,10 +61,10 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
-    def search(self, query, path):
+    def search(self, query, path=None):
         or_conditions = query.split("|")
         conditions = [condition.split('&') for condition in or_conditions]
-        subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", ""))]) for condition in condition_list]) for condition_list in conditions])])
+        subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Term("title", condition.strip().replace(" ", ""))]) for condition in condition_list]) for condition_list in conditions])])
         with self.open_index.searcher() as searcher:
             results = searcher.search(subquery)
         return results

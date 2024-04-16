@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profil.css') }}">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/profil.js') }}"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block content %}
+<section>
+    <div class="d-flex justify-content-center align-items-center flex-column mt-5">
+        {% if not edit_mode %}
+        <div class="card border-secondary mb-3" style="width: 65vw;" id="profil">
+            <div class="card-header d-flex justify-content-center align-items-center flex-column">
+                <h1>Mon compte</h1>
+            </div>
+            <div class="card-body info">
+              <p><span>Nom :</span> {{ user.nom_Utilisateur }}</p>
+              <p><span>Prénom :</span> {{ user.prenom_Utilisateur }}</p>
+              <p><span>Email :</span> {{ user.email_Utilisateur }}</p>
+              <p><span>Téléphone :</span> {{ user.telephone_Utilisateur }}</p>
+              <p><span>Mot de passe :</span> **********</p>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#verif_modal">
+                    Modifier mon profil
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        {% if edit_mode %}
+        <div class="card border-secondary mb-3" style="width: 65vw;" id="profil_edit">
+            <div class="card-header d-flex justify-content-center align-items-center flex-column">
+                <h1>Mon compte</h1>
+            </div>
+            <div class="card-body info">
+                <form method="POST" action="{{ url_for('profil.edit') }}">
+                    {{ form.csrf_token }}
+                    <div>
+                        {{ form.first_name.label(class="form-label") }}
+                        {{ form.first_name(class="form-control") }}
+                    </div>
+                    <div>
+                        {{ form.last_name.label(class="form-label") }}
+                        {{ form.last_name(class="form-control") }}
+                    </div>
+                    <div>
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                    </div>
+                    <div>
+                        {{ form.telephone.label(class="form-label") }}
+                        {{ form.telephone(class="form-control") }}
+                    </div>
+                    <div>
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                    </div>
+                    <div class="form-group text-center mt-3">
+                        <input type="submit" value="Valider la modification" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<div class="modal" id="verif_modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Verification du mot de passe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <input type="password" class="form-control form-control-lg" name="verif_password" id="verif_password" placeholder="Mot de passe">
+        </div>
+        <div class="modal-footer justify-content-center">
+            <div class="col-12 d-flex justify-content-center d-none" id="alert_mdp">
+              <div class="card text-white bg-danger mb-3" style="max-width: 20rem;">
+                <div class="card-header">Mot de passe incorrect</div>
+              </div>
+            </div>
+            <div class="col-12 d-flex justify-content-center">
+              <button type="button" class="btn btn-primary" id="btn_verif">Valider</button>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

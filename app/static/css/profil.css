@@ -1,0 +1,12 @@
+.info span {
+    font-weight: bold;
+}
+
+.info p {
+    font-size: x-large;
+    margin-bottom: 3rem;
+}
+
+.display_none {
+    display: none;
+}
