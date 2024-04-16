@@ -57,7 +57,7 @@
                         {{ form.password.label(class="form-label") }}
                         {{ form.password(class="form-control") }}
                     </div>
-                    <div class="form-group text-center">
+                    <div class="form-group text-center mt-3">
                         <input type="submit" value="Valider la modification" class="btn btn-primary">
                     </div>
                 </form>
@@ -71,12 +71,12 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Verification du mot de passe</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close">
             <span aria-hidden="true"></span>
           </button>
         </div>
         <div class="modal-body">
-            <input type="text" class="form-control form-control-lg" name="verif_password" id="verif_password" placeholder="Mot de passe">
+            <input type="password" class="form-control form-control-lg" name="verif_password" id="verif_password" placeholder="Mot de passe">
         </div>
         <div class="modal-footer justify-content-center">
             <div class="col-12 d-flex justify-content-center d-none" id="alert_mdp">
@@ -84,7 +84,6 @@
                 <div class="card-header">Mot de passe incorrect</div>
               </div>
             </div>
-          
             <div class="col-12 d-flex justify-content-center">
               <button type="button" class="btn btn-primary" id="btn_verif">Valider</button>
             </div>
