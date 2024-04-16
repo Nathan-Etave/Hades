@@ -1,5 +1,5 @@
 """Routes for the profil blueprint."""
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, url_for, redirect
 from flask_login import login_required, current_user
 from app.profil import bp
 from app.extensions import db
@@ -15,21 +15,40 @@ def profil():
     Returns:
         render_template: The profile page.
     """
+    return render_template('profil/index.html', is_authenticated=True, is_admin=current_user.id_Role == 1, user=current_user, edit_mode=False)
+
+@bp.route('/edit', methods=['GET','POST'])
+@login_required
+def edit():
+    """
+    Edit the user profile.
+
+    Returns:
+        If the form is valid, redirects to the user's profile page.
+        Otherwise, renders the profile edit page with the form and user data.
+    """
     form = Edit_profil_form()
     if form.validate_on_submit():
         edit_user(current_user.id_Utilisateur, form.last_name.data, form.first_name.data, form.email.data, form.telephone.data, form.password.data)
+        return redirect(url_for('profil.profil'))
     else :
         form.last_name.data = current_user.nom_Utilisateur
         form.first_name.data = current_user.prenom_Utilisateur
         form.email.data = current_user.email_Utilisateur
         form.telephone.data = current_user.telephone_Utilisateur
-    return render_template('profil/index.html', is_authenticated=True, is_admin=current_user.id_Role == 1, user=current_user, form=form)
+    return render_template('profil/index.html', is_authenticated=True, is_admin=current_user.id_Role == 1, user=current_user, form=form, edit_mode=True)
 
 @bp.route('/verification', methods=['POST'])
 @login_required
-def verification() :
+def verification():
+    """
+    Verify the password provided by the user.
+
+    Returns:
+        A JSON response containing the result of the password verification.
+    """
     password = request.json.get("password")
-    return jsonify({'verif' : check_password_hash(current_user.mdp_Utilisateur, password)})
+    return jsonify({'verif': check_password_hash(current_user.mdp_Utilisateur, password)})
 
 
 def edit_user(id, last_name, first_name, email, telephone, password):
