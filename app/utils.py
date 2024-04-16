@@ -87,7 +87,7 @@ class NLPProcessor(metaclass=SingletonMeta):
         return [
             unidecode(token.text).lower()
             for token in self.tokenizer_nlp(text)
-            if not unidecode(token.text).lower() in self.stop_words
+            if unidecode(token.text).lower() not in self.stop_words
             and len(token) >= 3
             and not token.is_stop
             and not token.is_punct
