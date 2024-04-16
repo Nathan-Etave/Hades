@@ -16,7 +16,7 @@ class UTILISATEUR(db.Model, UserMixin):
     prenom_Utilisateur = mapped_column(String(255))
     email_Utilisateur = mapped_column(String(255))
     mdp_Utilisateur = mapped_column(String(255))
-    telephone_Utilisateur = mapped_column(Integer)
+    telephone_Utilisateur = mapped_column(String(255))
     est_Actif_Utilisateur = mapped_column(Integer)
     id_Role = mapped_column(Integer)
 
