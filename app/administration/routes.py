@@ -1,13 +1,16 @@
 import os
 from base64 import b64decode
 from app.administration import bp
-from flask import render_template, request, current_app, Response, send_from_directory
+from app.tasks import process_file
+from unidecode import unidecode
+from flask import render_template, request, current_app, Response
 from werkzeug.utils import secure_filename
 from flask_login import login_required
 from app.decorators import admin_required
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.fichier import FICHIER
+from app.utils import Whoosh, NLPProcessor, FileReader
 
 @bp.route("/")
 @login_required
@@ -24,7 +27,7 @@ def upload():
     json = request.get_json()
     folder_id = json.get("folderId")
     file_data = json.get("data")
-    filename = secure_filename(json.get("filename"))
+    filename = unidecode(secure_filename(json.get("filename"))).lower()
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -32,6 +35,7 @@ def upload():
     db.session.add(file)
     db.session.commit()
     file_path = os.path.join(storage_directory, folder_id, f'{file.id_Fichier}.{file.extension_Fichier}')
-    with open(file_path, "wb") as file:
-        file.write(b64decode(file_data.split(",")[1]))
+    with open(file_path, "wb") as new_file:
+        new_file.write(b64decode(file_data.split(",")[1]))
+    process_file.apply_async(args=[file_path, filename, folder_id, file.id_Fichier])
     return Response(status=200)

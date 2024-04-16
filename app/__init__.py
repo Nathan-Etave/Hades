@@ -2,7 +2,9 @@ import os
 from flask import Flask, current_app
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 from config import Config
+from celery import Celery
 from app.extensions import db
 from app.models.a_acces import A_ACCES
 from app.models.a_recherche import A_RECHERCHE
@@ -19,6 +21,8 @@ from app.models.utilisateur import UTILISATEUR
 
 crsf = CSRFProtect()
 login_manager = LoginManager()
+socketio = SocketIO()
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND, include=['app.tasks'])
 
 def create_app(config_class = Config):
     from app.register import bp as register_bp
@@ -40,6 +44,10 @@ def create_app(config_class = Config):
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
+
+    socketio.init_app(app)
+
+    celery.conf.update(app.config)
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')
