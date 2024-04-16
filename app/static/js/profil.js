@@ -20,13 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => {
             console.log(response.verif)
             if (response.verif) {
-                let profil = document.getElementById("profil");
-                let profilEdit = document.getElementById("profil_edit");
-                profil.classList.add("d-none");
-                profilEdit.classList.remove("d-none");
-                
-                let closeBtn = document.getElementById("close");
-                closeBtn.click();
+                window.location.href = "edit";
             }
             else {
                 let alertMdp = document.getElementById("alert_mdp");
