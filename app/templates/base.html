@@ -12,7 +12,7 @@
 
 <body>
     <header>
-        <a href="#">
+        <a href="{{ url_for('home.home') }}">
             <div class="logo_container">
                 <svg xmlns="http://www.w3.org/2000/svg" width="195.928" height="101.436" viewBox="0 0 195.928 101.436"
                     class="svg_text">
@@ -31,7 +31,7 @@
                     <a href="#">MultiVue</a>
                 </li>
                 <li>
-                    <a href="#">Profil</a>
+                    <a href="{{ url_for('profil.profil') }}">Profil</a>
                 </li>
                 {% if is_admin %}
                 <li>
