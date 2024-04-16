@@ -37,4 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    let search_tiles = document.querySelectorAll(".search_term");
+    let search_btn = document.getElementById("search_btn");
+    search_tiles.forEach(function(tile) {
+        tile.addEventListener('click', function() {
+            search_bar.value = tile.getAttribute("query");
+            search_btn.click();
+        });
+    });
 });
