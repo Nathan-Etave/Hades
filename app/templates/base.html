@@ -35,7 +35,7 @@
                 </li>
                 {% if is_admin %}
                 <li>
-                    <a href="#">Admin</a>
+                    <a href="{{ url_for('administration.administration') }}">Admin</a>
                 </li>
                 {% endif %}
                 {% else %}
