@@ -61,8 +61,13 @@ def add_research(user_id, search):
         user_id (int): The ID of the user.
         search (str): The search query.
     """
-    research = A_RECHERCHE(id_Utilisateur=user_id, champ_Recherche=search, datetime_Recherche=datetime.now())
-    db.session.add(research)
+    research = A_RECHERCHE.query.filter_by(id_Utilisateur=user_id, champ_Recherche=search).first()
+    if research:
+        research.datetime_Recherche = datetime.now()
+    else:
+        research = A_RECHERCHE(id_Utilisateur=user_id, champ_Recherche=search, datetime_Recherche=datetime.now())
+        db.session.add(research)
+    db.session.commit()
     db.session.commit()
 
 def unfavorite_file(file_id, user_id):
