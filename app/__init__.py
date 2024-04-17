@@ -95,7 +95,6 @@ def fill_db():
         db.session.commit()
 
     if not DOSSIER.query.all():
-        db.session.add(DOSSIER(nom_Dossier="Racine", priorite_Dossier=1, couleur_Dossier="#ffffcc"))
         db.session.add(DOSSIER(nom_Dossier="Décret / Circulaire", priorite_Dossier=1, couleur_Dossier="#ffffcc"))
         db.session.add(DOSSIER(nom_Dossier="GDO / GTO", priorite_Dossier=2, couleur_Dossier="#ffcc99"))
         db.session.add(DOSSIER(nom_Dossier="DTO / NDS", priorite_Dossier=3, couleur_Dossier="#ffcccc"))
@@ -108,5 +107,6 @@ def fill_db():
         db.session.commit()
 
     if not UTILISATEUR.query.all():
-        db.session.add(UTILISATEUR(nom_Utilisateur="admin", prenom_Utilisateur="admin", email_Utilisateur="admin@admin.fr", password_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", est_Actif=True, id_Role=1))
+        db.session.add(UTILISATEUR(nom_Utilisateur="admin", prenom_Utilisateur="admin", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", est_Actif_Utilisateur=True, id_Role=1))
+        # password: O]SxR=rBv%
         db.session.commit()
