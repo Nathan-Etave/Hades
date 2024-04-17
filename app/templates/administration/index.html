@@ -79,7 +79,40 @@
 <div class="container-fluid pt-5" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <p class="mb-1">Fichiers en cours de traitement sur le serveur : <span id="currentFile"></span>
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h5 class="mb-0">Worker #1</h5>
+                            <table class="table table-striped" id="workerStatusTable1">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Fichiers en cours de traitement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <td>En attente</td>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-4">
+                            <h5 class="mb-0">Worker #2</h5>
+                            <table class="table table-striped" id="workerStatusTable2">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Fichiers en cours de traitement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <td>En attente</td>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col d-flex flex-column justify-content-evenly">
+                            <p class="mb-0">Suivant : <span id="nextFile">Aucun fichier en attente</span></p>
+                            <p class="mb-0">Traités : <span id="totalFilesProcessed">0</span>/<span id="totalFiles">0</span></p>
+                        </div>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center">
                     <p class="mb-1 text-muted flex-shrink-0 me-3">Progression du téléversement :</p>
                     <div class="progress text-center flex-grow-1">
