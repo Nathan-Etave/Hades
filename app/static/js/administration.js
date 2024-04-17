@@ -43,7 +43,45 @@ document.addEventListener('DOMContentLoaded', function () {
             event.target.value = '';
         });
     });
-    window.onbeforeunload = function() {
+    window.onbeforeunload = function () {
         return '';
-     };
+    };
+    const socket = io.connect('/administration');
+
+    socket.on('worker_status', function (data) {
+        const workers = [
+            document.querySelector('#workerStatusTable1 tbody'),
+            document.querySelector('#workerStatusTable2 tbody')
+        ];
+        const nextFile = document.querySelector('#nextFile');
+
+        for (let worker of workers) {
+            if (worker.dataset.worker == data.worker) {
+                worker.innerHTML = `
+            <tr>
+                <td>${data.status == 'processing' ? data.file : 'En attente'}</td>
+            </tr>
+            `;
+            }
+            else if (worker.dataset.worker == undefined) {
+                worker.dataset.worker = data.worker;
+                worker.innerHTML = `
+            <tr>
+                <td>${data.status == 'processing' ? data.file : 'En attente'}</td>
+            </tr>
+            `;
+                break;
+            }
+        }
+
+        nextFile.innerHTML = data.next_file == null ? 'Aucun fichier en attente' : JSON.parse(data.next_file).filename;
+    });
+
+    socket.on('total_files', function (data) {
+        document.querySelector('#totalFiles').innerHTML = data;
+    });
+
+    socket.on('total_files_processed', function (data) {
+        document.querySelector('#totalFilesProcessed').innerHTML = data;
+    });
 });
