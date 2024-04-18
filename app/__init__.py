@@ -35,6 +35,7 @@ def create_app(config_class = Config):
     from app.home import bp as home_bp
     from app.administration import bp as administration_bp
     from app.profil import bp as profil_bp
+    from app.search import bp as search_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -83,6 +84,7 @@ def create_app(config_class = Config):
     app.register_blueprint(home_bp, url_prefix='/')
     app.register_blueprint(administration_bp, url_prefix='/administration')
     app.register_blueprint(profil_bp, url_prefix='/profil')
+    app.register_blueprint(search_bp, url_prefix='/recherche')
 
     return app
 
