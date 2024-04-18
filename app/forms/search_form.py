@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 
+
 class SearchForm(FlaskForm):
     """
     Represents a search form.
@@ -9,5 +10,6 @@ class SearchForm(FlaskForm):
         search (StringField): The search input field.
         submit (SubmitField): The submit button for the form.
     """
-    search = StringField('Recherche')
-    submit = SubmitField('Rechercher')
+
+    search = StringField("Recherche")
+    submit = SubmitField("Rechercher")
