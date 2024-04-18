@@ -84,4 +84,50 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('total_files_processed', function (data) {
         document.querySelector('#totalFilesProcessed').innerHTML = data;
     });
+
+    const trashBtn = document.querySelectorAll('#trash-btn');
+    trashBtn.forEach((btn) => {
+        btn.addEventListener('click', async function (event) {
+            let fileId = event.target.dataset.file;
+            let folderId = event.target.dataset.folder
+            socket.emit('trash_file', { fileId: fileId, folderId: folderId });
+        });
+    });
+
+    socket.on('file_deleted', function (data) {
+        let file = document.querySelector(`#file-${data.fileId}`);
+        file.remove();
+    });
+    
+    socket.on('file_deletion_failed', function (data) {
+        alert('La suppression du fichier a échoué');
+    });
+
+    const folders = document.querySelectorAll('#folder');
+    const searchBars = [];
+    const intialFiles = {};
+    folders.forEach((folder) => {
+        searchBars.push(folder.querySelector('#fileSearch'));
+        intialFiles[folder.dataset.folder] = folder.querySelector(`#filesAccordion${folder.dataset.folder}`).children;
+    });
+    searchBars.forEach((searchBar) => {
+        searchBar.addEventListener('input', function (event) {
+            if (event.target.value === '') {
+                Array.from(intialFiles[event.target.dataset.folder]).forEach((file) => {
+                    file.style.display = 'block';
+                });
+            }
+            else {
+                Array.from(intialFiles[event.target.dataset.folder]).forEach((file) => {
+                    file.style.display = 'none';
+                });
+                socket.emit('search_files', { folderId: event.target.dataset.folder, query: event.target.value });
+            }
+        });
+    });
+    socket.on('search_results', function (data) {
+        data.forEach((file) => {
+            document.querySelector(`#file-${file.id}`).style.display = 'block';
+        });
+    });
 });
