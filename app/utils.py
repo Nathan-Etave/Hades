@@ -12,7 +12,6 @@ from spacy.lang.en.stop_words import STOP_WORDS as en_stop
 from spacy.util import compile_infix_regex
 from spacy import load
 from unidecode import unidecode
-from flask import current_app
 from pandas import read_excel, read_csv
 from docx import Document
 from PIL import Image, UnidentifiedImageError
@@ -23,6 +22,9 @@ from pptx import Presentation
 from pdf2image import convert_from_path
 import os
 from chardet import detect
+from app.extensions import db
+from flask_login import current_user
+from app.models.favoris import FAVORIS
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -64,6 +66,8 @@ class Whoosh(metaclass=SingletonMeta):
     def search(self, query, path=None):
         or_conditions = query.split("|")
         conditions = [condition.split('&') for condition in or_conditions]
+        favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
+        favoris_ids = [favori.id_Fichier for favori in favoris]
         if path is not None:
             subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Wildcard("title", "*"+condition.strip().replace(" ", "")+"*")]) for condition in condition_list]) for condition_list in conditions])])
         else:
@@ -72,7 +76,12 @@ class Whoosh(metaclass=SingletonMeta):
             results = searcher.search(subquery, limit=None)
             results_list = []
             for result in results:
-                results_list.append(result.fields())
+                result_field = result.fields()
+                if result_field['id'] in favoris_ids:
+                    result_field['favori'] = True
+                else :
+                    result_field['favori'] = False
+                results_list.append(result_field)
         return results_list
 
 

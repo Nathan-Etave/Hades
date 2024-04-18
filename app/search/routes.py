@@ -1,8 +1,9 @@
 from app.search import bp
 from flask_login import login_required, current_user
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from app.extensions import db
 from app.models.dossier import DOSSIER
+from app.models.favoris import FAVORIS
 from app.utils import Whoosh
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -13,6 +14,16 @@ def search():
     results = whoosh.search(query)
     results = create_rendered_list(results)
     return render_template("search/index.html", is_authenticated=True, is_admin=current_user.id_Role == 1, folders=results, query=query)
+
+@bp.route('/favori/<int:id_file>', methods=['POST', 'DELETE'])
+@login_required
+def favorize(id_file):
+    if request.method == 'POST' :
+        db.session.execute(FAVORIS.insert().values(id_Fichier=id_file, id_Utilisateur=current_user.id_Utilisateur))
+    else :
+        db.session.query(FAVORIS).filter(FAVORIS.c.id_Fichier == id_file, FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).delete()
+    db.session.commit()
+    return jsonify({'status': 'ok'})
 
 def create_rendered_list(results):
     folders = db.session.query(DOSSIER).order_by(DOSSIER.priorite_Dossier).all()
