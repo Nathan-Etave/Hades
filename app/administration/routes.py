@@ -12,7 +12,8 @@ from app.decorators import admin_required
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.fichier import FICHIER
-from app.utils import Whoosh, NLPProcessor, FileReader
+from app.utils import Whoosh
+from fasteners import InterProcessLock
 
 @bp.route("/")
 @login_required
@@ -51,9 +52,30 @@ def upload():
 @socketio.on('connect', namespace='/administration')
 def connect():
     workers = redis.keys('worker:*') if len(redis.keys('worker:*')) > 0 else []
-    #socketio.emit('worker_status', [[json.loads(item.decode('utf-8')) for item in redis.lrange(worker.decode('utf-8'), 0, -1)] for worker in workers], namespace='/administration')
     for worker in workers:
         socketio.emit('worker_status', json.loads(redis.get(worker).decode('utf-8')), namespace='/administration')
     
     socketio.emit('total_files', redis.get('total_files').decode('utf-8'), namespace='/administration')
     socketio.emit('total_files_processed', redis.get('total_files_processed').decode('utf-8'), namespace='/administration')
+
+@socketio.on('trash_file', namespace='/administration')
+def trash_file(data):
+    try:
+        file_id = data.get('fileId')
+        folder_id = data.get('folderId')
+        with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
+            Whoosh().delete_document(file_id)
+        file = FICHIER.query.get(file_id)
+        db.session.delete(file)
+        os.remove(os.path.join(current_app.root_path, "storage", folder_id, f'{file_id}.{file.extension_Fichier}'))
+        db.session.commit()
+        socketio.emit('file_deleted', data, namespace='/administration')
+    except Exception as e:
+        socketio.emit('file_deletion_failed', {**data, 'error': str(e)}, namespace='/administration')
+
+@socketio.on('search_files', namespace='/administration')
+def search_files(data):
+    search_query = data.get('query')
+    with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
+        search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
+    socketio.emit('search_results', search_results, namespace='/administration')
