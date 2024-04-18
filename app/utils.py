@@ -22,6 +22,9 @@ from pptx import Presentation
 from pdf2image import convert_from_path
 import os
 from chardet import detect
+from app.extensions import db
+from flask_login import current_user
+from app.models.favoris import FAVORIS
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -70,10 +73,23 @@ class Whoosh(metaclass=SingletonMeta):
     def search(self, query, path=None):
         or_conditions = query.split("|")
         conditions = [condition.split('&') for condition in or_conditions]
-        subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Term("title", condition.strip().replace(" ", ""))]) for condition in condition_list]) for condition_list in conditions])])
+        favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
+        favoris_ids = [favori.id_Fichier for favori in favoris]
+        if path is not None:
+            subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Wildcard("title", "*"+condition.strip().replace(" ", "")+"*")]) for condition in condition_list]) for condition_list in conditions])])
+        else:
+            subquery = Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Wildcard("title", "*"+condition.strip().replace(" ", "")+"*")]) for condition in condition_list]) for condition_list in conditions])
         with self.open_index.searcher() as searcher:
-            results = searcher.search(subquery)
-        return results
+            results = searcher.search(subquery, limit=None)
+            results_list = []
+            for result in results:
+                result_field = result.fields()
+                if result_field['id'] in favoris_ids:
+                    result_field['favori'] = True
+                else :
+                    result_field['favori'] = False
+                results_list.append(result_field)
+        return results_list
 
 
 class NLPProcessor(metaclass=SingletonMeta):
