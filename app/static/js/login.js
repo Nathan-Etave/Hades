@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
     let reactivationButton = document.getElementById("btn_reactivation");
 
-    reactivationButton.addEventListener('click', function() {
+    reactivationButton.addEventListener('click', function () {
         let email_user = document.getElementById("email").value;
         let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         console.log(email_user);
@@ -17,26 +17,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRFToken': csrfToken
             }
         })
-        .then(response => response.json().then(data => ({status: response.status, body: data})))
-        .then(response => {
-            if (response.status === 200) {
-                alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.");
-                window.location.href = "/connexion";
-            }
-            if (response.status === 404) {
-                console.log(response.body.error);
-                if (response.body.error === "user not found") {
-                    alert("Aucun utilisateur n'est associé à cet email.");
+            .then(response => response.json().then(data => ({ status: response.status, body: data })))
+            .then(response => {
+                if (response.status === 200) {
+                    alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.");
+                    window.location.href = "/connexion";
                 }
-                else if (response.body.error === "user already have a notification") {
-                    alert("Vous avez déjà une demande de réactivation en cours.");
+                if (response.status === 404) {
+                    console.log(response.body.error);
+                    if (response.body.error === "user not found") {
+                        alert("Aucun utilisateur n'est associé à cet email.");
+                    }
+                    else if (response.body.error === "user already have a notification") {
+                        alert("Vous avez déjà une demande de réactivation en cours.");
+                    }
+                    else {
+                        alert("Une erreur est survenue.");
+                    }
+                    window.location.href = "/connexion";
                 }
-                else {
-                    alert("Une erreur est survenue.");
-                }
-                window.location.href = "/connexion";
-            }
-        })
+            })
     });
 
 });
