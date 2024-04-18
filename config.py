@@ -8,3 +8,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL') or 'redis://localhost:6379/0'
     RESULT_BACKEND = os.environ.get('RESULT_BACKEND') or 'redis://localhost:6379/0'
+    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://localhost:6379/0'
