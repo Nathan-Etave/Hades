@@ -12,7 +12,6 @@ from spacy.lang.en.stop_words import STOP_WORDS as en_stop
 from spacy.util import compile_infix_regex
 from spacy import load
 from unidecode import unidecode
-from flask import current_app
 from pandas import read_excel, read_csv
 from docx import Document
 from PIL import Image, UnidentifiedImageError
@@ -58,6 +57,13 @@ class Whoosh(metaclass=SingletonMeta):
         writer = self.open_index.writer()
         try:
             writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
+        finally:
+            writer.commit()
+
+    def delete_document(self, id):
+        writer = self.open_index.writer()
+        try:
+            writer.delete_by_term("id", id)
         finally:
             writer.commit()
 

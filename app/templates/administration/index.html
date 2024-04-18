@@ -11,7 +11,7 @@
     {% endblock %}
 
 {% macro render_folder(folder) %}
-    <div class="accordion-item" style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
+    <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item" style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
         <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ folder.id_Dossier }}" aria-expanded="false" aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};">
                 <div class="d-flex w-100 align-items-center justify-content-between">
@@ -31,6 +31,9 @@
                             <div>
                                 {{ folder.FICHIER|length }}
                             </div>
+                        </div>
+                        <div class="d-flex me-2" style="margin-left: 1rem;">
+                            <input data-folder="{{ folder.id_Dossier }}" type="text" id="fileSearch" placeholder="Rechercher dans le dossier"class="form-control" style="border-radius: 50px; padding: 5px 10px;">
                         </div>
                     </div>
                     <div class="me-2">
@@ -53,16 +56,21 @@
                         {{ render_folder(sub_folder) }}
                     {% endfor %}
                 </div>
-                <div class="accordion" id="fichierAccordion{{ folder.id_Dossier }}">
+                <div class="accordion" id="filesAccordion{{ folder.id_Dossier }}">
                     {% for file in folder.FICHIER %}
-                    <div class="card mt-1 mb-1" style="height: 5vh">
+                    <div class="card mt-1 mb-1" style="height: 5vh" id="file-{{ file.id_Fichier }}">
                         <div class="card-body">
-                            <div class="d-flex me-2">
-                                <div class="me-2">
-                                    <i class="fas fa-file"></i>
+                            <div class="d-flex me-2 w-100 justify-content-between">
+                                <div class="me-2 d-flex">
+                                    <div class="me-2">
+                                        <i class="fas fa-file"></i>
+                                    </div>
+                                    <div>
+                                        <p>{{ file.nom_Fichier }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p>{{ file.nom_Fichier }}</p>
+                                <div class="me-2">
+                                    <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
                                 </div>
                             </div>
                         </div>
@@ -79,14 +87,47 @@
 <div class="container-fluid pt-5" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <p class="mb-1">Fichiers en cours de traitement sur le serveur : <span id="currentFile"></span>
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h5 class="mb-0">Worker #1</h5>
+                            <table class="table table-striped" id="workerStatusTable1">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Fichiers en cours de traitement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <td>En attente</td>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-4">
+                            <h5 class="mb-0">Worker #2</h5>
+                            <table class="table table-striped" id="workerStatusTable2">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Fichiers en cours de traitement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <td>En attente</td>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col d-flex flex-column justify-content-evenly">
+                            <p class="mb-0">Suivant : <span id="nextFile">Aucun fichier en attente</span></p>
+                            <p class="mb-0">Traités : <span id="totalFilesProcessed">0</span>/<span id="totalFiles">0</span></p>
+                        </div>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center">
                     <p class="mb-1 text-muted flex-shrink-0 me-3">Progression du téléversement :</p>
                     <div class="progress text-center flex-grow-1">
                         <div class="progress-bar progress-bar-striped text-center" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-            <div class="accordion" id="folderAccordion">
+            <div class="accordion mb-5" id="folderAccordion">
                 {% for folder in folders %}
                     {{ render_folder(folder) }}
                 {% endfor %}
