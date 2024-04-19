@@ -13,4 +13,4 @@ def file(folder_id, file_id):
         return abort(404)
     if not any(current_user.id_Role == role.id_Role for role in file.DOSSIER_.ROLE):
         return abort(403)
-    return send_from_directory(f'{current_app.root_path}/storage/{folder_id}', f'{file.id_Fichier}.{file.extension_Fichier}', as_attachment=as_attachment)
+    return send_from_directory(f'{current_app.root_path}/storage/{folder_id}', f'{file.id_Fichier}.{file.extension_Fichier}', as_attachment=as_attachment, download_name=file.nom_Fichier)
