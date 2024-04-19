@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     let favs = document.querySelectorAll('.favori');
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    favs.forEach(function(fav) {
+    favs.forEach(function (fav) {
         let id = fav.id;
         let isFav = fav.getAttribute('is-fav');
-        let etoile = document.getElementById("fav-"+id);
+        let etoile = document.getElementById("fav-" + id);
         if (isFav === "True") {
             fav.className = "favori-true";
         }
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fav.className = "favori-false";
             etoile.className = "fa-regular fa-star fa-lg";
         }
-        fav.addEventListener('click', function(event) {
+        fav.addEventListener('click', function (event) {
             event.preventDefault();
             if (fav.className === "favori-true") {
                 fetch("favori/" + id, {
@@ -22,16 +22,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRFToken': csrfToken
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "ok"){
-                        fav.className = "favori-false";
-                        etoile.className = "fa-regular fa-star fa-lg";
-                    }
-                    else {
-                        alert("Erreur lors de la suppression du favori");
-                    }
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "ok") {
+                            fav.className = "favori-false";
+                            etoile.className = "fa-regular fa-star fa-lg";
+                        }
+                        else {
+                            alert("Erreur lors de la suppression du favori");
+                        }
+                    });
             }
             else {
                 fetch("favori/" + id, {
@@ -41,17 +41,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRFToken': csrfToken
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "ok"){
-                        fav.className = "favori-true";
-                        etoile.className = "fa-solid fa-star fa-lg";
-                    }
-                    else {
-                        alert("Erreur lors de l'ajout du favori");
-                    }
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "ok") {
+                            fav.className = "favori-true";
+                            etoile.className = "fa-solid fa-star fa-lg";
+                        }
+                        else {
+                            alert("Erreur lors de l'ajout du favori");
+                        }
+                    });
             }
         });
+    });
+
+    let btn_and = document.getElementById("btn_and");
+    let btn_or = document.getElementById("btn_or");
+    let search_bar = document.getElementById("search-bar");
+
+    btn_and.addEventListener('click', function () {
+        search_bar.value += " & ";
+    });
+
+    btn_or.addEventListener('click', function () {
+        search_bar.value += " | "
     });
 });
