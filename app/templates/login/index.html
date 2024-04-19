@@ -31,33 +31,33 @@
                 </div>
             </form>
             {% if form.email.errors %}
-            <div class="alert alert-dismissible alert-danger mt-4">
-                <strong>Erreur lors de la soumission du formulaire.</strong><br>
-                {% for error in form.email.errors %}
-                <a href="#email" class="alert-link">{{ error }}</a><br>
-                {% endfor %}
-            </div>
+                <div class="alert alert-dismissible alert-danger mt-4">
+                    <strong>Erreur lors de la soumission du formulaire.</strong><br>
+                    {% for error in form.email.errors %}
+                        <a href="#email" class="alert-link">{{ error }}</a><br>
+                    {% endfor %}
+                </div>
             {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            {% for category, message in messages %}
-            {% if category == 'info' %}
-            <div class="alert alert-{{ category }} alert-dismissible mt-4">
-                {{ message }}
-                <div class="d-flex justify-content-center mt-3">
-                    <input type="button" class="btn btn-secondary" value="Demander une réactivation"
-                        id="btn_reactivation">
-                </div>
-            </div>
-            {% else %}
-            {% if message != 'Please log in to access this page.' %}
-            <div class="alert alert-{{ category }} alert-dismissible mt-4">
-                {{ message }}
-            </div>
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            {% endif %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'info' %}
+                            <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                                {{ message }}
+                                <div class="d-flex justify-content-center mt-3">
+                                    <input type="button" class="btn btn-secondary" value="Demander une réactivation"
+                                        id="btn_reactivation">
+                                </div>
+                            </div>
+                        {% else %}
+                            {% if message != 'Please log in to access this page.' %}
+                                <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             {% endwith %}
         </div>
     </div>
