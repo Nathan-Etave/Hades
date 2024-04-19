@@ -24,18 +24,19 @@
                     {{ form.password.label(class="form-label") }}
                     {{ form.password(class="form-control") }}
                 </div>
-                <a href="#" class="text-muted" id="mdp_oublie" data-bs-toggle="modal" data-bs-target="#mdp_oublie_modal">Mot de passe oublié</a>
+                <a href="#" class="text-muted" id="mdp_oublie" data-bs-toggle="modal"
+                    data-bs-target="#mdp_oublie_modal">Mot de passe oublié</a>
                 <div class="form-group text-center" style="margin-top: 3vh;">
                     <input type="submit" value="Connexion" class="btn btn-primary">
                 </div>
             </form>
             {% if form.email.errors %}
-            <div class="alert alert-dismissible alert-danger mt-4">
-                <strong>Erreur lors de la soumission du formulaire.</strong><br>
-                {% for error in form.email.errors %}
-                <a href="#email" class="alert-link">{{ error }}</a><br>
-                {% endfor %}
-            </div>
+                <div class="alert alert-dismissible alert-danger mt-4">
+                    <strong>Erreur lors de la soumission du formulaire.</strong><br>
+                    {% for error in form.email.errors %}
+                        <a href="#email" class="alert-link">{{ error }}</a><br>
+                    {% endfor %}
+                </div>
             {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -44,7 +45,8 @@
                             <div class="alert alert-{{ category }} alert-dismissible mt-4">
                                 {{ message }}
                                 <div class="d-flex justify-content-center mt-3">
-                                    <input type="button" class="btn btn-secondary" value="Demander une réactivation" id="btn_reactivation">
+                                    <input type="button" class="btn btn-secondary" value="Demander une réactivation"
+                                        id="btn_reactivation">
                                 </div>
                             </div>
                         {% else %}
@@ -64,31 +66,31 @@
 
 <div class="modal" id="mdp_oublie_modal">
     <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Mot de passe oublié</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true"></span>
-          </button>
-        </div>
-        <form method="POST" action="{{ url_for('login.login') }}">
-            {{ mdp_form.csrf_token }}
-            <div class="modal-body">
-                <div class="form-group">
-                    {{ mdp_form.email.label(class="form-label") }}
-                    {{ mdp_form.email(class="form-control") }}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mot de passe oublié</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <form method="POST" action="{{ url_for('login.login') }}">
+                {{ mdp_form.csrf_token }}
+                <div class="modal-body">
+                    <div class="form-group">
+                        {{ mdp_form.email.label(class="form-label") }}
+                        {{ mdp_form.email(class="form-control") }}
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-              <div class="form-group text-center">
-                  <input type="submit" value="Valider" class="btn btn-primary">
-              </div>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </form>
-      </div>
+                <div class="modal-footer">
+                    <div class="form-group text-center">
+                        <input type="submit" value="Valider" class="btn btn-primary">
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
-  
-  
+</div>
+
+
 {% endblock %}
