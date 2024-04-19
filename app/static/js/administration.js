@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let file = document.querySelector(`#file-${data.fileId}`);
         file.remove();
     });
-    
+
     socket.on('file_deletion_failed', function (data) {
         alert('La suppression du fichier a échoué');
     });
@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchBars.push(folder.querySelector('#fileSearch'));
         intialFiles[folder.dataset.folder] = folder.querySelector(`#filesAccordion${folder.dataset.folder}`).children;
     });
+
     searchBars.forEach((searchBar) => {
         searchBar.addEventListener('input', function (event) {
             if (event.target.value === '') {
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
     socket.on('search_results', function (data) {
         data.forEach((file) => {
             document.querySelector(`#file-${file.id}`).style.display = 'block';
