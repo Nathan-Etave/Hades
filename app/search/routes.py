@@ -83,7 +83,6 @@ def create_folder_dict(folder, files):
         "subfolder": subfolders,
     }
 
-
 def create_rendered_list(results):
     """
     Create a rendered list of folders and their associated results.

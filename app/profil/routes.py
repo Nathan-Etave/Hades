@@ -1,6 +1,6 @@
 """Routes for the profil blueprint."""
 
-from flask import render_template, request, jsonify, url_for, redirect
+from flask import render_template, request, jsonify, url_for, redirect, abort
 from flask_login import login_required, current_user, logout_user
 from app.profil import bp
 from app.extensions import db
@@ -36,6 +36,9 @@ def edit():
         If the form is valid, redirects to the user's profile page.
         Otherwise, renders the profile edit page with the form and user data.
     """
+    if not request.referrer or 'profil' not in request.referrer:
+        return redirect(url_for("profil.profil"))
+
     form = Edit_profil_form()
     if form.validate_on_submit():
         edit_user(
