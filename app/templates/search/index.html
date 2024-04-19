@@ -48,29 +48,29 @@
         <div class="accordion-body">
             <div class="accordion" id="subfolderAccordion{{ folder.id }}">
                 {% for sub_folder in folder.subfolder %}
-                {{ render_folder(sub_folder) }}
+                    {{ render_folder(sub_folder) }}
                 {% endfor %}
             </div>
             <div class="accordion" id="fichierAccordion{{ folder.id }}">
                 {% for file in folder.files %}
-                <div class="card mt-1 mb-1" style="height: 5vh">
-                    <div class="card-body">
-                        <div class="d-flex me-2">
-                            <div class="me-2">
-                                <i class="fas fa-file"></i>
-                            </div>
-                            <div>
-                                <p>{{ file["title"] }}</p>
-                            </div>
-                            <div class="me-2 ms-auto">
-                                <a href="#" id="{{ file.id }}" class="favori" is-fav="{{ file.favori }}">
-                                    <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
-                                        id="fav-{{ file.id }}"></i>
-                                </a>
+                    <div class="card mt-1 mb-1" style="height: 5vh">
+                        <div class="card-body">
+                            <div class="d-flex me-2">
+                                <div class="me-2">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div>
+                                    <p>{{ file["title"] }}</p>
+                                </div>
+                                <div class="me-2 ms-auto">
+                                    <a href="#" id="{{ file.id }}" class="favori" is-fav="{{ file.favori }}">
+                                        <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
+                                            id="fav-{{ file.id }}"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
         </div>
@@ -97,7 +97,7 @@
         <div class="col-lg-8">
             <div class="accordion" id="folderAccordion">
                 {% for folder in folders %}
-                {{ render_folder(folder) }}
+                    {{ render_folder(folder) }}
                 {% endfor %}
             </div>
         </div>
