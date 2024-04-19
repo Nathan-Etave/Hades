@@ -71,14 +71,15 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def search(self, query, path=None):
-        or_conditions = query.split("|")
-        conditions = [condition.split('&') for condition in or_conditions]
+        or_conditions = [cond.strip().replace(" ", "") for cond in query.split("|")]
+        conditions = [[cond.strip().replace(" ", "") for cond in condition.split('&')] for condition in or_conditions]
         favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
         favoris_ids = [favori.id_Fichier for favori in favoris]
         if path is not None:
-            subquery = And([Term("path", path.strip().replace(" ", "")), Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Wildcard("title", "*"+condition.strip().replace(" ", "")+"*")]) for condition in condition_list]) for condition_list in conditions])])
+            path = path.strip().replace(" ", "")
+            subquery = And([Term("path", path), Or([And([Or([Term("content", condition), Term("tags", condition), Wildcard("title", "*"+condition+"*")]) for condition in condition_list]) for condition_list in conditions])])
         else:
-            subquery = Or([And([Or([Term("content", condition.strip().replace(" ", "")), Term("tags", condition.strip().replace(" ", "")), Wildcard("title", "*"+condition.strip().replace(" ", "")+"*")]) for condition in condition_list]) for condition_list in conditions])
+            subquery = Or([And([Or([Term("content", condition), Term("tags", condition), Wildcard("title", "*"+condition+"*")]) for condition in condition_list]) for condition_list in conditions])
         with self.open_index.searcher() as searcher:
             results = searcher.search(subquery, limit=None)
             results_list = []
@@ -177,7 +178,7 @@ class FileReader(metaclass=SingletonMeta):
 
     def read(self, file_path, extension):
         extension = extension.lower()
-        return self.readers.get(extension, lambda x: None)(file_path)
+        return self.readers.get(extension, lambda x: '')(file_path)
     
     def read_csv(self, file_path):
         if os.stat(file_path).st_size == 0:
