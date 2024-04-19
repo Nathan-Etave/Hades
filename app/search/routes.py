@@ -80,7 +80,7 @@ def create_folder_dict(folder, files):
         "files": files_in_folder,
         "color": folder.couleur_Dossier,
         "id": folder.id_Dossier,
-        "subfolder": subfolders,
+        "subfolder": subfolders
     }
 
 def create_rendered_list(results):

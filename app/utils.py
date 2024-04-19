@@ -71,20 +71,22 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def search(self, query, path=None):
-        or_conditions = [cond.strip().replace(" ", "") for cond in query.split("|")]
-        conditions = [[cond.strip().replace(" ", "") for cond in condition.split('&')] for condition in or_conditions]
+        query = unidecode(query).lower()
+        or_conditions = [cond.strip() for cond in query.split("|")]
+        conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
         favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
         favoris_ids = [favori.id_Fichier for favori in favoris]
         if path is not None:
             path = path.strip().replace(" ", "")
-            subquery = And([Term("path", path), Or([And([Or([Term("content", condition), Term("tags", condition), Wildcard("title", "*"+condition+"*")]) for condition in condition_list]) for condition_list in conditions])])
+            subquery = And([Term("path", path), Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])])
         else:
-            subquery = Or([And([Or([Term("content", condition), Term("tags", condition), Wildcard("title", "*"+condition+"*")]) for condition in condition_list]) for condition_list in conditions])
+            subquery = Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])
         with self.open_index.searcher() as searcher:
             results = searcher.search(subquery, limit=None)
             results_list = []
             for result in results:
                 result_field = result.fields()
+                result_field['extension'] = result_field['title'].split('.')[-1]
                 if result_field['id'] in favoris_ids:
                     result_field['favori'] = True
                 else :
