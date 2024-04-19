@@ -1,0 +1,19 @@
+.modal-xl {
+    max-width: 100%;
+    height: 90%;
+    width: 90%;
+}
+
+.modal-content {
+    min-height: 95vh;
+    min-width: 90vw;
+}
+
+.spreadsheet-table table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.spreadsheet-table th, .spreadsheet-table td {
+    border: 1px solid black;
+}

@@ -118,7 +118,6 @@ def unfavorite_file(file_id, user_id):
         file_id (int): The ID of the file.
         user_id (int): The ID of the user.
     """
-    print(file_id, user_id)
     db.session.query(FAVORIS).filter(
         FAVORIS.c.id_Fichier == file_id, FAVORIS.c.id_Utilisateur == user_id
     ).delete()
