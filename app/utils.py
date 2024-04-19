@@ -177,7 +177,7 @@ class FileReader(metaclass=SingletonMeta):
 
     def read(self, file_path, extension):
         extension = extension.lower()
-        return self.readers.get(extension, lambda x: None)(file_path)
+        return self.readers.get(extension, lambda x: '')(file_path)
     
     def read_csv(self, file_path):
         if os.stat(file_path).st_size == 0:
