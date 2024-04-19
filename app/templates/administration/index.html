@@ -74,7 +74,9 @@
                                     </div>
                                 </div>
                                 <div class="me-2 d-flex">
-                                    <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                    <a href="/dossier/{{ folder.id_Dossier }}/fichier/{{ file.id_Fichier }}?as_attachment=true" style="display: inherit;">
+                                        <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                    </a>
                                     <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
                                 </div>
                             </div>
