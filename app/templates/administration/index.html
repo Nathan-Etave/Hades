@@ -3,97 +3,155 @@
 {% block title %}Administration{% endblock %}
 
 {% block head %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/administration.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/preview.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
-    <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    {% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+    crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/administration.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/preview.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/css/bootstrap5-toggle.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/js/bootstrap5-toggle.ecmas.min.js"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
 
 {% macro render_folder(folder) %}
-    <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item" style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
-        <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ folder.id_Dossier }}" aria-expanded="false" aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};">
-                <div class="d-flex w-100 align-items-center justify-content-between">
-                    <div class="me-2 d-flex align-items-center">
-                        <div class="d-flex">
-                            <div class="me-2">
-                                <i class="fas fa-folder"></i>
-                            </div>
-                            <div>
-                                {{ folder.nom_Dossier }}
-                            </div>
+<div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item"
+    style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
+    <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapse{{ folder.id_Dossier }}" aria-expanded="false"
+            aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+                <div class="me-2 d-flex align-items-center">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="fas fa-folder"></i>
                         </div>
-                        <div class="d-flex me-2" style="margin-left: 1rem;">
-                            <div class="me-2">
-                                <i class="fas fa-file"></i>
-                            </div>
-                            <div>
-                                {{ folder.FICHIER|length }}
-                            </div>
-                        </div>
-                        <div class="d-flex me-2" style="margin-left: 1rem;">
-                            <input data-folder="{{ folder.id_Dossier }}" type="text" id="fileSearch" placeholder="Rechercher dans le dossier"class="form-control" style="border-radius: 50px; padding: 5px 10px;">
+                        <div>
+                            {{ folder.nom_Dossier }}
                         </div>
                     </div>
-                    <div class="me-2">
-                        <form method="POST" enctype="multipart/form-data">
-                            <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un/plusieurs fichier(s)
-                                <input type="file" name="file" id="file{{ folder.id_Dossier }}" style="display: none;" multiple class="file-input"  data-folder="{{ folder.id_Dossier }}">
-                            </label>
-                            <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un dossier
-                                <input type="file" name="folder" id="folder{{ folder.id_Dossier }}" style="display: none;" multiple webkitdirectory class="file-input"  data-folder="{{ folder.id_Dossier }}">
-                            </label>
-                        </form>
+                    <div class="d-flex me-2" style="margin-left: 1rem;">
+                        <div class="me-2">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div>
+                            {{ folder.FICHIER|length }}
+                        </div>
+                    </div>
+                    <div class="d-flex me-2" style="margin-left: 1rem;">
+                        <input data-folder="{{ folder.id_Dossier }}" type="text" id="fileSearch"
+                            placeholder="Rechercher dans le dossier" class="form-control"
+                            style="border-radius: 50px; padding: 5px 10px;">
                     </div>
                 </div>
-            </button>
-        </h2>
-        <div id="collapse{{ folder.id_Dossier }}" class="accordion-collapse collapse" aria-labelledby="heading{{ folder.id_Dossier }}" data-bs-parent="#accordion{{ folder.id_Dossier }}">
-            <div class="accordion-body">
-                <div class="accordion" id="subfolderAccordion{{ folder.id_Dossier }}">
-                    {% for sub_folder in folder.DOSSIER_ %}
-                        {{ render_folder(sub_folder) }}
-                    {% endfor %}
+                <div class="me-2">
+                    <form method="POST" enctype="multipart/form-data">
+                        <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un/plusieurs fichier(s)
+                            <input type="file" name="file" id="file{{ folder.id_Dossier }}" style="display: none;"
+                                multiple class="file-input" data-folder="{{ folder.id_Dossier }}">
+                        </label>
+                        <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un dossier
+                            <input type="file" name="folder" id="folder{{ folder.id_Dossier }}" style="display: none;"
+                                multiple webkitdirectory class="file-input" data-folder="{{ folder.id_Dossier }}">
+                        </label>
+                    </form>
                 </div>
-                <div class="accordion" id="filesAccordion{{ folder.id_Dossier }}">
-                    {% for file in folder.FICHIER %}
-                    <div class="card mt-1 mb-1" style="height: 5vh" id="file-{{ file.id_Fichier }}">
-                        <div class="card-body">
-                            <div class="d-flex me-2 w-100 justify-content-between align-items-baseline" style="cursor: pointer;">
-                                <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}" data-type="{{ file.extension_Fichier }}">
-                                    <div class="me-2">
-                                        <i class="fas fa-file"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">{{ file.nom_Fichier }}</p>
-                                    </div>
+            </div>
+        </button>
+    </h2>
+    <div id="collapse{{ folder.id_Dossier }}" class="accordion-collapse collapse"
+        aria-labelledby="heading{{ folder.id_Dossier }}" data-bs-parent="#accordion{{ folder.id_Dossier }}">
+        <div class="accordion-body">
+            <div class="accordion" id="subfolderAccordion{{ folder.id_Dossier }}">
+                {% for sub_folder in folder.DOSSIER_ %}
+                {{ render_folder(sub_folder) }}
+                {% endfor %}
+            </div>
+            <div class="accordion mt-2 pt-2" id="filesAccordion{{ folder.id_Dossier }}"
+                style="height: 50vh; overflow: auto;">
+                {% for file in folder.FICHIER %}
+                <div class="card mt-1 mb-1 me-2" style="height: 5vh" id="file-{{ file.id_Fichier }}">
+                    <div class="card-body">
+                        <div class="d-flex me-2 w-100 justify-content-between align-items-baseline"
+                            style="cursor: pointer;">
+                            <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file"
+                                data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"
+                                data-type="{{ file.extension_Fichier }}">
+                                <div class="me-2">
+                                    <i class="fas fa-file"></i>
                                 </div>
-                                <div class="me-2 d-flex">
-                                    <a href="/dossier/{{ folder.id_Dossier }}/fichier/{{ file.id_Fichier }}?as_attachment=true" style="display: inherit;">
-                                        <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
-                                    </a>
-                                    <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;" data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                <div>
+                                    <p class="mb-0">{{ file.nom_Fichier }}</p>
                                 </div>
+                            </div>
+                            <div class="me-2 d-flex">
+                                <a href="/dossier/{{ folder.id_Dossier }}/fichier/{{ file.id_Fichier }}?as_attachment=true"
+                                    style="display: inherit;">
+                                    <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;"
+                                        data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                </a>
+                                <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;"
+                                    data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+</div>
+{% endmacro %}
+
+{% macro render_user(user) %}
+<div class="card mt-2 user" id="user-{{ user.id_Utilisateur }}" data-firstname="{{ user.prenom_Utilisateur }}"
+    data-lastname="{{ user.nom_Utilisateur }}" data-email="{{ user.email_Utilisateur }}">
+    <div class="card-body d-flex align-items-center">
+        <h5 class="card-title flex-grow-1 mb-0">{{ user.prenom_Utilisateur }} {{ user.nom_Utilisateur }}</h5>
+        <div class="me-2 d-flex align-items-center align-self-center">
+            <select id="role-select-{{ user.id_Utilisateur }}" class="form-select role-select"
+                style="margin-right: 0.5rem;" data-user="{{ user.id_Utilisateur }}">
+                {% for role in roles %}
+                {% if role.id_Role == user.id_Role %}
+                <option value="{{ role.id_Role }}" selected>{{ role.nom_Role }}</option>
+                {% else %}
+                <option value="{{ role.id_Role }}">{{ role.nom_Role }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="me-2">
+            <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-offstyle="danger"
+                data-onlabel="Actif" data-offlabel="Inactif" class="status-toggle" data-user="{{ user.id_Utilisateur }}"
+                id="status-toggle-{{ user.id_Utilisateur }}" {% if user.est_Actif_Utilisateur %}checked{% endif %}>
+        </div>
+        <button class="btn btn-danger delete-user-button" data-user="{{ user.id_Utilisateur }}"><i
+                class="fas fa-trash"></i> Supprimer</button>
+    </div>
+</div>
 {% endmacro %}
 
 {% block content %}
-<h1 class="text-center">Administration</h1>
+<h1 class="text-center mb-5">Administration</h1>
 <div class="container-fluid" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <h3 class="text-center">Gestion des documents</h3>
+            <div class="text-end">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseWorkers" aria-expanded="false" title="Afficher les workers"
+                    style="cursor: pointer;">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="collapse" id="collapseWorkers">
                 <div class="container mt-3">
                     <div class="row">
                         <div class="col-lg-4">
@@ -124,19 +182,32 @@
                         </div>
                         <div class="col d-flex flex-column justify-content-evenly">
                             <p class="mb-0">Suivant : <span id="nextFile">Aucun fichier en attente</span></p>
-                            <p class="mb-0">Traités : <span id="totalFilesProcessed">0</span>/<span id="totalFiles">0</span></p>
+                            <p class="mb-0">Traités : <span id="totalFilesProcessed">0</span>/<span
+                                    id="totalFiles">0</span>
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex align-items-center">
-                    <p class="mb-1 text-muted flex-shrink-0 me-3">Progression du téléversement :</p>
-                    <div class="progress text-center flex-grow-1">
-                        <div class="progress-bar progress-bar-striped text-center" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <p class="mb-1 text-muted flex-shrink-0 me-3">Progression du téléversement :</p>
+                <div class="progress text-center flex-grow-1">
+                    <div class="progress-bar progress-bar-striped text-center" role="progressbar" style="width:0%;"
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-            <div class="accordion mb-2" id="folderAccordion">
+            </div>
+            <div class="accordion mb-5" id="folderAccordion">
                 {% for folder in folders %}
-                    {{ render_folder(folder) }}
+                {{ render_folder(folder) }}
+                {% endfor %}
+            </div>
+            <h3 class="text-center">Gestion des utilisateurs</h3>
+            <div class="user-alert"></div>
+            <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
+                style="border-radius: 50px; padding: 5px 10px; width: 25%; float: left; margin-left: 0.75rem;">
+            <div class="container mt-3 mb-4 pt-2" style="height: 50vh; overflow: auto;">
+                {% for user in users %}
+                {{ render_user(user) }}
                 {% endfor %}
             </div>
         </div>
