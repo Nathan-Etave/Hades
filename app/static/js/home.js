@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "ok") {
-                        let div_fav = document.getElementById("fav" + id);
+                        let div_fav = document.querySelector(".fav"+id);
                         div_fav.remove();
                     }
                     else {
