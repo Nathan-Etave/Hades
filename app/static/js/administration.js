@@ -132,4 +132,94 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelector(`#file-${file.id}`).style.display = 'block';
         });
     });
+
+    const roleSelectS = document.querySelectorAll('.role-select');
+    roleSelectS.forEach((select) => {
+        select.addEventListener('change', async function (event) {
+            let userId = event.target.dataset.user;
+            socket.emit('update_user_role', { userId: userId, roleId: event.target.value });
+        });
+    });
+
+    socket.on('user_role_updated', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
+    });
+
+    socket.on('user_role_not_updated', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
+        document.querySelector(`#role-select-${data.userId}`).value = data.roleId;
+    });
+
+    const statusToggles = document.querySelectorAll('.status-toggle');
+    statusToggles.forEach((toggle) => {
+        toggle.addEventListener('change', async function (event) {
+            let userId = event.target.dataset.user;
+            socket.emit('update_user_status', { userId: userId, status: event.target.checked });
+        });
+    });
+
+    socket.on('user_status_updated', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
+    });
+
+    socket.on('user_status_not_updated', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
+        let statusToggle = document.querySelector(`#status-toggle-${data.userId}`);
+        statusToggle.parentElement.classList.remove('off');
+        statusToggle.parentElement.classList.replace('btn-danger', 'btn-success');
+    });
+
+    const deleteUserButtons = document.querySelectorAll('.delete-user-button');
+    deleteUserButtons.forEach((button) => {
+        button.addEventListener('click', async function (event) {
+            let userId = event.target.dataset.user;
+            let confirmation = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');
+            if (!confirmation) return;
+            socket.emit('delete_user', { userId: userId });
+        });
+    });
+
+    socket.on('user_deleted', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
+        document.querySelector(`#user-${data.userId}`).remove();
+    });
+
+    socket.on('user_not_deleted', function (data) {
+        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
+    });
+
+    function createAlert(type, message) {
+        let alert = document.createElement('div');
+        alert.classList.add('alert', `alert-${type}`, 'alert-dismissible');
+        alert.innerHTML = `<p class="mb-0">${message}</p><button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+        return alert;
+    }
+
+    const searchUser = document.querySelector('#searchUser');
+    const initialUsers = Array.from(document.querySelectorAll('.user'));
+    searchUser.addEventListener('input', function (event) {
+        if (event.target.value === '') {
+            initialUsers.forEach((user) => {
+                user.style.display = 'block';
+            });
+        }
+        else {
+            initialUsers.forEach((user) => {
+                user.style.display = 'none';
+                console.log(user.dataset);
+            });
+            let search = event.target.value.toLowerCase();
+            initialUsers.forEach((user) => {
+                let firstname = user.dataset.firstname.toLowerCase();
+                let lastname = user.dataset.lastname.toLowerCase();
+                let email = user.dataset.email.toLowerCase();
+                if (firstname.includes(search) || lastname.includes(search) || email.includes(search)) {
+                    user.style.display = 'block';
+                }
+            });
+        }
+    });
 });
