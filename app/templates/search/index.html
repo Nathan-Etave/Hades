@@ -11,7 +11,11 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
     integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
     crossorigin="anonymous"></script>
-<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/preview.js') }}" id="preview-script"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
 
@@ -53,16 +57,21 @@
             </div>
             <div class="accordion" id="fichierAccordion{{ folder.id }}">
                 {% for file in folder.files %}
-                    <div class="card mt-1 mb-1" style="height: 5vh">
+                    <div class="card mt-1 mb-1" style="height: 5vh" id="file-{{ file.id }}">
                         <div class="card-body">
-                            <div class="d-flex me-2">
-                                <div class="me-2">
-                                    <i class="fas fa-file"></i>
+                            <div class="d-flex me-2 w-100 justify-content-between align-items-baseline" style="cursor: pointer;">
+                                <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file" data-file="{{ file.id }}" data-folder="{{ folder.id }}" data-type="{{ file.extension }}">
+                                    <div class="me-2">
+                                        <i class="fas fa-file"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">{{ file.title }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p>{{ file["title"] }}</p>
-                                </div>
-                                <div class="me-2 ms-auto">
+                                <div class="me-2 d-flex">
+                                    <a href="/dossier/{{ folder.id }}/fichier/{{ file.id }}?as_attachment=true" style="display: inherit;">
+                                        <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id }}" data-folder="{{ folder.id }}"></i>
+                                    </a>
                                     <a href="#" id="{{ file.id }}" class="favori" is-fav="{{ file.favori }}">
                                         <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
                                             id="fav-{{ file.id }}"></i>
@@ -80,7 +89,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center flex-column" style="margin-top: 5vh;">
-    <form class="d-flex flex-column mb-3" method="POST" action="{{ url_for('home.home') }}">
+    <form class="d-flex flex-column mb-3" method="POST">
         {{ form.hidden_tag() }}
         <div class="d-flex" id="search">
             {{ form.search(placeholder="Recherche", id="search-bar", value=query) }}
@@ -103,4 +112,5 @@
         </div>
     </div>
 </div>
+{% include 'components/preview.html' %}
 {% endblock %}
