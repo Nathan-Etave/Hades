@@ -11,8 +11,8 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
     integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
     crossorigin="anonymous"></script>
-<script src="{{ url_for('static', filename='js/search.js') }}"></script>
-<script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/preview.js') }}" id="preview-script"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
 <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js"></script>
@@ -89,7 +89,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center flex-column" style="margin-top: 5vh;">
-    <form class="d-flex flex-column mb-3" method="POST" action="{{ url_for('home.home') }}">
+    <form class="d-flex flex-column mb-3" method="POST">
         {{ form.hidden_tag() }}
         <div class="d-flex" id="search">
             {{ form.search(placeholder="Recherche", id="search-bar", value=query) }}

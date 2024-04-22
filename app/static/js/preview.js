@@ -1,9 +1,9 @@
-document.addEventListener('DOMContentLoaded', function () {
+export function previewAfterRender(){
     const previewModal = new bootstrap.Modal(document.querySelector('#previewModal'));
     const files = document.querySelectorAll('#file');
     files.forEach((file) => {
         file.addEventListener('click', async function (event) {
-            target = event.target;
+            let target = event.target;
             if (event.target.nodeName === 'P' || event.target.nodeName === 'I') {
                 target = event.target.parentElement.parentElement;
             }
@@ -150,4 +150,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return css;
     }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('Preview script loaded');
+    previewAfterRender();
 });
