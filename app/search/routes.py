@@ -1,11 +1,13 @@
 from app.search import bp
 from flask_login import login_required, current_user
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, current_app
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.favoris import FAVORIS
 from app.utils import Whoosh
 from app.forms.search_form import SearchForm
+from app import socketio
+from fasteners import InterProcessLock
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -80,7 +82,7 @@ def create_folder_dict(folder, files):
         "files": files_in_folder,
         "color": folder.couleur_Dossier,
         "id": folder.id_Dossier,
-        "subfolder": subfolders,
+        "subfolder": subfolders
     }
 
 def create_rendered_list(results):
@@ -111,3 +113,11 @@ def recursive_subfolder(folder, files):
         list: A list of dictionaries containing information about each subfolder.
     """
     return [create_folder_dict(subfolder, files) for subfolder in folder.DOSSIER_]
+
+@socketio.on('search_files', namespace='/search')
+def search_files(data):
+    search_query = data.get('query')
+    with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
+        search_results = Whoosh().search(search_query)
+    search_results = create_rendered_list(search_results)
+    socketio.emit('search_results', search_results, namespace='/search')
