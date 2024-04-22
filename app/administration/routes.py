@@ -84,3 +84,38 @@ def search_files(data):
     with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
     socketio.emit('search_results', search_results, namespace='/administration')
+
+@socketio.on('update_user_role', namespace='/administration')
+def update_user_role(data):
+    user_id = data.get('userId')
+    role_id = data.get('roleId')
+    user = UTILISATEUR.query.get(user_id)
+    if user.id_Role == 1 and role_id != 1:
+        data['roleId'] = 1
+        socketio.emit('user_role_not_updated', {**data, 'error': 'Le rôle de l\'administrateur ne peut pas être modifié.'}, namespace='/administration')
+        return
+    user.id_Role = role_id
+    db.session.commit()
+    socketio.emit('user_role_updated', {**data, 'message': 'Le rôle de l\'utilisateur a été modifié avec succès.'}, namespace='/administration')
+
+@socketio.on('update_user_status', namespace='/administration')
+def update_user_status(data):
+    user_id = data.get('userId')
+    user = UTILISATEUR.query.get(user_id)
+    if user.id_Role == 1:
+        socketio.emit('user_status_not_updated', {**data, 'error': 'Le statut de l\'administrateur ne peut pas être modifié.'}, namespace='/administration')
+        return
+    user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
+    db.session.commit()
+    socketio.emit('user_status_updated', {**data, 'message': 'Le statut de l\'utilisateur a été modifié avec succès.'}, namespace='/administration')
+
+@socketio.on('delete_user', namespace='/administration')
+def delete_user(data):
+    user_id = data.get('userId')
+    user = UTILISATEUR.query.get(user_id)
+    if user.id_Role == 1:
+        socketio.emit('user_not_deleted', {**data, 'error': 'L\'administrateur ne peut pas être supprimé.'}, namespace='/administration')
+        return
+    db.session.delete(user)
+    db.session.commit()
+    socketio.emit('user_deleted', {**data, 'message': 'L\'utilisateur a été supprimé avec succès.'}, namespace='/administration')
