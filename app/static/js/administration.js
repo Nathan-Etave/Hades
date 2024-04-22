@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
         document.querySelector(`#user-${data.userId}`).remove();
     });
-    
+
     socket.on('user_not_deleted', function (data) {
         document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
     });
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             let search = event.target.value.toLowerCase();
             initialUsers.forEach((user) => {
-                let firstname =user.dataset.firstname.toLowerCase();
+                let firstname = user.dataset.firstname.toLowerCase();
                 let lastname = user.dataset.lastname.toLowerCase();
                 let email = user.dataset.email.toLowerCase();
                 if (firstname.includes(search) || lastname.includes(search) || email.includes(search)) {

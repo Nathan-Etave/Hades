@@ -97,14 +97,14 @@ class NLPProcessor(metaclass=SingletonMeta):
     def __init__(self, batch_size=100000):
         self.batch_size = batch_size
         self.tokenizer_nlp = load(f"{current_app.root_path}/storage/model")
-        self.lemmatizer_nlp = load("fr_dep_news_trf")
+        self.lemmatizer_nlp = load("fr_core_news_sm")
         self.tokenizer_nlp.max_length = batch_size
         self.lemmatizer_nlp.max_length = batch_size
         default_infixes = list(self.tokenizer_nlp.Defaults.infixes)
         default_infixes.append("[A-Z][a-z0-9]+")
         infix_regex = compile_infix_regex(default_infixes)
         self.tokenizer_nlp.tokenizer.infix_finditer = infix_regex.finditer
-        self.stop_words = fr_stop.union(en_stop)
+        self.stop_words = set(fr_stop).union(en_stop)
 
     def clean(self, text):
         return [
@@ -125,11 +125,11 @@ class NLPProcessor(metaclass=SingletonMeta):
         batches = [
             text[i : i + self.batch_size] for i in range(0, len(text), self.batch_size)
         ]
-        text = ""
+        result = []
         with ThreadPoolExecutor() as executor:
             for batch in executor.map(self.process_lemmatize_batch, batches):
-                text += " ".join(token.lemma_ for token in batch)
-        return text
+                result.append(" ".join(token.lemma_ for token in batch))
+        return " ".join(result)
 
     def process_lemmatize_batch(self, batch):
         return self.lemmatizer_nlp(batch)
