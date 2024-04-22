@@ -12,6 +12,8 @@ from app.decorators import admin_required
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.fichier import FICHIER
+from app.models.utilisateur import UTILISATEUR
+from app.models.role import ROLE
 from app.utils import Whoosh
 from fasteners import InterProcessLock
 
@@ -22,7 +24,10 @@ def administration():
     all_folders = DOSSIER.query.all()
     all_root_folders = [folder for folder in all_folders if folder.DOSSIER == []]
     all_root_folders.sort(key=lambda x: x.priorite_Dossier)
-    return render_template("administration/index.html", folders=all_root_folders, is_admin=True, is_authenticated=True)
+    all_users = UTILISATEUR.query.all()
+    all_users = [user for user in all_users if user.id_Role is not None]
+    all_roles = ROLE.query.all()
+    return render_template("administration/index.html", folders=all_root_folders, users=all_users, roles=all_roles, is_admin=True, is_authenticated=True)
 
 @bp.route("/upload", methods=["POST"])
 @login_required
