@@ -1,59 +1,66 @@
+import { previewAfterRender } from './preview.js';
+
 document.addEventListener('DOMContentLoaded', function () {
-    let favs = document.querySelectorAll('.favori');
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    favs.forEach(function (fav) {
-        let id = fav.id;
-        let isFav = fav.getAttribute('is-fav');
-        let etoile = document.getElementById("fav-" + id);
-        if (isFav === "True") {
-            fav.className = "favori-true";
-        }
-        else {
-            fav.className = "favori-false";
-            etoile.className = "fa-regular fa-star fa-lg";
-        }
-        fav.addEventListener('click', function (event) {
-            event.preventDefault();
-            if (fav.className === "favori-true") {
-                fetch("favori/" + id, {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'X-CSRFToken': csrfToken
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "ok") {
-                            fav.className = "favori-false";
-                            etoile.className = "fa-regular fa-star fa-lg";
-                        }
-                        else {
-                            alert("Erreur lors de la suppression du favori");
-                        }
-                    });
+
+    function afterRender() {
+        let favs = document.querySelectorAll('.favori');
+        favs.forEach(function (fav) {
+            let id = fav.id;
+            let isFav = fav.getAttribute('is-fav');
+            let etoile = document.getElementById("fav-" + id);
+            if (isFav === "True") {
+                fav.className = "favori-true";
             }
             else {
-                fetch("favori/" + id, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'X-CSRFToken': csrfToken
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "ok") {
-                            fav.className = "favori-true";
-                            etoile.className = "fa-solid fa-star fa-lg";
-                        }
-                        else {
-                            alert("Erreur lors de l'ajout du favori");
-                        }
-                    });
+                fav.className = "favori-false";
+                etoile.className = "fa-regular fa-star fa-lg";
             }
+            fav.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (fav.className === "favori-true") {
+                    fetch("favori/" + id, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "ok") {
+                                fav.className = "favori-false";
+                                etoile.className = "fa-regular fa-star fa-lg";
+                            }
+                            else {
+                                alert("Erreur lors de la suppression du favori");
+                            }
+                        });
+                }
+                else {
+                    fetch("favori/" + id, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "ok") {
+                                fav.className = "favori-true";
+                                etoile.className = "fa-solid fa-star fa-lg";
+                            }
+                            else {
+                                alert("Erreur lors de l'ajout du favori");
+                            }
+                        });
+                }
+            });
         });
-    });
+    }
+
+    afterRender();
 
     let btn_and = document.getElementById("btn_and");
     let btn_or = document.getElementById("btn_or");
@@ -65,5 +72,108 @@ document.addEventListener('DOMContentLoaded', function () {
 
     btn_or.addEventListener('click', function () {
         search_bar.value += " | "
+    });
+
+
+    function renderFolder(folder) {
+        let html = `
+        <div class="accordion-item" style="background-color: ${folder.color}; border: 1px solid black;">
+            <h2 class="accordion-header" id="heading${folder.id}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse${folder.id}" aria-expanded="false" aria-controls="collapse${folder.id}"
+                    style="background-color: ${folder.color};">
+                    <div class="d-flex w-100 align-items-center justify-content-between">
+                        <div class="me-2 d-flex align-items-center">
+                            <div class="d-flex">
+                                <div class="me-2">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <div>
+                                    ${folder.name}
+                                </div>
+                            </div>
+                            <div class="d-flex me-2" style="margin-left: 1rem;">
+                                <div class="me-2">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div>
+                                    ${folder.files.length}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapse${folder.id}" class="accordion-collapse collapse" aria-labelledby="heading${folder.id}"
+                data-bs-parent="#accordion${folder.id}">
+                <div class="accordion-body">
+                    <div class="accordion" id="subfolderAccordion${folder.id}">
+                        ${folder.subfolder.map(renderFolder).join('')}
+                    </div>
+                    <div class="accordion" id="fichierAccordion${folder.id}">
+                        ${folder.files.map(file => `
+                            <div class="card mt-1 mb-1" style="height: 5vh" id="file-${file.id}">
+                                <div class="card-body">
+                                    <div class="d-flex me-2 w-100 justify-content-between align-items-baseline" style="cursor: pointer;">
+                                        <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file" data-file="${file.id}" data-folder="${folder.id}" data-type="${file.extension}">
+                                            <div class="me-2">
+                                                <i class="fas fa-file"></i>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0">${file.title}</p>
+                                            </div>
+                                        </div>
+                                        <div class="me-2 d-flex">
+                                            <a href="/dossier/${folder.id}/fichier/${file.id}?as_attachment=true" style="display: inherit;">
+                                                <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="${file.id}" data-folder="${folder.id}"></i>
+                                            </a>
+                                            <a href="#" id="${file.id}" class="favori" is-fav="${file.favori}">
+                                                <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
+                                                    id="fav-${file.id}"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+        return html;
+    }
+
+    const socket = io.connect('/search');
+
+    let searchBar = document.getElementById("search-bar");
+    let searchButton = document.getElementById("search_btn");
+
+    searchButton.addEventListener('click', function (event) {
+        event.preventDefault(); 
+    });
+
+    searchBar.addEventListener('input', function () {
+        socket.emit('search_files', { query: searchBar.value });
+    });
+
+    socket.on('search_results', function (data) {
+        let accordion = document.getElementById("folderAccordion");
+        accordion.innerHTML = data.map(renderFolder).join('');
+
+        afterRender();
+
+        // let head = document.getElementsByTagName('head')[0];
+        // console.log(head);
+        // let previewScript = document.getElementById('preview-script');
+        // console.log(previewScript);
+        // head.removeChild(previewScript);
+        // let newScript = document.createElement('script');
+        // newScript.src = '/static/js/preview.js';
+        // newScript.id = 'preview-script';
+        // console.log(newScript);
+        // head.appendChild(newScript);
+
+        previewAfterRender();
     });
 });
