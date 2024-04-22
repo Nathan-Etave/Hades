@@ -71,16 +71,19 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def search(self, query, path=None):
-        query = unidecode(query).lower()
-        or_conditions = [cond.strip() for cond in query.split("|")]
-        conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
+        if query.strip() == "":
+            subquery = Every()
+        else : 
+            query = unidecode(query).lower()
+            or_conditions = [cond.strip() for cond in query.split("|")]
+            conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
+            if path is not None:
+                path = path.strip().replace(" ", "")
+                subquery = And([Term("path", path), Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])])
+            else:
+                subquery = Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])
         favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
         favoris_ids = [favori.id_Fichier for favori in favoris]
-        if path is not None:
-            path = path.strip().replace(" ", "")
-            subquery = And([Term("path", path), Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])])
-        else:
-            subquery = Or([And([Or([Phrase("content", condition.split()), Term("tags", condition), Wildcard("title", "*"+condition.replace(" ", "_")+"*")]) for condition in condition_list]) for condition_list in conditions])
         with self.open_index.searcher() as searcher:
             results = searcher.search(subquery, limit=None)
             results_list = []
