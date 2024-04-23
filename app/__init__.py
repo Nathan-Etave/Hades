@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 from flask import Flask, current_app
 from flask_wtf.csrf import CSRFProtect
@@ -29,7 +28,7 @@ socketio = SocketIO()
 celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND, include=['app.tasks'])
 redis = FlaskRedis()
 
-def create_app(config_class = Config):
+def create_app(config_class = Config, is_worker=False):
     from app.register import bp as register_bp
     from app.api import bp as api_bp
     from app.notifications import bp as notifications_bp
@@ -64,7 +63,7 @@ def create_app(config_class = Config):
     if redis.get('total_files_processed') is None:
         redis.set('total_files_processed', 0)
 
-    if 'worker' in sys.argv:
+    if not is_worker:
         def handle_worker_status_message(message):
             data = json.loads(message['data'].decode('utf-8'))
             socketio.emit('worker_status', data, namespace='/administration')
@@ -76,10 +75,10 @@ def create_app(config_class = Config):
             socketio.emit('total_files', total_files, namespace='/administration')
             socketio.emit('total_files_processed', total_files_processed, namespace='/administration')
 
-            pubsub = redis.pubsub()
-            pubsub.subscribe(**{'worker_status': handle_worker_status_message})
-            pubsub.subscribe(**{'process_status': handle_process_status_message})
-            pubsub.run_in_thread(sleep_time=1.0)
+        pubsub = redis.pubsub()
+        pubsub.subscribe(**{'worker_status': handle_worker_status_message})
+        pubsub.subscribe(**{'process_status': handle_process_status_message})
+        pubsub.run_in_thread(sleep_time=0.5)
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')

@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     fileInput.forEach((input) => {
         input.addEventListener('change', async function (event) {
+            let tags = prompt('Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags');
+            if (tags === null) {
+                event.target.value = '';
+                return;
+            }
             let folderId = event.target.dataset.folder;
             let files = event.target.files;
             fileTotal += files.length;
@@ -25,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             body: JSON.stringify({
                                 folderId: folderId,
                                 filename: file.name,
-                                data: ev.target.result
+                                data: ev.target.result,
+                                tags: tags
                             })
                         });
                         let status = await response.status;
@@ -43,9 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
             event.target.value = '';
         });
     });
-    window.onbeforeunload = function () {
-        return '';
-    };
+
     const socket = io.connect('/administration');
 
     socket.on('worker_status', function (data) {
@@ -247,4 +251,40 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-});
+
+    const modalParentFolder = document.querySelector('#parentFolder');
+    folders.forEach((folder) => {
+        modalParentFolder.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
+    });
+
+    const createFolderButton = document.querySelector('#createFolderButton');
+    createFolderButton.addEventListener('click', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            return;
+        }
+        let folderName = document.querySelector('#folderName').value;
+        let parentFolderId = document.querySelector('#parentFolder').value;
+        let folderRoles = Array.from(document.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
+        let folderColor = document.querySelector('#folderColor').value;
+        createFolderButton.disabled = true;
+        socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+    });
+
+    socket.on('folder_created', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('folder_not_created', function (data) {
+        alert(`La création du dossier a échoué: ${data.error}`);
+        createFolderButton.disabled = false;
+    });
+
+    const formCreateFolder = document.querySelector('#addFolderModal').querySelector('form');
+    formCreateFolder.addEventListener('submit', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            event.preventDefault();
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un dossier.');
+            return;
+        }
+    });
+}); 
