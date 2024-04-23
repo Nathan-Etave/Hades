@@ -1,4 +1,5 @@
 import { previewAfterRender } from './preview.js';
+import { baseAfterRender } from './base.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             else {
                 fav.className = "favori-false";
-                etoile.className = "fa-regular fa-star fa-lg";
+                etoile.className = "fa-regular fa-star fa-lg me-2";
             }
             fav.addEventListener('click', function (event) {
                 event.preventDefault();
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         .then(data => {
                             if (data.status === "ok") {
                                 fav.className = "favori-false";
-                                etoile.className = "fa-regular fa-star fa-lg";
+                                etoile.className = "fa-regular fa-star fa-lg me-2";
                             }
                             else {
                                 alert("Erreur lors de la suppression du favori");
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         .then(data => {
                             if (data.status === "ok") {
                                 fav.className = "favori-true";
-                                etoile.className = "fa-solid fa-star fa-lg";
+                                etoile.className = "fa-solid fa-star fa-lg me-2";
                             }
                             else {
                                 alert("Erreur lors de l'ajout du favori");
@@ -64,17 +65,58 @@ document.addEventListener('DOMContentLoaded', function () {
         let accordions = document.querySelectorAll('.accordion-collapse');
         accordions.forEach(
             accordion => {
-                accordion.addEventListener('show.bs.collapse', function () {
+                accordion.addEventListener('show.bs.collapse', function (event) {
+                    event.stopPropagation();
                     let id = accordion.id;
                     accordionStates[id] = true;
                 });
 
-                accordion.addEventListener('hide.bs.collapse', function () {
+                accordion.addEventListener('hide.bs.collapse', function (event) {
+                    event.stopPropagation();
                     let id = accordion.id;
                     accordionStates[id] = false;
                 });
             }
         )
+
+
+        let desktops = document.querySelectorAll('.desktop');
+        let deskList = JSON.parse(localStorage.getItem('desktop'));
+        if (deskList === null) {
+            deskList = [];
+            localStorage.setItem('desktop', JSON.stringify(deskList));
+        }
+
+        desktops.forEach(
+            desktop => {
+                let fileId = desktop.id;
+                let deskBtn = document.getElementById("desk-" + fileId); 
+                if (deskList.includes(fileId)) {
+                    desktop.className = "desktop-true";
+                    deskBtn.className = "fa-regular fa-square-minus fa-lg";
+                }
+                else {
+                    desktop.className = "desktop-false";
+                }
+                desktop.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    let newDeskList = JSON.parse(localStorage.getItem('desktop'));
+                    if (desktop.className === "desktop-true") {
+                        newDeskList = newDeskList.filter(file => file !== fileId);
+                        localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                        desktop.className = "desktop-false";
+                        deskBtn.className = "fa-regular fa-square-plus fa-lg";
+                    }
+                    else {
+                        newDeskList.push(fileId);
+                        localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                        desktop.className = "desktop-true";
+                        deskBtn.className = "fa-regular fa-square-minus fa-lg";
+                    }
+                    baseAfterRender(newDeskList.length);
+                });
+            }
+        );
     }
 
     afterRender();
@@ -129,7 +171,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 data-bs-parent="#accordion${folder.id}">
                 <div class="accordion-body">
                     <div class="accordion" id="subfoldersAccordion${folder.id}">
-                        ${folder.subfolder.map(subfolder => renderFolder(subfolder, isOpen)).join('')}
+                    ${folder.subfolder.map(subfolder => {
+                        let isOpen = accordionStates[`collapse${subfolder.id}`] || false;
+                        return renderFolder(subfolder, isOpen);
+                    }).join('')}
                     </div>
                     <div class="accordion" id="fichierAccordion${folder.id}"
                     style="height: 50vh; overflow: auto;">
@@ -152,6 +197,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <a href="#" id="${file.id}" class="favori" is-fav="${file.favori}">
                                                 <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
                                                     id="fav-${file.id}"></i>
+                                            </a>
+                                            <a href="#" id="${file.id}" class="desktop">
+                                                <i class="fa-regular fa-square-plus fa-lg" id="desk-${file.id}"></i>
                                             </a>
                                         </div>
                                     </div>

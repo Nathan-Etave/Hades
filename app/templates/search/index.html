@@ -74,8 +74,11 @@
                                         <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id }}" data-folder="{{ folder.id }}"></i>
                                     </a>
                                     <a href="#" id="{{ file.id }}" class="favori" is-fav="{{ file.favori }}">
-                                        <i class="fa-solid fa-star fa-lg" style="color: #FFD43B;"
+                                        <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"
                                             id="fav-{{ file.id }}"></i>
+                                    </a>
+                                    <a href="#" id="{{ file.id }}" class="desktop">
+                                        <i class="fa-regular fa-square-plus fa-lg" id="desk-{{ file.id }}"></i>
                                     </a>
                                 </div>
                             </div>
