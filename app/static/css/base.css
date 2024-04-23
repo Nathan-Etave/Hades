@@ -65,3 +65,17 @@ header {
     margin-left: 2.5rem;
     border: unset!important
 }
+
+#number {
+    background-color: #ea4e4e;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    color: white;
+}
+
+#desktop {
+    margin-right: 0rem;
+}

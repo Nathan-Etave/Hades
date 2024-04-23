@@ -1,3 +1,5 @@
+import { baseAfterRender } from './base.js';
+
 document.addEventListener('DOMContentLoaded', function () {
 
     let btn_and = document.getElementById("btn_and");
@@ -46,4 +48,42 @@ document.addEventListener('DOMContentLoaded', function () {
             search_btn.click();
         });
     });
+
+    let desktops = document.querySelectorAll('.desktop');
+    let deskList = JSON.parse(localStorage.getItem('desktop'));
+    if (deskList === null) {
+        deskList = [];
+        localStorage.setItem('desktop', JSON.stringify(deskList));
+    }
+
+    desktops.forEach(
+        desktop => {
+            let fileId = desktop.id;
+            let deskBtn = document.getElementById("desk-" + fileId); 
+            if (deskList.includes(fileId)) {
+                desktop.className = "desktop-true";
+                deskBtn.className = "fa-regular fa-square-minus fa-lg";
+            }
+            else {
+                desktop.className = "desktop-false";
+            }
+            desktop.addEventListener('click', function (event) {
+                event.preventDefault();
+                let newDeskList = JSON.parse(localStorage.getItem('desktop'));
+                if (desktop.className === "desktop-true") {
+                    newDeskList = newDeskList.filter(file => file !== fileId);
+                    localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                    desktop.className = "desktop-false";
+                    deskBtn.className = "fa-regular fa-square-plus fa-lg";
+                }
+                else {
+                    newDeskList.push(fileId);
+                    localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                    desktop.className = "desktop-true";
+                    deskBtn.className = "fa-regular fa-square-minus fa-lg";
+                }
+                baseAfterRender(newDeskList.length);
+            });
+        }
+    );
 });
