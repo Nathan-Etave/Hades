@@ -109,6 +109,11 @@ def fill_db():
         db.session.add(DOSSIER(nom_Dossier="Confidentiel", priorite_Dossier=9, couleur_Dossier="#ccffff"))
         db.session.commit()
 
+    if not db.session.query(A_ACCES).all():
+        for dossier in DOSSIER.query.all():
+            db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=dossier.id_Dossier))
+        db.session.commit()
+
     if not UTILISATEUR.query.all():
         db.session.add(UTILISATEUR(nom_Utilisateur="admin", prenom_Utilisateur="admin", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", est_Actif_Utilisateur=True, id_Role=1))
         # password: O]SxR=rBv%

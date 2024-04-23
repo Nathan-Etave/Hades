@@ -133,8 +133,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    const roleSelectS = document.querySelectorAll('.role-select');
-    roleSelectS.forEach((select) => {
+    const roleSelects = document.querySelectorAll('.role-select');
+    roleSelects.forEach((select) => {
         select.addEventListener('change', async function (event) {
             let userId = event.target.dataset.user;
             socket.emit('update_user_role', { userId: userId, roleId: event.target.value });
@@ -209,7 +209,6 @@ document.addEventListener('DOMContentLoaded', function () {
         else {
             initialUsers.forEach((user) => {
                 user.style.display = 'none';
-                console.log(user.dataset);
             });
             let search = event.target.value.toLowerCase();
             initialUsers.forEach((user) => {
@@ -221,5 +220,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
+    });
+
+    folders.forEach((folder) => {
+        folder.addEventListener('click', function (event) {
+            event.stopPropagation();
+            if (event.target.dataset.triggerAccordion !== undefined) {
+                var collapse = new bootstrap.Collapse(folder.querySelector('.accordion-collapse'));
+                collapse.show();
+            }
+        });
     });
 });
