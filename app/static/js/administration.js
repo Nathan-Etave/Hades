@@ -97,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('file_deleted', function (data) {
         let file = document.querySelector(`#file-${data.fileId}`);
         file.remove();
+        let fileCount = document.querySelector(`.folder-${data.folderId}`).querySelector('#fileCount').innerHTML;
+        fileCount--;
+        document.querySelector(`.folder-${data.folderId}`).querySelector('#fileCount').innerHTML = fileCount;
     });
 
     socket.on('file_deletion_failed', function (data) {
@@ -111,12 +114,17 @@ document.addEventListener('DOMContentLoaded', function () {
         intialFiles[folder.dataset.folder] = folder.querySelector(`#filesAccordion${folder.dataset.folder}`).children;
     });
 
+    let lastInputEvent = null;
     searchBars.forEach((searchBar) => {
         searchBar.addEventListener('input', function (event) {
+            lastInputEvent = event;
             if (event.target.value === '') {
                 Array.from(intialFiles[event.target.dataset.folder]).forEach((file) => {
                     file.style.display = 'block';
                 });
+                let fileCount = document.querySelector(`.folder-${event.target.dataset.folder}`).querySelector('#fileCount').innerHTML;
+                fileCount = Array.from(intialFiles[event.target.dataset.folder]).length;
+                document.querySelector(`.folder-${event.target.dataset.folder}`).querySelector('#fileCount').innerHTML = fileCount;
             }
             else {
                 Array.from(intialFiles[event.target.dataset.folder]).forEach((file) => {
@@ -131,10 +139,18 @@ document.addEventListener('DOMContentLoaded', function () {
         data.forEach((file) => {
             document.querySelector(`#file-${file.id}`).style.display = 'block';
         });
+        if (data.length > 0) {
+            let fileCount = document.querySelector(`.folder-${data[0].path}`).querySelector('#fileCount').innerHTML;
+            fileCount = data.length;
+            document.querySelector(`.folder-${data[0].path}`).querySelector('#fileCount').innerHTML = fileCount;
+        }
+        else {
+            document.querySelector(`.folder-${lastInputEvent.target.dataset.folder}`).querySelector('#fileCount').innerHTML = 0;
+        }
     });
 
-    const roleSelectS = document.querySelectorAll('.role-select');
-    roleSelectS.forEach((select) => {
+    const roleSelects = document.querySelectorAll('.role-select');
+    roleSelects.forEach((select) => {
         select.addEventListener('change', async function (event) {
             let userId = event.target.dataset.user;
             socket.emit('update_user_role', { userId: userId, roleId: event.target.value });
@@ -209,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function () {
         else {
             initialUsers.forEach((user) => {
                 user.style.display = 'none';
-                console.log(user.dataset);
             });
             let search = event.target.value.toLowerCase();
             initialUsers.forEach((user) => {
@@ -221,5 +236,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
+    });
+
+    folders.forEach((folder) => {
+        folder.addEventListener('click', function (event) {
+            event.stopPropagation();
+            if (event.target.dataset.triggerAccordion !== undefined) {
+                var collapse = new bootstrap.Collapse(folder.querySelector('.accordion-collapse'));
+                collapse.show();
+            }
+        });
     });
 });

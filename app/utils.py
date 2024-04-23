@@ -49,7 +49,7 @@ class SingletonMeta(type):
 class Whoosh(metaclass=SingletonMeta):
     def __init__(self):
         analyzer = StandardAnalyzer(stoplist=None)
-        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=STORED)
+        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True))
         with current_app.app_context():
             if not os.path.exists(f'{current_app.root_path}/storage/index') :
                 os.mkdir(f'{current_app.root_path}/storage/index')
