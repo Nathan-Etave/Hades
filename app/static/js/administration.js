@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     fileInput.forEach((input) => {
         input.addEventListener('change', async function (event) {
+            let tags = prompt('Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags');
+            if (tags === null) {
+                event.target.value = '';
+                return;
+            }
             let folderId = event.target.dataset.folder;
             let files = event.target.files;
             fileTotal += files.length;
@@ -25,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             body: JSON.stringify({
                                 folderId: folderId,
                                 filename: file.name,
-                                data: ev.target.result
+                                data: ev.target.result,
+                                tags: tags
                             })
                         });
                         let status = await response.status;
