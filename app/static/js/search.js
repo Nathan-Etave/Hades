@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div id="collapse${folder.id}" class="accordion-collapse collapse ${show}" aria-labelledby="heading${folder.id}"
                 data-bs-parent="#accordion${folder.id}">
                 <div class="accordion-body">
-                    <div class="accordion" id="subfolderAccordion${folder.id}">
+                    <div class="accordion" id="subfoldersAccordion${folder.id}">
                         ${folder.subfolder.map(subfolder => renderFolder(subfolder, isOpen)).join('')}
                     </div>
                     <div class="accordion" id="fichierAccordion${folder.id}"
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('search_results', function (data) {
-        let accordion = document.getElementById("folderAccordion");
+        let accordion = document.getElementById("foldersAccordion");
         accordion.innerHTML = data.map(folder => {
             let isOpen = accordionStates[`collapse${folder.id}`] || false;
             return renderFolder(folder, isOpen);

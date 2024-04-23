@@ -11,6 +11,7 @@ from flask_login import login_required
 from app.decorators import admin_required
 from app.extensions import db
 from app.models.dossier import DOSSIER
+from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.fichier import FICHIER
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
@@ -193,3 +194,28 @@ def delete_user(data):
         {**data, "message": "L'utilisateur a été supprimé avec succès."},
         namespace="/administration",
     )
+
+@socketio.on('create_folder', namespace='/administration')
+def create_folder(data):
+    folder_name = data.get('folderName')
+    parent_folder_id = data.get('parentFolderId')
+    folder_color = data.get('folderColor')
+    last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).scalar()
+    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=last_priority + 1, couleur_Dossier=folder_color)
+    db.session.add(folder)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        return
+    try:
+        if parent_folder_id != 0:
+            db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder.id_Dossier))
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.delete(folder)
+        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('folder_created', {'folderId': folder.id_Dossier, 'folderName': folder_name, 'folderColor': folder.couleur_Dossier, 'parentFolderId': parent_folder_id}, namespace='/administration')

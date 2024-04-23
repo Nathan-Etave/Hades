@@ -50,7 +50,7 @@
     <div id="collapse{{ folder.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ folder.id }}"
         data-bs-parent="#accordion{{ folder.id }}">
         <div class="accordion-body">
-            <div class="accordion" id="subfolderAccordion{{ folder.id }}">
+            <div class="accordion" id="subfoldersAccordion{{ folder.id }}">
                 {% for sub_folder in folder.subfolder %}
                     {{ render_folder(sub_folder) }}
                 {% endfor %}
@@ -105,7 +105,7 @@
 <div class="container-fluid pt-2" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="accordion" id="folderAccordion">
+            <div class="accordion" id="foldersAccordion">
                 {% for folder in folders %}
                     {{ render_folder(folder) }}
                 {% endfor %}
