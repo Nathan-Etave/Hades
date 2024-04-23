@@ -2,6 +2,7 @@ import { previewAfterRender } from './preview.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    let accordionStates = {};
 
     function afterRender() {
         let favs = document.querySelectorAll('.favori');
@@ -58,6 +59,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+
+
+        let accordions = document.querySelectorAll('.accordion-collapse');
+        accordions.forEach(
+            accordion => {
+                accordion.addEventListener('show.bs.collapse', function () {
+                    let id = accordion.id;
+                    accordionStates[id] = true;
+                });
+
+                accordion.addEventListener('hide.bs.collapse', function () {
+                    let id = accordion.id;
+                    accordionStates[id] = false;
+                });
+            }
+        )
     }
 
     afterRender();
@@ -75,12 +92,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    function renderFolder(folder) {
+    function renderFolder(folder, isOpen) {
+        let expanded = isOpen ? 'true' : 'false';
+        let collapsed = isOpen ? '' : 'collapsed';
+        let show = isOpen ? 'show' : '';
+    
         let html = `
         <div class="accordion-item" style="background-color: ${folder.color}; border: 1px solid black;">
             <h2 class="accordion-header" id="heading${folder.id}">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapse${folder.id}" aria-expanded="false" aria-controls="collapse${folder.id}"
+                <button class="accordion-button ${collapsed}" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse${folder.id}" aria-expanded="${expanded}" aria-controls="collapse${folder.id}"
                     style="background-color: ${folder.color};">
                     <div class="d-flex w-100 align-items-center justify-content-between">
                         <div class="me-2 d-flex align-items-center">
@@ -104,13 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </button>
             </h2>
-            <div id="collapse${folder.id}" class="accordion-collapse collapse" aria-labelledby="heading${folder.id}"
+            <div id="collapse${folder.id}" class="accordion-collapse collapse ${show}" aria-labelledby="heading${folder.id}"
                 data-bs-parent="#accordion${folder.id}">
                 <div class="accordion-body">
                     <div class="accordion" id="subfolderAccordion${folder.id}">
-                        ${folder.subfolder.map(renderFolder).join('')}
+                        ${folder.subfolder.map(subfolder => renderFolder(subfolder, isOpen)).join('')}
                     </div>
-                    <div class="accordion" id="fichierAccordion${folder.id}">
+                    <div class="accordion" id="fichierAccordion${folder.id}"
+                    style="height: 50vh; overflow: auto;">
                         ${folder.files.map(file => `
                             <div class="card mt-1 mb-1" style="height: 5vh" id="file-${file.id}">
                                 <div class="card-body">
@@ -159,21 +181,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     socket.on('search_results', function (data) {
         let accordion = document.getElementById("folderAccordion");
-        accordion.innerHTML = data.map(renderFolder).join('');
+        accordion.innerHTML = data.map(folder => {
+            let isOpen = accordionStates[`collapse${folder.id}`] || false;
+            return renderFolder(folder, isOpen);
+        }).join('');
 
         afterRender();
-
-        // let head = document.getElementsByTagName('head')[0];
-        // console.log(head);
-        // let previewScript = document.getElementById('preview-script');
-        // console.log(previewScript);
-        // head.removeChild(previewScript);
-        // let newScript = document.createElement('script');
-        // newScript.src = '/static/js/preview.js';
-        // newScript.id = 'preview-script';
-        // console.log(newScript);
-        // head.appendChild(newScript);
-
         previewAfterRender();
     });
+    
+
 });
