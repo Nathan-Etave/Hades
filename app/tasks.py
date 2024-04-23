@@ -6,7 +6,7 @@ from fasteners import InterProcessLock
 
 @celery.task(name='app.tasks.process_file')
 def process_file(file_path, filename, folder_id, file_id):
-    app = create_app()
+    app = create_app(is_worker=True)
     with app.app_context():
         worker_name = current_task.request.hostname
         redis.lpop('file_queue')
