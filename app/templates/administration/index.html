@@ -22,7 +22,7 @@
 
 {% macro render_folder(folder) %}
 <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item folder-{{ folder.id_Dossier }}"
-    style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
+    style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;" data-name="{{ folder.nom_Dossier }}">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
             aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};" data-trigger-accordion="">
@@ -68,7 +68,7 @@
     <div id="collapse{{ folder.id_Dossier }}" class="accordion-collapse collapse"
         aria-labelledby="heading{{ folder.id_Dossier }}" data-bs-parent="#accordion{{ folder.id_Dossier }}">
         <div class="accordion-body">
-            <div class="accordion" id="subfolderAccordion{{ folder.id_Dossier }}">
+            <div class="accordion" id="subfoldersAccordion{{ folder.id_Dossier }}">
                 {% for sub_folder in folder.DOSSIER_ %}
                 {{ render_folder(sub_folder) }}
                 {% endfor %}
@@ -195,10 +195,14 @@
                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            <div class="accordion mb-5" id="folderAccordion">
+            <div class="accordion mb-5" id="foldersAccordion">
                 {% for folder in folders %}
                 {{ render_folder(folder) }}
                 {% endfor %}
+                <div class="text-end">
+                    <button class="position-relative btn btn-primary mt-2" id="addFolderButton" data-bs-toggle="modal"
+                        data-bs-target="#addFolderModal">Créer un dossier</button>
+                </div>
             </div>
             <h3 class="text-center">Gestion des utilisateurs</h3>
             <div class="user-alert"></div>
@@ -208,6 +212,37 @@
                 {% for user in users %}
                 {{ render_user(user) }}
                 {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addFolderModal" tabindex="-1" aria-labelledby="addFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFolderModalLabel">Créer un dossier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <input type="text" class="form-control" id="folderName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <select class="form-control" id="parentFolder">
+                            <option value="0">Aucun</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <input type="color" class="form-control" id="folderColor" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le dossier</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

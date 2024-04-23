@@ -49,9 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
             event.target.value = '';
         });
     });
-    window.onbeforeunload = function () {
-        return '';
-    };
+
     const socket = io.connect('/administration');
 
     socket.on('worker_status', function (data) {
@@ -253,4 +251,39 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-});
+
+    const modalParentFolder = document.querySelector('#parentFolder');
+    folders.forEach((folder) => {
+        modalParentFolder.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
+    });
+
+    const createFolderButton = document.querySelector('#createFolderButton');
+    createFolderButton.addEventListener('click', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            return;
+        }
+        let folderName = document.querySelector('#folderName').value;
+        let parentFolderId = document.querySelector('#parentFolder').value;
+        let folderColor = document.querySelector('#folderColor').value;
+        createFolderButton.disabled = true;
+        socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderColor: folderColor });
+    });
+
+    socket.on('folder_created', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('folder_not_created', function (data) {
+        alert('La création du dossier a échoué.');
+        createFolderButton.disabled = false;
+    });
+
+    const formCreateFolder = document.querySelector('#addFolderModal').querySelector('form');
+    formCreateFolder.addEventListener('submit', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            event.preventDefault();
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un dossier.');
+            return;
+        }
+    });
+}); 
