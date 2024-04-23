@@ -264,9 +264,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         let folderName = document.querySelector('#folderName').value;
         let parentFolderId = document.querySelector('#parentFolder').value;
+        let folderRoles = Array.from(document.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
         let folderColor = document.querySelector('#folderColor').value;
         createFolderButton.disabled = true;
-        socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderColor: folderColor });
+        socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
     });
 
     socket.on('folder_created', function (data) {
@@ -274,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_created', function (data) {
-        alert('La création du dossier a échoué.');
+        alert(`La création du dossier a échoué: ${data.error}`);
         createFolderButton.disabled = false;
     });
 

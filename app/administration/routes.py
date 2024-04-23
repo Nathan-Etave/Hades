@@ -14,6 +14,7 @@ from app.models.dossier import DOSSIER
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.fichier import FICHIER
 from app.models.utilisateur import UTILISATEUR
+from app.models.a_acces import A_ACCES
 from app.models.role import ROLE
 from app.utils import Whoosh
 from fasteners import InterProcessLock
@@ -199,6 +200,7 @@ def delete_user(data):
 def create_folder(data):
     folder_name = data.get('folderName')
     parent_folder_id = data.get('parentFolderId')
+    folder_roles = data.get('folderRoles')
     folder_color = data.get('folderColor')
     last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).scalar()
     folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=last_priority + 1, couleur_Dossier=folder_color)
@@ -210,12 +212,27 @@ def create_folder(data):
         socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
         return
     try:
+        db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=folder.id_Dossier))
+        for role in folder_roles:
+            db.session.execute(A_ACCES.insert().values(id_Role=role, id_Dossier=folder.id_Dossier))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.delete(folder)
+        db.session.commit()
+        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        return
+    try:
         if parent_folder_id != 0:
             db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder.id_Dossier))
             db.session.commit()
     except Exception as e:
         db.session.rollback()
+        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Role == 1).where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+        for role in folder_roles:
+            db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Role == role).where(A_ACCES.c.id_Dossier == folder.id_Dossier))
         db.session.delete(folder)
+        db.session.commit()
         socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
         return
     socketio.emit('folder_created', {'folderId': folder.id_Dossier, 'folderName': folder_name, 'folderColor': folder.couleur_Dossier, 'parentFolderId': parent_folder_id}, namespace='/administration')
