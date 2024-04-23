@@ -22,6 +22,7 @@ from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 
+
 crsf = CSRFProtect()
 login_manager = LoginManager()
 socketio = SocketIO()

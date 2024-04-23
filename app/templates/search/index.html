@@ -55,7 +55,8 @@
                     {{ render_folder(sub_folder) }}
                 {% endfor %}
             </div>
-            <div class="accordion" id="fichierAccordion{{ folder.id }}">
+            <div class="accordion" id="fichierAccordion{{ folder.id }}"
+            style="height: 50vh; overflow: auto;">
                 {% for file in folder.files %}
                     <div class="card mt-1 mb-1" style="height: 5vh" id="file-{{ file.id }}">
                         <div class="card-body">
