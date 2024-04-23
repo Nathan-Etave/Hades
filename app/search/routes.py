@@ -96,7 +96,7 @@ def create_rendered_list(results):
         list: A list of dictionaries representing folders and their associated results.
     """
     folders = db.session.query(DOSSIER).order_by(DOSSIER.priorite_Dossier).all()
-    folders_root = [folder for folder in folders if folder.DOSSIER == []]
+    folders_root = [folder for folder in folders if folder.DOSSIER == [] and is_accessible(folder)]
     return [create_folder_dict(folder, results) for folder in folders_root]
 
 
@@ -112,7 +112,19 @@ def recursive_subfolder(folder, files):
     Returns:
         list: A list of dictionaries containing information about each subfolder.
     """
-    return [create_folder_dict(subfolder, files) for subfolder in folder.DOSSIER_]
+    return [create_folder_dict(subfolder, files) for subfolder in folder.DOSSIER_ if is_accessible(subfolder)]
+
+def is_accessible(folder):
+    """
+    Check if the current user has access to the given folder.
+
+    Args:
+        folder (Folder): The folder to check.
+
+    Returns:
+        bool: True if the user has access to the folder, False otherwise.
+    """
+    return any(current_user.id_Role == role.id_Role for role in folder.ROLE)
 
 @socketio.on('search_files', namespace='/search')
 def search_files(data):
