@@ -67,13 +67,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 accordion.addEventListener('show.bs.collapse', function () {
                     let id = accordion.id;
                     accordionStates[id] = true;
-                    console.log(accordionStates);
                 });
 
                 accordion.addEventListener('hide.bs.collapse', function () {
                     let id = accordion.id;
                     accordionStates[id] = false;
-                    console.log(accordionStates);
                 });
             }
         )
