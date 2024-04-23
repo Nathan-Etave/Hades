@@ -49,6 +49,7 @@ def upload():
     folder_id = json_data.get("folderId")
     file_data = json_data.get("data")
     filename = unidecode(secure_filename(json_data.get("filename"))).lower()
+    user_tags = ' '.join(json_data.get("tags").replace(' ', ';').split(';'))
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -64,7 +65,7 @@ def upload():
     )
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier)])
+    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags])
     redis.incr("total_files")
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
