@@ -23,4 +23,3 @@ pdf2image==1.17.0
 celery==5.3.6
 fasteners==0.19
 flask_redis==0.4.0
-localStoragePy==0.2.3

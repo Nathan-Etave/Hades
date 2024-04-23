@@ -20,7 +20,6 @@ from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
-from localStoragePy import localStoragePy
 
 
 crsf = CSRFProtect()
@@ -79,10 +78,6 @@ def create_app(config_class = Config):
     pubsub.subscribe(**{'worker_status': handle_worker_status_message})
     pubsub.subscribe(**{'process_status': handle_process_status_message})
     pubsub.run_in_thread(sleep_time=1.0)
-
-    localStorage = localStoragePy('app', 'json')
-    if localStorage.getItem('multiview') is None:
-        localStorage.setItem('multiview', json.dumps([]))
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')
