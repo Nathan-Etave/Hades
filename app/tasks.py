@@ -5,8 +5,8 @@ from app.utils import FileReader, NLPProcessor, Whoosh
 from fasteners import InterProcessLock
 
 @celery.task(name='app.tasks.process_file')
-def process_file(file_path, filename, folder_id, file_id):
-    app = create_app()
+def process_file(file_path, filename, folder_id, file_id, user_tags):
+    app = create_app(is_worker=True)
     with app.app_context():
         worker_name = current_task.request.hostname
         redis.lpop('file_queue')
@@ -17,7 +17,7 @@ def process_file(file_path, filename, folder_id, file_id):
         redis.publish('worker_status', json.dumps({'worker': worker_name, 'status': 'processing', 'file': filename, 'next_file': next_file}))
         redis.set(f'worker:{worker_name}', json.dumps({'worker': worker_name, 'status': 'processing', 'file': filename, 'next_file': next_file}))
         file_text = FileReader().read(file_path, filename.split(".")[-1])
-        file_tags = ' '.join(NLPProcessor().tokenize(file_text))
+        file_tags = f'{' '.join(NLPProcessor().tokenize(file_text))} {user_tags}'
         with InterProcessLock(f'{app.root_path}/whoosh.lock'):
             Whoosh().add_document(filename, file_text, folder_id, file_tags, file_id)
         redis.publish('worker_status', json.dumps({'worker': worker_name, 'status': 'idle', 'file': None, 'next_file': None}))
