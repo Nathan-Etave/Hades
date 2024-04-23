@@ -89,4 +89,5 @@ function createFlashMessage(message, notificationId, type) {
     const text = document.createTextNode(message);
     flash.appendChild(text);
     document.querySelector('.flash').appendChild(flash);
+    setTimeout(() => flash.remove(), 5000);
 }
