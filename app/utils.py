@@ -25,6 +25,7 @@ from chardet import detect
 from app.extensions import db
 from flask_login import current_user
 from app.models.favoris import FAVORIS
+import re
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -75,6 +76,11 @@ class Whoosh(metaclass=SingletonMeta):
             subquery = Every()
         else : 
             query = unidecode(query).lower()
+            if query.startswith("&") or query.startswith("|"):
+                query = "* " + query
+            while re.search(r'([&|])\s*([&|]|$)', query):
+                query = re.sub(r'([&|])\s*([&|]|$)', r'\1 * \2', query)
+            print(query)
             or_conditions = [cond.strip() for cond in query.split("|")]
             conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
             if path is not None:
