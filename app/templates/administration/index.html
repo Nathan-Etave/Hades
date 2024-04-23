@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% macro render_folder(folder) %}
-<div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item"
+<div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item folder-{{ folder.id_Dossier }}"
     style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
@@ -40,7 +40,7 @@
                         <div class="me-2" data-trigger-accordion="">
                             <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
-                        <div data-trigger-accordion="">
+                        <div data-trigger-accordion="" id="fileCount">
                             {{ folder.FICHIER|length }}
                         </div>
                     </div>

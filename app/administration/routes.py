@@ -64,7 +64,7 @@ def upload():
     )
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-    process_file.apply_async(args=[file_path, filename, folder_id, file.id_Fichier])
+    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier)])
     redis.incr("total_files")
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})

@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from flask import Flask, current_app
 from flask_wtf.csrf import CSRFProtect
@@ -62,21 +63,22 @@ def create_app(config_class = Config):
     if redis.get('total_files_processed') is None:
         redis.set('total_files_processed', 0)
 
-    def handle_worker_status_message(message):
-        data = json.loads(message['data'].decode('utf-8'))
-        socketio.emit('worker_status', data, namespace='/administration')
+    if 'worker' in sys.argv:
+        def handle_worker_status_message(message):
+            data = json.loads(message['data'].decode('utf-8'))
+            socketio.emit('worker_status', data, namespace='/administration')
 
-    def handle_process_status_message(message):
-        data = json.loads(message['data'].decode('utf-8'))
-        total_files = data['total_files']
-        total_files_processed = data['total_files_processed']
-        socketio.emit('total_files', total_files, namespace='/administration')
-        socketio.emit('total_files_processed', total_files_processed, namespace='/administration')
+        def handle_process_status_message(message):
+            data = json.loads(message['data'].decode('utf-8'))
+            total_files = data['total_files']
+            total_files_processed = data['total_files_processed']
+            socketio.emit('total_files', total_files, namespace='/administration')
+            socketio.emit('total_files_processed', total_files_processed, namespace='/administration')
 
-    pubsub = redis.pubsub()
-    pubsub.subscribe(**{'worker_status': handle_worker_status_message})
-    pubsub.subscribe(**{'process_status': handle_process_status_message})
-    pubsub.run_in_thread(sleep_time=1.0)
+            pubsub = redis.pubsub()
+            pubsub.subscribe(**{'worker_status': handle_worker_status_message})
+            pubsub.subscribe(**{'process_status': handle_process_status_message})
+            pubsub.run_in_thread(sleep_time=1.0)
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')
