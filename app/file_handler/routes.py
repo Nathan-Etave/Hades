@@ -2,6 +2,8 @@ from app.file_handler import bp
 from flask import send_from_directory, abort, current_app, request
 from app.models.fichier import FICHIER
 from flask_login import current_user, login_required
+from app import socketio
+from app.extensions import db
 
 @bp.route('/dossier/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
 @login_required
@@ -30,3 +32,14 @@ def get_skybox(filename):
 @login_required
 def get_texture(filename):
     return send_from_directory(f'{current_app.root_path}/static/textures', filename, as_attachment=False)
+
+@socketio.on('get_files_details', namespace='/file_handler')
+def get_files_details(data):
+    files_id = data['files']
+    files = []
+    for file_id in files_id:
+        file = db.session.query(FICHIER).filter(FICHIER.id_Fichier == file_id).first()
+        dict_file = file.to_dict()
+        dict_file['id_Dossier'] = file.DOSSIER_.id_Dossier
+        files.append(dict_file)
+    socketio.emit('files_details', files, namespace='/file_handler')

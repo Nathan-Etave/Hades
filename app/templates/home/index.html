@@ -56,7 +56,7 @@
         <div class="list-group mt-3" id="aside-favorites">
             {% for favori in favorite_files %}
                 <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fav{{ favori.id_Fichier }}" id="file" data-file="{{ favori.id_Fichier }}" data-folder="{{ favori.DOSSIER_.id_Dossier }}" data-type="{{ favori.extension_Fichier }}" style="word-wrap: break-word;">
-                        {{ favori.nom_Fichier }}
+                        <p style="margin-bottom: 0;">{{ favori.nom_Fichier }}</p>
                         <div class="d-flex justify-content-end">
                             <a href="#" id="{{ favori.id_Fichier }}" class="favori" onclick="event.stopPropagation();">
                                 <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
