@@ -7,11 +7,14 @@ export function previewAfterRender() {
             if (event.target.nodeName === 'P' || event.target.nodeName === 'I') {
                 target = event.target.parentElement.parentElement;
             }
+            if (event.target.className.includes('desktop-element')) {
+                target = event.target.parentElement;
+            }
             const fileId = target.dataset.file;
             const folderId = target.dataset.folder;
             const fileType = target.dataset.type;
             let previewModalLabel = document.querySelector('#previewModalLabel');
-            previewModalLabel.innerHTML = target.innerHTML;
+            previewModalLabel.innerHTML = target.querySelector('p').textContent;
             const modalBody = document.querySelector('#previewModal').querySelector('.modal-body');
             modalBody.innerHTML = '';
 

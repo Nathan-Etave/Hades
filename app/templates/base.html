@@ -29,7 +29,7 @@
             <ul class="nav_item">
                 {% if is_authenticated %}
                 <li class="d-flex">
-                    <a href="#" id="desktop">Bureau</a>
+                    <a href="{{ url_for('desktop.desktop') }}" id="desktop">Bureau</a>
                     <span id="number"></span>
                 </li>
                 <li>
