@@ -19,9 +19,14 @@ def file(folder_id, file_id):
 @bp.route('/model/<path:filename>', methods=['GET'])
 @login_required
 def get_model(filename):
-    return send_from_directory(f'{current_app.root_path}/static/model', filename, as_attachment=False)
+    return send_from_directory(f'{current_app.root_path}/static/models', filename, as_attachment=False)
 
 @bp.route('/skybox/<path:filename>', methods=['GET'])
 @login_required
 def get_skybox(filename):
     return send_from_directory(f'{current_app.root_path}/static/skybox', filename, as_attachment=False)
+
+@bp.route('/texture/<path:filename>', methods=['GET'])
+@login_required
+def get_texture(filename):
+    return send_from_directory(f'{current_app.root_path}/static/textures', filename, as_attachment=False)
