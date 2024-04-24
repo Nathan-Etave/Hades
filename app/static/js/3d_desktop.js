@@ -1,6 +1,7 @@
 /*
 Computer Desk by Zsky [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/OhXey2fljr)
 Laptop by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/csEfSvMgyOw)
+Debris Papers by Quaternius (https://poly.pizza/m/MujITy1NRR)
 */
 
 import * as THREE from 'three';
@@ -21,12 +22,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
 directionalLight.position.set(1, 1.5, 2);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-const ambientLight = new THREE.AmbientLight(0x404040, 2.0);
+const ambientLight = new THREE.AmbientLight(0x404040, 10.0);
 scene.add(ambientLight);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -82,6 +83,34 @@ gltfLoader.load('/model/laptop.glb', (gltf) => {
     gltf.scene.rotation.x = -Math.PI / 2;
     gltf.scene.rotation.z = -Math.PI / 3;
     gltf.scene.position.set(-0.85, 0.39, -0.15);
+    scene.add(gltf.scene);
+});
+
+gltfLoader.load('/model/debris.glb', (gltf) => {
+    gltf.scene.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+            node.material = new THREE.MeshPhongMaterial({ color: node.material.color });
+        }
+    }
+    );
+    gltf.scene.rotation.y = Math.PI / 2;
+    gltf.scene.position.set(-1.6, -0.3, 0.2);
+    scene.add(gltf.scene);
+});
+
+gltfLoader.load('/model/debris.glb', (gltf) => {
+    gltf.scene.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+            node.material = new THREE.MeshPhongMaterial({ color: node.material.color });
+        }
+    }
+    );
+    gltf.scene.rotation.y = Math.PI / 4;
+    gltf.scene.position.set(0.2, -0.3, 0);
     scene.add(gltf.scene);
 });
 
@@ -159,8 +188,8 @@ function getLaptopScreenSize() {
                 min.project(camera);
                 max.project(camera);
 
-                width = Math.abs(max.x - min.x) * window.innerWidth / 1.95;
-                height = Math.abs(max.y - min.y) * window.innerHeight / 1.95;
+                width = Math.abs(max.x - min.x) * window.innerWidth / 1.9;
+                height = Math.abs(max.y - min.y) * window.innerHeight / 1.9;
             }
         }
     });
@@ -170,7 +199,7 @@ function getLaptopScreenSize() {
 function openLaptop() {
     lastCameraPosition = camera.position.clone();
     const targetPosition = { x: -0.809, y: 0.542, z: -0.066 };
-    const targetRotation = { x: -0.058, y: 0.505, z: 0.03 };
+    const targetRotation = { x: -0.048, y: 0.505, z: 0.03 };
     controls.enabled = false;
     new TWEEN.Tween(camera.position)
         .to(targetPosition, 2000)
