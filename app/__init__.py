@@ -38,6 +38,7 @@ def create_app(config_class = Config, is_worker=False):
     from app.profil import bp as profil_bp
     from app.search import bp as search_bp
     from app.file_handler import bp as file_handler_bp
+    from app.desktop import bp as desktop_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -89,6 +90,7 @@ def create_app(config_class = Config, is_worker=False):
     app.register_blueprint(profil_bp, url_prefix='/profil')
     app.register_blueprint(search_bp, url_prefix='/recherche')
     app.register_blueprint(file_handler_bp)
+    app.register_blueprint(desktop_bp, url_prefix='/bureau')
     return app
 
 def fill_db():
