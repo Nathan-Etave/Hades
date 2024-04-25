@@ -7,6 +7,7 @@ from app.models.fichier import FICHIER
 from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
+from app.utils import check_notitications
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -30,11 +31,12 @@ def home():
     if form.validate_on_submit():
         add_research(current_user.id_Utilisateur, form.search.data)
         return redirect(url_for("search.search", query=form.search.data))
+    print(current_user.NOTIFICATION)
     return render_template(
         "home/index.html",
         is_authenticated=True,
-        is_admin=current_user.id_Role == 1,
-        has_notifications=current_user.NOTIFICATION != [],
+        is_admin=current_user.is_admin(),
+        has_notifications=check_notitications(),
         favorite_files=favorite_files,
         researches=researches,
         form=form,

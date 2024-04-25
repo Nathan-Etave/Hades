@@ -16,7 +16,7 @@ from app.models.fichier import FICHIER
 from app.models.utilisateur import UTILISATEUR
 from app.models.a_acces import A_ACCES
 from app.models.role import ROLE
-from app.utils import Whoosh
+from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
 
 
@@ -37,6 +37,7 @@ def administration():
         roles=all_roles,
         is_admin=True,
         is_authenticated=True,
+        has_notifications=check_notitications(),
     )
 
 
