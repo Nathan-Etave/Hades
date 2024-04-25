@@ -25,6 +25,7 @@ from chardet import detect
 from app.extensions import db
 from flask_login import current_user
 from app.models.favoris import FAVORIS
+from app.models.notification import NOTIFICATION
 import re
 
 class SingletonMeta(type):
@@ -80,7 +81,6 @@ class Whoosh(metaclass=SingletonMeta):
                 query = "* " + query
             while re.search(r'([&|])\s*([&|]|$)', query):
                 query = re.sub(r'([&|])\s*([&|]|$)', r'\1 * \2', query)
-            print(query)
             or_conditions = [cond.strip() for cond in query.split("|")]
             conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
             if path is not None:
@@ -249,3 +249,11 @@ class FileReader(metaclass=SingletonMeta):
                 if hasattr(shape, "text"):
                     text += shape.text
         return text
+
+def check_notitications():
+    """Check if there is any notification in the database.
+
+    Returns:
+        bool: True if there is any notification, False otherwise.
+    """
+    return NOTIFICATION.query.all() != []
