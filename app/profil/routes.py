@@ -7,6 +7,7 @@ from app.extensions import db
 from app.forms.edit_profil_form import Edit_profil_form
 from flask_bcrypt import check_password_hash, generate_password_hash
 from app.models.utilisateur import UTILISATEUR
+from app.utils import check_notitications
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -20,8 +21,8 @@ def profil():
     return render_template(
         "profil/index.html",
         is_authenticated=True,
-        is_admin=current_user.id_Role == 1,
-        has_notifications=current_user.NOTIFICATION != [],
+        is_admin=current_user.is_admin(),
+        has_notifications=check_notitications(),
         user=current_user,
         edit_mode=False,
     )
@@ -59,8 +60,8 @@ def edit():
     return render_template(
         "profil/index.html",
         is_authenticated=True,
-        is_admin=current_user.id_Role == 1,
-        has_notifications=current_user.NOTIFICATION != [],
+        is_admin=current_user.is_admin(),
+        has_notifications=check_notitications(),
         user=current_user,
         form=form,
         edit_mode=True,

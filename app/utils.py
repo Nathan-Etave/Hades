@@ -25,6 +25,7 @@ from chardet import detect
 from app.extensions import db
 from flask_login import current_user
 from app.models.favoris import FAVORIS
+from app.models.notification import NOTIFICATION
 import re
 
 class SingletonMeta(type):
@@ -249,3 +250,11 @@ class FileReader(metaclass=SingletonMeta):
                 if hasattr(shape, "text"):
                     text += shape.text
         return text
+
+def check_notitications():
+    """Check if there is any notification in the database.
+
+    Returns:
+        bool: True if there is any notification, False otherwise.
+    """
+    return NOTIFICATION.query.all() != []
