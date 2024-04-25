@@ -8,4 +8,4 @@ from app.models.fichier import FICHIER
 @bp.route('/')
 @login_required
 def desktop():
-    return render_template('desktop/index.html', is_authenticated=True, is_admin=current_user.id_Role == 1)
+    return render_template('desktop/index.html', is_authenticated=True, is_admin=current_user.id_Role == 1, has_notifications=current_user.NOTIFICATION != [])

@@ -21,6 +21,7 @@ def profil():
         "profil/index.html",
         is_authenticated=True,
         is_admin=current_user.id_Role == 1,
+        has_notifications=current_user.NOTIFICATION != [],
         user=current_user,
         edit_mode=False,
     )
@@ -59,6 +60,7 @@ def edit():
         "profil/index.html",
         is_authenticated=True,
         is_admin=current_user.id_Role == 1,
+        has_notifications=current_user.NOTIFICATION != [],
         user=current_user,
         form=form,
         edit_mode=True,

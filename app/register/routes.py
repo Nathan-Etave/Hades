@@ -9,6 +9,7 @@ from app.mail.mail import send_registration_request_email
 from app.forms.registration_form import RegistrationForm
 from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
+from flask_login import current_user
 
 @bp.route("/", methods=["GET", "POST"])
 def register() -> any:
@@ -17,6 +18,8 @@ def register() -> any:
     Returns:
         any: Redirect to the registration page.
     """
+    if current_user is not None and current_user.is_authenticated:
+        return redirect(url_for("home.home"))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = UTILISATEUR.query.filter_by(email_Utilisateur=form.email.data).first()
@@ -54,4 +57,4 @@ def register() -> any:
                     "warning",
                 )
         return redirect(url_for("register.register"))
-    return render_template("register/index.html", form=form)
+    return render_template("register/index.html", form=form, is_authenticated=False)

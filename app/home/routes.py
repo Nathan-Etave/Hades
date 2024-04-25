@@ -34,6 +34,7 @@ def home():
         "home/index.html",
         is_authenticated=True,
         is_admin=current_user.id_Role == 1,
+        has_notifications=current_user.NOTIFICATION != [],
         favorite_files=favorite_files,
         researches=researches,
         form=form,
