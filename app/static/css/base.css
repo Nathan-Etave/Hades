@@ -29,7 +29,7 @@ header {
     margin-left: 1rem
 }
 
-.nav_item>li>a {
+.nav_item>li:not(:last-child)>a {
     color: #004f8a;
     text-decoration: none;
     font-size: 1.5rem;
@@ -41,10 +41,14 @@ header {
     background-repeat: no-repeat;
     transition: background-size .2s ease-in-out
 }
-
-.nav_item>li>a:hover {
+.nav_item>li:not(:last-child)>a:hover {
     background-image: linear-gradient(#004f8a,#004f8a);
     background-size: 100% .15em
+}
+
+.nav_item>li:last-child>a {
+    display: inline-block;
+    width: 2rem;
 }
 
 .nav_item,.navbar {
@@ -54,7 +58,7 @@ header {
 
 .nav_item {
     list-style-type: none;
-    gap: 1.5rem
+    gap: 0.5rem
 }
 
 .nav_item li {

@@ -39,6 +39,21 @@
                 <li>
                     <a href="{{ url_for('administration.administration') }}">Admin</a>
                 </li>
+                <li>
+                    <a href="{{ url_for('notifications.notifications') }}">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            {% if has_notifications %}
+                                <style>@keyframes notify {0%,to {transform: rotate(0deg);transform-origin: top center}10%,90% {transform: rotate(2deg)}20%,40%,60% {transform: rotate(-6deg)}30%,50%,70% {transform: rotate(6deg)}80% {transform: rotate(-2deg)}}</style>
+                            {% endif %}
+                                <g style="animation:notify 1s cubic-bezier(.455,.03,.515,.955) both infinite" stroke-width="1.5">
+                                <path fill="#FFFFFF" stroke="#0A0A30" d="M12.29 3.398a5 5 0 00-5 5v2c0 .758-.441 1.505-1.005 2.012a3 3 0 002.005 5.232h8a3 3 0 002.006-5.232c-.564-.507-1.005-1.254-1.005-2.012v-2a5 5 0 00-5-5z"/>
+                                <path stroke="#265BFF" stroke-linecap="round" d="M14.68 20.312l-.042.01a9.713 9.713 0 01-4.67-.01"/>
+                            </g>
+                        </svg>
+                    </a>
+                </li>
+                {% else %}
+                <li class="d-none"></li>
                 {% endif %}
                 {% else %}
                 <li>
@@ -47,6 +62,7 @@
                 <li>
                     <a href="{{ url_for('register.register') }}">Inscription</a>
                 </li>
+                <li class="d-none"></li>
                 {% endif %}
             </ul>
         </nav>
