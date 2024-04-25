@@ -23,7 +23,8 @@
 {% macro render_folder(folder) %}
 <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item folder-{{ folder.id_Dossier }}"
     style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;"
-    data-name="{{ folder.nom_Dossier }}">
+    data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}"{% else %}data-parent="0"{% endif %}
+    data-color="{{ folder.couleur_Dossier }}" data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
             aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};"
@@ -202,8 +203,10 @@
                 {{ render_folder(folder) }}
                 {% endfor %}
                 <div class="text-end">
-                    <button class="position-relative btn btn-primary mt-2" id="addFolderButton" data-bs-toggle="modal"
+                    <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
                         data-bs-target="#addFolderModal">Créer un dossier</button>
+                    <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
+                    data-bs-target="#modifyFolderModal">Modifier un dossier</button>
                 </div>
             </div>
             <h3 class="text-center">Gestion des utilisateurs</h3>
@@ -223,7 +226,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addFolderModalLabel">Créer un dossier</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form>
@@ -256,6 +259,56 @@
                     </div>
                     <div class="text-end">
                         <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le dossier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un dossier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="existingFolder" class="form-label">Dossier à modifier</label>
+                        <select class="form-control" id="existingFolder">
+                            <option value="0">Aucun</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <input type="text" class="form-control" id="folderName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <select class="form-control" id="parentFolder">
+                            <option value="0">Aucun</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rôles autorisés</label>
+                        {% for role in roles %}
+                        {% if role.id_Role != 1 %}
+                        <div class="form-check">
+                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}" id="role{{ role.id_Role }}">
+                            <label class="form-check-label" for="role{{ role.id_Role }}">
+                                {{ role.nom_Role }}
+                            </label>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <input type="color" class="form-control" id="folderColor" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le dossier</button>
                     </div>
                 </form>
             </div>

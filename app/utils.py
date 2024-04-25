@@ -81,7 +81,6 @@ class Whoosh(metaclass=SingletonMeta):
                 query = "* " + query
             while re.search(r'([&|])\s*([&|]|$)', query):
                 query = re.sub(r'([&|])\s*([&|]|$)', r'\1 * \2', query)
-            print(query)
             or_conditions = [cond.strip() for cond in query.split("|")]
             conditions = [[cond.strip() for cond in condition.split('&')] for condition in or_conditions]
             if path is not None:
