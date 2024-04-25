@@ -4,6 +4,7 @@ from app.models.fichier import FICHIER
 from flask_login import current_user, login_required
 from app import socketio
 from app.extensions import db
+from app.models.favoris import FAVORIS
 
 @bp.route('/dossier/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
 @login_required
@@ -22,10 +23,13 @@ def file(folder_id, file_id):
 @socketio.on('get_files_details', namespace='/file_handler')
 def get_files_details(data):
     files_id = data['files']
+    favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
+    favoris_ids = [favori.id_Fichier for favori in favoris]
     files = []
     for file_id in files_id:
         file = db.session.query(FICHIER).filter(FICHIER.id_Fichier == file_id).first()
         dict_file = file.to_dict()
         dict_file['id_Dossier'] = file.DOSSIER_.id_Dossier
+        dict_file['is_favorite'] = file.id_Fichier in favoris_ids
         files.append(dict_file)
     socketio.emit('files_details', files, namespace='/file_handler')
