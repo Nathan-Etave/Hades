@@ -18,6 +18,7 @@ from app.decorators import admin_required
 from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
+from app.utils import check_notitications
 
 
 @bp.route("/", methods=["GET"])
@@ -36,7 +37,7 @@ def notifications():
         roles=roles,
         is_authenticated=True,
         is_admin=True,
-        has_notifications=current_user.NOTIFICATION != [],
+        has_notifications=check_notitications(),
     )
 
 

@@ -8,6 +8,7 @@ from app.utils import Whoosh
 from app.forms.search_form import SearchForm
 from app import socketio
 from fasteners import InterProcessLock
+from app.utils import check_notitications
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -27,8 +28,8 @@ def search():
     return render_template(
         "search/index.html",
         is_authenticated=True,
-        is_admin=current_user.id_Role == 1,
-        has_notifications=current_user.NOTIFICATION != [],
+        is_admin=current_user.is_admin(),
+        has_notifications=check_notitications(),
         folders=results,
         query=query,
         form=form,

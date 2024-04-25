@@ -25,6 +25,9 @@ class UTILISATEUR(db.Model, UserMixin):
     
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def is_admin(self):
+        return self.id_Role == 1
 
     FICHIER_: Mapped[List['FICHIER']] = relationship('FICHIER', secondary='FAVORIS', back_populates='UTILISATEUR_')
     ROLE_: Mapped[Optional['ROLE']] = relationship('ROLE', back_populates='UTILISATEUR')
