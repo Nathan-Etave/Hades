@@ -30,7 +30,6 @@ redis = FlaskRedis()
 
 def create_app(config_class = Config, is_worker=False):
     from app.register import bp as register_bp
-    from app.api import bp as api_bp
     from app.notifications import bp as notifications_bp
     from app.login import bp as login_bp
     from app.home import bp as home_bp
@@ -81,7 +80,6 @@ def create_app(config_class = Config, is_worker=False):
         pubsub.subscribe(**{'process_status': handle_process_status_message})
         pubsub.run_in_thread(sleep_time=0.5)
 
-    app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/inscription')
     app.register_blueprint(notifications_bp, url_prefix='/notifications')
     app.register_blueprint(login_bp, url_prefix='/connexion')

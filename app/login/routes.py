@@ -3,7 +3,7 @@ Module for handling login routes.
 """
 
 from flask import render_template, redirect, url_for, flash
-from flask_login import login_user
+from flask_login import login_user, current_user
 from flask_bcrypt import check_password_hash, generate_password_hash
 from app.login import bp
 from app.models.utilisateur import UTILISATEUR
@@ -39,6 +39,8 @@ def login():
     Returns:
         The rendered login template with the login form and forgotten password form.
     """
+    if current_user is not None and current_user.is_authenticated:
+        return redirect(url_for("home.home"))
     form = LoginForm()
     mdp_form = ForgottenPasswordForm()
     if form.validate_on_submit():

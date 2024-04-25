@@ -28,6 +28,7 @@ def search():
         "search/index.html",
         is_authenticated=True,
         is_admin=current_user.id_Role == 1,
+        has_notifications=current_user.NOTIFICATION != [],
         folders=results,
         query=query,
         form=form,
