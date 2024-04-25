@@ -210,7 +210,7 @@ def create_folder(data):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
         return
     try:
         db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=folder.id_Dossier))
@@ -221,7 +221,7 @@ def create_folder(data):
         db.session.rollback()
         db.session.delete(folder)
         db.session.commit()
-        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
         return
     try:
         if parent_folder_id != 0:
@@ -234,6 +234,47 @@ def create_folder(data):
             db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Role == role).where(A_ACCES.c.id_Dossier == folder.id_Dossier))
         db.session.delete(folder)
         db.session.commit()
-        socketio.emit('folder_creation_failed', {'error': str(e)}, namespace='/administration')
+        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
         return
     socketio.emit('folder_created', {'folderId': folder.id_Dossier, 'folderName': folder_name, 'folderColor': folder.couleur_Dossier, 'parentFolderId': parent_folder_id}, namespace='/administration')
+
+@socketio.on('modify_folder', namespace='/administration')
+def modify_folder(data):
+    folder_id = data.get('folderId')
+    folder_name = data.get('folderName')
+    parent_folder_id = data.get('parentFolderId')
+    folder_roles = data.get('folderRoles')
+    folder_color = data.get('folderColor')
+    folder = DOSSIER.query.get(folder_id)
+    folder.nom_Dossier = folder_name
+    folder.couleur_Dossier = folder_color
+    try:
+        if parent_folder_id != 0:
+            db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
+            db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder_id))
+            db.session.commit()
+        else:
+            db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        return
+    try:
+        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder_id))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        return
+    try:
+        db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=folder_id))
+        for role in folder_roles:
+            db.session.execute(A_ACCES.insert().values(id_Role=role, id_Dossier=folder_id))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        return
+    db.session.commit()
+    socketio.emit('folder_modified', {'folderId': folder_id, 'folderName': folder_name, 'folderColor': folder_color}, namespace='/administration')

@@ -252,22 +252,57 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    const modalParentFolder = document.querySelector('#parentFolder');
+    const modalParentFolders = document.querySelectorAll('#parentFolder');
+    const modalExistingFolders = document.querySelector('#existingFolder');
     folders.forEach((folder) => {
-        modalParentFolder.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
+        modalParentFolders.forEach((select) => {
+            select.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
+        });
+        modalExistingFolders.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
     });
 
+    const modifyFolderModal = document.querySelector('#modifyFolderModal');
+    modalExistingFolders.addEventListener('change', function (event) {
+        let folderId = event.target.value;
+        if (folderId == '0') {
+            modifyFolderModal.querySelector('#folderName').value = '';
+            modifyFolderModal.querySelector('#parentFolder').value = '0';
+            modifyFolderModal.querySelectorAll('.role-checkbox:checked').forEach((cb) => {
+                cb.checked = false;
+            });
+            modifyFolderModal.querySelector('#folderColor').value = '#000000';
+            return;
+        }
+        let folderArray = Array.from(folders);
+        let folder = folderArray.find(f => f.dataset.folder == folderId);
+        modifyFolderModal.querySelector('#folderName').value = folder.dataset.name;
+        modifyFolderModal.querySelector('#parentFolder').value = folder.dataset.parent;
+        folder.dataset.roles.split(',').forEach((role) => {
+            if (role !== '1') {
+                modifyFolderModal.querySelector(`#role${role}`).checked = true;
+            }
+        });
+        modifyFolderModal.querySelector('#folderColor').value = folder.dataset.color;
+    });
+
+    const addFolderModal = document.querySelector('#addFolderModal');
     const createFolderButton = document.querySelector('#createFolderButton');
     createFolderButton.addEventListener('click', function (event) {
         if (fileTotal != fileUploadTotal) {
             return;
         }
-        let folderName = document.querySelector('#folderName').value;
-        let parentFolderId = document.querySelector('#parentFolder').value;
-        let folderRoles = Array.from(document.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
-        let folderColor = document.querySelector('#folderColor').value;
+        let folderName = addFolderModal.querySelector('#folderName').value;
+        let parentFolderId = addFolderModal.querySelector('#parentFolder').value;
+        let folderRoles = Array.from(addFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
+        let folderColor = addFolderModal.querySelector('#folderColor').value;
         createFolderButton.disabled = true;
-        socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+        if (folderName !== '') {
+            socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+        }
+        else {
+            alert('Veuillez remplir tous les champs.');
+            createFolderButton.disabled = false;
+        }
     });
 
     socket.on('folder_created', function (data) {
@@ -284,6 +319,44 @@ document.addEventListener('DOMContentLoaded', function () {
         if (fileTotal != fileUploadTotal) {
             event.preventDefault();
             alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un dossier.');
+            return;
+        }
+    });
+
+    const modifyFolderButton = document.querySelector('#modifyFolderButton');
+    modifyFolderButton.addEventListener('click', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            return;
+        }
+        let folderId = modifyFolderModal.querySelector('#existingFolder').value;
+        let folderName = modifyFolderModal.querySelector('#folderName').value;
+        let parentFolderId = modifyFolderModal.querySelector('#parentFolder').value;
+        let folderRoles = Array.from(modifyFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
+        let folderColor = modifyFolderModal.querySelector('#folderColor').value;
+        modifyFolderButton.disabled = true;
+        if (folderName !== '' && folderId !== '0') {
+            socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+        }
+        else {
+            alert('Veuillez remplir tous les champs.');
+            modifyFolderButton.disabled = false;
+        }
+    });
+
+    socket.on('folder_modified', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('folder_not_modified', function (data) {
+        alert(`La modification du dossier a échoué: ${data.error}`);
+        modifyFolderButton.disabled = false;
+    });
+
+    const formModifyFolder = document.querySelector('#modifyFolderModal').querySelector('form');
+    formModifyFolder.addEventListener('submit', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            event.preventDefault();
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de modifier un dossier.');
             return;
         }
     });
