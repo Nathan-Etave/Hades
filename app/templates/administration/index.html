@@ -43,8 +43,8 @@
                         <div class="me-2" data-trigger-accordion="">
                             <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
-                        <div data-trigger-accordion="" id="fileCount">
-                            {{ folder.FICHIER|length }}
+                        <div data-trigger-accordion="">
+                            <span id="fileCount" data-trigger-accordion="">{{ folder.FICHIER|length }}</span> <span id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count(folder) }})</span>
                         </div>
                     </div>
                     <div class="d-flex me-2" style="margin-left: 1rem;">
@@ -65,6 +65,10 @@
                         </label>
                     </form>
                 </div>
+                <div class="me-2">
+                    <input type="checkbox" class="me-2 folder-checkbox" style="cursor: pointer; transform: scale(1.5);"
+                        data-folder="{{ folder.id_Dossier }}">
+                </div>
             </div>
         </button>
     </h2>
@@ -79,8 +83,8 @@
             <div class="accordion mt-2 pt-2" id="filesAccordion{{ folder.id_Dossier }}"
                 style="height: 50vh; overflow: auto;">
                 {% for file in folder.FICHIER %}
-                <div class="card mt-1 mb-1 me-2" style="height: 5vh" id="file-{{ file.id_Fichier }}">
-                    <div class="card-body">
+                <div class="card mt-1 mb-1 me-2" id="file-{{ file.id_Fichier }}">
+                    <div class="card-body text-wrap">
                         <div class="d-flex me-2 w-100 justify-content-between align-items-baseline"
                             style="cursor: pointer;">
                             <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file"
@@ -94,13 +98,8 @@
                                 </div>
                             </div>
                             <div class="me-2 d-flex">
-                                <a href="/dossier/{{ folder.id_Dossier }}/fichier/{{ file.id_Fichier }}?as_attachment=true"
-                                    style="display: inherit;">
-                                    <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;"
-                                        data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
-                                </a>
-                                <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;"
-                                    data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                <input type="checkbox" class="me-2 file-checkbox" style="cursor: pointer; transform: scale(1.5);"
+                                    data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}">
                             </div>
                         </div>
                     </div>
@@ -315,5 +314,13 @@
         </div>
     </div>
 </div>
+<div class="dropdown position-fixed bottom-0 end-0 m-3 d-none" id="actionsDropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="actionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
+      Actions
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="actionsMenu">
+        <li class="dropdown-item" id="actionDownload" style="cursor: pointer;">Télécharger les éléments sélectionnés</li>
+    </ul>
+  </div>    
 {% include 'components/preview.html' %}
 {% endblock %}

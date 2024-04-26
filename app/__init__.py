@@ -20,6 +20,7 @@ from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
+from app.utils import check_notitications, get_total_file_count
 
 
 crsf = CSRFProtect()
@@ -79,6 +80,11 @@ def create_app(config_class = Config, is_worker=False):
         pubsub.subscribe(**{'worker_status': handle_worker_status_message})
         pubsub.subscribe(**{'process_status': handle_process_status_message})
         pubsub.run_in_thread(sleep_time=0.5)
+
+    @app.context_processor
+    def utility_processor():
+        return dict(get_total_file_count=get_total_file_count,
+                    check_notitications=check_notitications)
 
     app.register_blueprint(register_bp, url_prefix='/inscription')
     app.register_blueprint(notifications_bp, url_prefix='/notifications')

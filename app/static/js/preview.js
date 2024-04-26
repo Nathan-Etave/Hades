@@ -61,7 +61,7 @@ export function previewAfterRender() {
 
     function iframeElement(fileId, folderId) {
         const iframe = document.createElement('iframe');
-        iframe.src = `/dossier/${folderId}/fichier/${fileId}`;
+        iframe.src = `/classeur/${folderId}/fichier/${fileId}`;
         iframe.width = '100%';
         iframe.height = '100%';
         return iframe;
@@ -74,7 +74,7 @@ export function previewAfterRender() {
     }
 
     async function docxElement(fileId, folderId) {
-        const url = `/dossier/${folderId}/fichier/${fileId}`;
+        const url = `/classeur/${folderId}/fichier/${fileId}`;
         const data = await (await fetch(url)).arrayBuffer();
         const result = await mammoth.convertToHtml({ arrayBuffer: new Uint8Array(data) });
         const div = document.createElement('div');
@@ -83,7 +83,7 @@ export function previewAfterRender() {
     }
 
     async function spreadsheetElement(fileId, folderId) {
-        const url = `/dossier/${folderId}/fichier/${fileId}`;
+        const url = `/classeur/${folderId}/fichier/${fileId}`;
         const data = await (await fetch(url)).arrayBuffer();
         const workbook = XLSX.read(new Uint8Array(data), { type: 'array', cellStyles: true });
 
