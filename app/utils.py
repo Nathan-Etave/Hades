@@ -257,3 +257,9 @@ def check_notitications():
         bool: True if there is any notification, False otherwise.
     """
     return NOTIFICATION.query.all() != []
+
+def get_total_file_count(folder):
+    total = len(folder.FICHIER)
+    for subfolder in folder.DOSSIER_:
+        total += get_total_file_count(subfolder)
+    return total

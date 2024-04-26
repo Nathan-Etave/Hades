@@ -6,7 +6,7 @@ from app import socketio
 from app.extensions import db
 from app.models.favoris import FAVORIS
 
-@bp.route('/dossier/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
+@bp.route('/classeur/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
 @login_required
 def file(folder_id, file_id):
     file = FICHIER.query.get(file_id)

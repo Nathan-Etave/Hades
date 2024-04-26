@@ -89,15 +89,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('#totalFilesProcessed').innerHTML = data;
     });
 
-    const trashBtn = document.querySelectorAll('#trash-btn');
-    trashBtn.forEach((btn) => {
-        btn.addEventListener('click', async function (event) {
-            let fileId = event.target.dataset.file;
-            let folderId = event.target.dataset.folder
-            socket.emit('trash_file', { fileId: fileId, folderId: folderId });
-        });
-    });
-
     socket.on('file_deleted', function (data) {
         let file = document.querySelector(`#file-${data.fileId}`);
         file.remove();
@@ -310,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_created', function (data) {
-        alert(`La création du dossier a échoué: ${data.error}`);
+        alert(`La création du classeur a échoué: ${data.error}`);
         createFolderButton.disabled = false;
     });
 
@@ -318,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
     formCreateFolder.addEventListener('submit', function (event) {
         if (fileTotal != fileUploadTotal) {
             event.preventDefault();
-            alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un dossier.');
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un classeur.');
             return;
         }
     });
@@ -348,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_modified', function (data) {
-        alert(`La modification du dossier a échoué: ${data.error}`);
+        alert(`La modification du classeur a échoué: ${data.error}`);
         modifyFolderButton.disabled = false;
     });
 
@@ -356,8 +347,108 @@ document.addEventListener('DOMContentLoaded', function () {
     formModifyFolder.addEventListener('submit', function (event) {
         if (fileTotal != fileUploadTotal) {
             event.preventDefault();
-            alert('Veuillez attendre la fin du téléversement des fichiers avant de modifier un dossier.');
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.');
             return;
         }
+    });
+
+    let isFolderChecked = false;
+    const actionsDropdown = document.querySelector('#actionsDropdown');
+    const folderCheckboxes = document.querySelectorAll('.folder-checkbox');
+    folderCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', function (event) {
+            let folderId = event.target.dataset.folder;
+            let subfolders = document.querySelectorAll(`.folder-${folderId} .folder-checkbox`);
+            let files = document.querySelectorAll(`.folder-${folderId} .file-checkbox`);
+            subfolders.forEach((subfolder) => {
+                if (subfolder !== checkbox) {
+                    subfolder.checked = event.target.checked;
+                    subfolder.disabled = event.target.checked;
+                }
+                let subfolderId = subfolder.dataset.folder;
+                let subfolderFiles = document.querySelectorAll(`.folder-${subfolderId} .file-checkbox`);
+                subfolderFiles.forEach((file) => {
+                    file.checked = event.target.checked;
+                    file.disabled = event.target.checked;
+                });
+            });
+            files.forEach((file) => {
+                file.checked = event.target.checked;
+                file.disabled = event.target.checked;
+            });
+            isFolderChecked = Array.from(folderCheckboxes).some(cb => cb.checked);
+            if (isFolderChecked) {
+                actionsDropdown.classList.remove('d-none');
+                if (!document.querySelector('#actionArchive')) {
+                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item" id="actionArchive" style="cursor: pointer;">Archiver le/les classeur(s) sélectionné(s)</li>');
+                    if (document.querySelector('#actionDelete')) {
+                        actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
+                    }
+                    actionsDropdown.querySelector('#actionArchive').addEventListener('click', async function (event) {
+                        let folders = Array.from(folderCheckboxes).filter(cb => cb.checked);
+                        let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
+                        let folderIds = folders.map(cb => cb.dataset.folder);
+                        let fileIds = files.map(cb => cb.dataset.file);
+                        let folderFiles = [];
+                        for (let folderId of folderIds) {
+                            folderFiles.push(Array.from(document.querySelectorAll(`.folder-${folderId} .file-checkbox:checked`)).map(cb => cb.dataset.file));
+                        }
+                        let allFiles = [];
+                        folderFiles.forEach((files) => {
+                            allFiles.push(...files);
+                        });
+                        let folderFilesIds = Array.from(new Set(allFiles));
+                        if (folderFilesIds.length === fileIds.length) {
+                            let confirmation = confirm('Voulez-vous vraiment archiver le/les classeurs(s) sélectionné(s) ?');
+                            if (confirmation) {
+                                console.log('Archive');
+                                console.log(folderIds);
+                            }
+                        }
+                        else {
+                            alert('Les fichiers sélectionnés ne sont pas tous dans les classeurs sélectionnés.');
+                        }
+                    });
+                }
+            }
+            else {
+                actionsDropdown.classList.add('d-none');
+                actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
+            }
+        });
+    });
+
+    const filesCheckboxes = document.querySelectorAll('.file-checkbox');
+    filesCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', function (event) {
+            let folderId = event.target.dataset.folder;
+            let folderCheckbox = document.querySelector(`.folder-checkbox[data-folder="${folderId}"]`);
+            let files = document.querySelectorAll(`.folder-${folderId} .file-checkbox`);
+            let filesChecked = Array.from(files).filter(cb => cb.checked);
+            if (filesChecked.length > 0) {
+                isFolderChecked = true;
+                actionsDropdown.classList.remove('d-none');
+                if (!document.querySelector('#actionDelete')) {
+                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item" id="actionDelete" style="cursor: pointer;">Supprimer le/les fichier(s) sélectionné(s)</li>');
+                    actionsDropdown.querySelector('#actionDelete').addEventListener('click', async function (event) {
+                        let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
+                        let fileIds = files.map(cb => cb.dataset.file);
+                        let confirmation = confirm('Voulez-vous vraiment supprimer le/les fichier(s) sélectionné(s) ?');
+                        if (confirmation) {
+                            console.log('Delete');
+                            console.log(fileIds);
+                        }
+                    });
+                }
+            }
+            else {
+                isFolderChecked = Array.from(folderCheckboxes).some(cb => cb.checked);
+                if (!isFolderChecked) {
+                    actionsDropdown.classList.add('d-none');
+                    actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
+                    actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
+                }
+            }
+        });
     });
 }); 
