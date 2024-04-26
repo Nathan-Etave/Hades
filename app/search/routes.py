@@ -76,7 +76,7 @@ def create_folder_dict(folder, files):
         dict: A dictionary representation of the folder, including its name, files, color, id, and subfolders.
     """
     files_in_folder = [
-        result for result in files if result["path"].startswith(str(folder.id_Dossier))
+        result for result in files if result["path"] == (str(folder.id_Dossier))
     ]
     subfolders = recursive_subfolder(folder, files)
     return {

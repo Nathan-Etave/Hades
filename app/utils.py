@@ -2,7 +2,7 @@ from threading import Lock
 from whoosh.fields import Schema, TEXT, STORED, KEYWORD, ID
 from whoosh.index import create_in, open_dir
 from whoosh.query import *
-from whoosh.analysis import StandardAnalyzer
+from whoosh.analysis import StandardAnalyzer, KeywordAnalyzer
 import os.path
 from flask import current_app
 from concurrent.futures import ThreadPoolExecutor
@@ -51,7 +51,7 @@ class SingletonMeta(type):
 class Whoosh(metaclass=SingletonMeta):
     def __init__(self):
         analyzer = StandardAnalyzer(stoplist=None)
-        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True))
+        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(analyzer=KeywordAnalyzer(), stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True))
         with current_app.app_context():
             if not os.path.exists(f'{current_app.root_path}/storage/index') :
                 os.mkdir(f'{current_app.root_path}/storage/index')
@@ -101,6 +101,7 @@ class Whoosh(metaclass=SingletonMeta):
                 else :
                     result_field['favori'] = False
                 results_list.append(result_field)
+        print(results_list)
         return results_list
 
 
