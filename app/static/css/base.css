@@ -7,9 +7,8 @@ body {
     font-family: "Poppins",sans-serif
 }
 
-.logo_container,header {
-    display: flex;
-    flex-direction: row
+h1 {
+    color: #000000;
 }
 
 header {
@@ -20,48 +19,46 @@ header {
     padding-right: 2rem
 }
 
-.logo_container {
-    margin-left: 2rem
+.logo-container {
+    margin-left: 2rem;
+    gap: 2rem;
 }
 
-.logo_sdis {
-    height: 6.5rem;
+.logo-img {
+    height: 8rem;
     margin-left: 1rem
 }
 
-.nav_item>li:not(:last-child)>a {
-    color: #004f8a;
-    text-decoration: none;
-    font-size: 1.5rem;
+.nav-item>li:not(:last-child)>a {
     margin: .1rem 2rem;
-    background-image: linear-gradient(#ea4e4e,#ea4e4e);
+    background-image: linear-gradient(#000000,#000000);
     background-size: 2rem .15em;
     background-position-y: 100%;
     background-position-x: 0;
     background-repeat: no-repeat;
     transition: background-size .2s ease-in-out
 }
-.nav_item>li:not(:last-child)>a:hover {
-    background-image: linear-gradient(#004f8a,#004f8a);
+.nav-item>li:not(:last-child)>a:hover {
+    background-image: linear-gradient(#ecb900,#ecb900);
     background-size: 100% .15em
 }
 
-.nav_item>li:last-child>a {
+.nav-item>li:last-child>a {
     display: inline-block;
     width: 2rem;
 }
 
-.nav_item,.navbar {
+.nav-item,.navbar {
     display: flex;
     align-items: center
 }
 
-.nav_item {
+.nav-item {
     list-style-type: none;
     gap: 0.5rem
 }
 
-.nav_item li {
+.nav-item li {
     white-space: nowrap
 }
 
@@ -71,15 +68,13 @@ header {
 }
 
 #number {
-    background-color: #ea4e4e;
+    background-color: #ecb900;
     width: 25px;
     height: 25px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
-    color: white;
-}
-
-#desktop {
-    margin-right: 0rem;
+    color: #000000;
+    position: relative;
+    bottom: 10px;
 }

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     fileInput.forEach((input) => {
         input.addEventListener('change', async function (event) {
-            let tags = prompt('Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags');
+            let tags = prompt('Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags.');
             if (tags === null) {
                 event.target.value = '';
                 return;
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('file_deletion_failed', function (data) {
-        alert('La suppression du fichier a échoué');
+        alert('La suppression du fichier a échoué.');
     });
 
     const folders = document.querySelectorAll('#folder');

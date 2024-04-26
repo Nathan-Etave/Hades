@@ -93,10 +93,10 @@ def create_app(config_class = Config, is_worker=False):
 
 def fill_db():
     if not ROLE.query.all():
+        db.session.add(ROLE(nom_Role="ADMIN"))
         db.session.add(ROLE(nom_Role="RCH4"))
         db.session.add(ROLE(nom_Role="RCH3"))
-        db.session.add(ROLE(nom_Role="RCH2"))
-        db.session.add(ROLE(nom_Role="RCH1"))
+        db.session.add(ROLE(nom_Role="RCH1/2"))
         db.session.commit()
 
     if not DOSSIER.query.all():
@@ -107,16 +107,18 @@ def fill_db():
         db.session.add(DOSSIER(nom_Dossier="Support formation", priorite_Dossier=5, couleur_Dossier="#ffccff"))
         db.session.add(DOSSIER(nom_Dossier="Mémoire", priorite_Dossier=6, couleur_Dossier="#cc99ff"))
         db.session.add(DOSSIER(nom_Dossier="Thèse", priorite_Dossier=7, couleur_Dossier="#ccccff"))
-        db.session.add(DOSSIER(nom_Dossier="À trier", priorite_Dossier=8, couleur_Dossier="#99ccff"))
-        db.session.add(DOSSIER(nom_Dossier="Confidentiel", priorite_Dossier=9, couleur_Dossier="#ccffff"))
+        db.session.add(DOSSIER(nom_Dossier="À trier", priorite_Dossier=8, couleur_Dossier="#ccffff"))
         db.session.commit()
 
     if not db.session.query(A_ACCES).all():
         for dossier in DOSSIER.query.all():
             db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=dossier.id_Dossier))
+            db.session.execute(A_ACCES.insert().values(id_Role=2, id_Dossier=dossier.id_Dossier))
+            db.session.execute(A_ACCES.insert().values(id_Role=3, id_Dossier=dossier.id_Dossier))
+            db.session.execute(A_ACCES.insert().values(id_Role=4, id_Dossier=dossier.id_Dossier))
         db.session.commit()
 
     if not UTILISATEUR.query.all():
-        db.session.add(UTILISATEUR(nom_Utilisateur="admin", prenom_Utilisateur="admin", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", est_Actif_Utilisateur=True, id_Role=1))
+        db.session.add(UTILISATEUR(nom_Utilisateur="Administrateur", prenom_Utilisateur="", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", telephone_Utilisateur="", est_Actif_Utilisateur=True, id_Role=1))
         # password: O]SxR=rBv%
         db.session.commit()

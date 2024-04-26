@@ -49,17 +49,17 @@
                     </div>
                     <div class="d-flex me-2" style="margin-left: 1rem;">
                         <input data-folder="{{ folder.id_Dossier }}" type="text" id="fileSearch"
-                            placeholder="Rechercher dans le dossier" class="form-control"
+                            placeholder="Rechercher dans le classeur" class="form-control"
                             style="border-radius: 50px; padding: 5px 10px;">
                     </div>
                 </div>
                 <div class="me-2">
                     <form method="POST" enctype="multipart/form-data">
-                        <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un/plusieurs fichier(s)
+                        <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Importer un/plusieurs fichier(s)
                             <input type="file" name="file" id="file{{ folder.id_Dossier }}" style="display: none;"
                                 multiple class="file-input" data-folder="{{ folder.id_Dossier }}">
                         </label>
-                        <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un dossier
+                        <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Importer un dossier
                             <input type="file" name="folder" id="folder{{ folder.id_Dossier }}" style="display: none;"
                                 multiple webkitdirectory class="file-input" data-folder="{{ folder.id_Dossier }}">
                         </label>
@@ -204,9 +204,9 @@
                 {% endfor %}
                 <div class="text-end">
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#addFolderModal">Créer un dossier</button>
+                        data-bs-target="#addFolderModal">Créer un classeur</button>
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                    data-bs-target="#modifyFolderModal">Modifier un dossier</button>
+                    data-bs-target="#modifyFolderModal">Modifier un classeur</button>
                 </div>
             </div>
             <h3 class="text-center">Gestion des utilisateurs</h3>
@@ -225,17 +225,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addFolderModalLabel">Créer un dossier</h5>
+                <h5 class="modal-title" id="addFolderModalLabel">Créer un classeur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <label for="folderName" class="form-label">Nom du classeur</label>
                         <input type="text" class="form-control" id="folderName" required>
                     </div>
                     <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <label for="parentFolder" class="form-label">Classeur parent</label>
                         <select class="form-control" id="parentFolder">
                             <option value="0">Aucun</option>
                         </select>
@@ -254,11 +254,11 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <label for="folderColor" class="form-label">Couleur du classeur</label>
                         <input type="color" class="form-control" id="folderColor" required>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le dossier</button>
+                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le classeur</button>
                     </div>
                 </form>
             </div>
@@ -269,23 +269,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un dossier</h5>
+                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un classeur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="mb-3">
-                        <label for="existingFolder" class="form-label">Dossier à modifier</label>
+                        <label for="existingFolder" class="form-label">Classeur à modifier</label>
                         <select class="form-control" id="existingFolder">
                             <option value="0">Aucun</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <label for="folderName" class="form-label">Nom du classeur</label>
                         <input type="text" class="form-control" id="folderName" required>
                     </div>
                     <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <label for="parentFolder" class="form-label">Classeur parent</label>
                         <select class="form-control" id="parentFolder">
                             <option value="0">Aucun</option>
                         </select>
@@ -304,11 +304,11 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <label for="folderColor" class="form-label">Couleur du classeur</label>
                         <input type="color" class="form-control" id="folderColor" required>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le dossier</button>
+                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le classeur</button>
                     </div>
                 </form>
             </div>
