@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
         search_bar.value += " | "
     });
 
-    let favorites_btn = document.querySelectorAll(".favori");
+    let favorites_btn = document.querySelectorAll(".favori-home");
     favorites_btn.forEach(function (btn) {
         btn.addEventListener('click', function () {
             let id = btn.id;
@@ -39,6 +39,61 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     });
+
+    let favs = document.querySelectorAll('.favori');
+        favs.forEach(function (fav) {
+            let id = fav.id;
+            let isFav = fav.getAttribute('is-fav');
+            let etoile = document.getElementById("fav-" + id);
+            if (isFav === "True") {
+                fav.className = "favori-true";
+            }
+            else {
+                fav.className = "favori-false";
+                etoile.className = "fa-regular fa-star fa-lg me-2";
+            }
+            fav.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (fav.className === "favori-true") {
+                    fetch("favori/" + id, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "ok") {
+                                fav.className = "favori-false";
+                                etoile.className = "fa-regular fa-star fa-lg me-2";
+                            }
+                            else {
+                                alert("Erreur lors de la suppression du favori");
+                            }
+                        });
+                }
+                else {
+                    fetch("favori/" + id, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "ok") {
+                                fav.className = "favori-true";
+                                etoile.className = "fa-solid fa-star fa-lg me-2";
+                            }
+                            else {
+                                alert("Erreur lors de l'ajout du favori");
+                            }
+                        });
+                }
+            });
+        });
 
     let search_tiles = document.querySelectorAll(".search_term");
     let search_btn = document.getElementById("search_btn");

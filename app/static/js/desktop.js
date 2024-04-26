@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const socket = io.connect('/file_handler');
     socket.emit('get_files_details', { 'files': deskList });
 
-    let currentFile = 1;
+    let currentFile = 0;
     let desktop = document.getElementById('desk-section');
 
     socket.on('files_details', function (data) {
@@ -182,9 +182,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.addEventListener('keydown', function (event) {
         let nbFiles = document.querySelectorAll('#file').length;
-        let nav = document.querySelector('.nav-' + currentFile);
-        nav.classList.remove('active');
         if (currentFile !== 0) {
+            let nav = document.querySelector('.nav-' + currentFile);
+            nav.classList.remove('active');
             if (event.key === 'ArrowRight') {
                 currentFile++;
                 if (currentFile > nbFiles) {
