@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
             card.style.border = '3px solid #004F8A';
 
             let fileDiv = document.createElement('div');
-            fileDiv.className = 'card-body file-' + deskFileNumber;
+            fileDiv.className = 'card-body d-flex flex-column file-' + deskFileNumber;
             fileDiv.setAttribute('data-file', file.id_Fichier);
             fileDiv.setAttribute('data-folder', file.id_Dossier);
             fileDiv.setAttribute('data-type', file.extension_Fichier);
@@ -47,18 +47,23 @@ document.addEventListener('DOMContentLoaded', function () {
                                  <div>
                                     <p class="card-title h5" style="font-size: 1.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${file.nom_Fichier}<p>
                                  </div>
-                                 <div class="desktop-element">
+                                 <div class="desktop-element mt-auto d-flex justify-content-center">
                                     <a href="#" id="${ file.id_Fichier }" class="favori" is-fav="${ file.is_favorite }" onclick="event.stopPropagation();">
                                         <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"
                                             id="fav-${ file.id_Fichier }"></i>
                                     </a>
                                     <a href="#" id="${ file.id_Fichier }" class="desktop-btn" onclick="event.stopPropagation();">
-                                        <i class="fa-regular fa-square-minus fa-lg" id="desk-${ file.id_Fichier }"></i>
+                                        <i class="fa-regular fa-square-minus fa-lg me-2" id="desk-${ file.id_Fichier }"></i>
+                                    </a>
+                                    <a href="/dossier/${ file.id_Dossier }/fichier/${ file.id_Fichier }?as_attachment=true"
+                                        style="display: inherit;">
+                                        <i class="fa fa-download mt-1" aria-hidden="true" style="cursor: pointer;"
+                                            data-file="${ file.id_Fichier }" data-folder="${ file.id_Dossier }"></i>
                                     </a>
                                  </div>`;
 
             fileDiv.addEventListener('click', function () {
-                let fileNumber = parseInt(fileDiv.className.split(' ')[1].split('-')[1], 10);
+                let fileNumber = parseInt(fileDiv.className.split('-')[4]);
                 let nav = document.querySelector('.nav-' + fileNumber);
                 nav.classList.add('active');
                 currentFile = fileNumber;

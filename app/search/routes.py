@@ -20,7 +20,7 @@ def search():
     Returns:
         A rendered template with the search results, query, and search form.
     """
-    query = request.args.get("query")
+    query = request.args.get("q")
     whoosh = Whoosh()
     results = whoosh.search(query)
     results = create_rendered_list(results)

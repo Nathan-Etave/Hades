@@ -30,7 +30,7 @@ def home():
     form = SearchForm()
     if form.validate_on_submit():
         add_research(current_user.id_Utilisateur, form.search.data)
-        return redirect(url_for("search.search", query=form.search.data))
+        return redirect(url_for("search.search", q=form.search.data))
     return render_template(
         "home/index.html",
         is_authenticated=True,

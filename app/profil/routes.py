@@ -8,6 +8,7 @@ from app.forms.edit_profil_form import Edit_profil_form
 from flask_bcrypt import check_password_hash, generate_password_hash
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications
+from app.models.role import ROLE
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -24,6 +25,7 @@ def profil():
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
         user=current_user,
+        user_role= db.session.query(ROLE.nom_Role).filter(ROLE.id_Role == current_user.id_Role).first()[0],
         edit_mode=False,
     )
 
