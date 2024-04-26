@@ -96,12 +96,11 @@ class Whoosh(metaclass=SingletonMeta):
             for result in results:
                 result_field = result.fields()
                 result_field['extension'] = result_field['title'].split('.')[-1]
-                if result_field['id'] in favoris_ids:
+                if int(result_field['id']) in favoris_ids:
                     result_field['favori'] = True
                 else :
                     result_field['favori'] = False
                 results_list.append(result_field)
-        print(results_list)
         return results_list
 
 

@@ -1,6 +1,6 @@
 from app.home import bp
 from flask_login import login_required, current_user
-from flask import render_template, jsonify, redirect, url_for
+from flask import render_template, jsonify, redirect, url_for, request, current_app
 from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
@@ -8,6 +8,10 @@ from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
 from app.utils import check_notitications
+from app.models.dossier import DOSSIER
+from app.utils import Whoosh
+from app import socketio
+from fasteners import InterProcessLock
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -28,9 +32,15 @@ def home():
     favorite_files = get_files_favoris(current_user.id_Utilisateur)
     researches = get_user_researches(current_user.id_Utilisateur)
     form = SearchForm()
+
+    query = ""
+    whoosh = Whoosh()
+    form = SearchForm()
     if form.validate_on_submit():
         add_research(current_user.id_Utilisateur, form.search.data)
-        return redirect(url_for("search.search", q=form.search.data))
+        query = form.search.data
+    results = whoosh.search(query)
+    results = create_rendered_list(results)
     return render_template(
         "home/index.html",
         is_authenticated=True,
@@ -38,14 +48,37 @@ def home():
         has_notifications=check_notitications(),
         favorite_files=favorite_files,
         researches=researches,
+        folders=results,
+        query=query,
         form=form,
     )
 
 
-@bp.route("/favori/<int:id_file>", methods=["DELETE"])
+@bp.route("/favori/<int:id_file>", methods=["POST", "DELETE"])
 @login_required
-def unfavorize(id_file):
-    unfavorite_file(id_file, current_user.get_id())
+def favorize(id_file):
+    """
+    Favorize or unfavorize a file for the current user.
+
+    Args:
+        id_file (int): The ID of the file to favorize or unfavorize.
+
+    Returns:
+        dict: A JSON response indicating the status of the operation.
+            The response will have a 'status' key with the value 'ok'.
+    """
+    if request.method == "POST":
+        db.session.execute(
+            FAVORIS.insert().values(
+                id_Fichier=id_file, id_Utilisateur=current_user.id_Utilisateur
+            )
+        )
+    else:
+        db.session.query(FAVORIS).filter(
+            FAVORIS.c.id_Fichier == id_file,
+            FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur,
+        ).delete()
+    db.session.commit()
     return jsonify({"status": "ok"})
 
 
@@ -111,16 +144,76 @@ def add_research(user_id, search):
     db.session.commit()
     db.session.commit()
 
+#--------------------------------------------------------------------------
 
-def unfavorite_file(file_id, user_id):
+def create_folder_dict(folder, files):
     """
-    Remove a file from the favorites of a user.
+    Create a dictionary representation of a folder.
 
     Args:
-        file_id (int): The ID of the file.
-        user_id (int): The ID of the user.
+        folder (Folder): The folder object.
+        files (list): A list of file objects.
+
+    Returns:
+        dict: A dictionary representation of the folder, including its name, files, color, id, and subfolders.
     """
-    db.session.query(FAVORIS).filter(
-        FAVORIS.c.id_Fichier == file_id, FAVORIS.c.id_Utilisateur == user_id
-    ).delete()
-    db.session.commit()
+    files_in_folder = [
+        result for result in files if result["path"] == (str(folder.id_Dossier))
+    ]
+    subfolders = recursive_subfolder(folder, files)
+    return {
+        "name": folder.nom_Dossier,
+        "files": files_in_folder,
+        "color": folder.couleur_Dossier,
+        "id": folder.id_Dossier,
+        "subfolder": subfolders
+    }
+
+def create_rendered_list(results):
+    """
+    Create a rendered list of folders and their associated results.
+
+    Args:
+        results (list): A list of results.
+
+    Returns:
+        list: A list of dictionaries representing folders and their associated results.
+    """
+    folders = db.session.query(DOSSIER).order_by(DOSSIER.priorite_Dossier).all()
+    folders_root = [folder for folder in folders if folder.DOSSIER == [] and is_accessible(folder)]
+    return [create_folder_dict(folder, results) for folder in folders_root]
+
+
+def recursive_subfolder(folder, files):
+    """
+    Recursively searches for subfolders in the given folder and creates a list of dictionaries
+    containing information about each subfolder.
+
+    Args:
+        folder (str): The path of the folder to search for subfolders.
+        files (list): A list of files to include in the dictionaries.
+
+    Returns:
+        list: A list of dictionaries containing information about each subfolder.
+    """
+    return [create_folder_dict(subfolder, files) for subfolder in folder.DOSSIER_ if is_accessible(subfolder)]
+
+def is_accessible(folder):
+    """
+    Check if the current user has access to the given folder.
+
+    Args:
+        folder (Folder): The folder to check.
+
+    Returns:
+        bool: True if the user has access to the folder, False otherwise.
+    """
+    return any(current_user.id_Role == role.id_Role for role in folder.ROLE)
+
+@socketio.on('search_files', namespace='/home')
+def search_files(data):
+    search_query = data.get('query')
+    with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
+        search_results = Whoosh().search(search_query)
+    search_results = create_rendered_list(search_results)
+    socketio.emit('search_results', search_results, namespace='/search')
