@@ -79,7 +79,7 @@ def favorize(id_file):
             FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur,
         ).delete()
     db.session.commit()
-    return jsonify({"status": "ok"})
+    return jsonify({"file": id_file}), 200
 
 
 def get_files_favoris(user_id):
