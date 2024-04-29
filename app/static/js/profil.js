@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     btnVerif.addEventListener('click', function () {
-        console.log("OK")
         let verifPassword = document.getElementById("verif_password");
         password = verifPassword.value
         fetch('verification', {
@@ -18,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.json())
             .then(response => {
-                console.log(response.verif)
                 if (response.verif) {
                     window.location.href = "edit";
                 }

@@ -98,33 +98,6 @@ def connect():
     )
 
 
-@socketio.on("trash_file", namespace="/administration")
-def trash_file(data):
-    try:
-        file_id = data.get("fileId")
-        folder_id = data.get("folderId")
-        with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
-            Whoosh().delete_document(file_id)
-        file = FICHIER.query.get(file_id)
-        db.session.delete(file)
-        os.remove(
-            os.path.join(
-                current_app.root_path,
-                "storage",
-                folder_id,
-                f"{file_id}.{file.extension_Fichier}",
-            )
-        )
-        db.session.commit()
-        socketio.emit("file_deleted", data, namespace="/administration")
-    except Exception as e:
-        socketio.emit(
-            "file_deletion_failed",
-            {**data, "error": str(e)},
-            namespace="/administration",
-        )
-
-
 @socketio.on("search_files", namespace="/administration")
 def search_files(data):
     search_query = data.get("query")
@@ -249,6 +222,9 @@ def modify_folder(data):
     folder.nom_Dossier = folder_name
     folder.couleur_Dossier = folder_color
     try:
+        if parent_folder_id == folder_id:
+            socketio.emit('folder_not_modified', {'error': 'Un dossier ne peut pas être son propre parent.'}, namespace='/administration')
+            return
         if parent_folder_id != 0:
             db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
             db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder_id))
@@ -278,3 +254,50 @@ def modify_folder(data):
         return
     db.session.commit()
     socketio.emit('folder_modified', {'folderId': folder_id, 'folderName': folder_name, 'folderColor': folder_color}, namespace='/administration')
+
+@socketio.on('archive_folders', namespace='/administration')
+def archive_folders(data):
+    folder_ids = data.get('folderIds')
+    try:
+        for folder_id in folder_ids:
+            database_folder = DOSSIER.query.get(folder_id)
+            if folder_id == '10':
+                pass
+            elif database_folder.DOSSIER != [] and database_folder.DOSSIER[0].id_Dossier == 10:
+                pass
+            elif database_folder.DOSSIER != [] and str(database_folder.DOSSIER[0].id_Dossier) in folder_ids:
+                pass
+            else:
+                if database_folder.DOSSIER != []:
+                    db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
+                db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=10, id_Dossier_Enfant=folder_id))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folders_not_archived', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('folders_archived', {'folderIds': folder_ids}, namespace='/administration')
+
+@socketio.on('delete_files', namespace='/administration')
+def delete_files(data):
+    file_ids = data.get('fileIds')
+    try:
+        for file_id in file_ids:
+            with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+                Whoosh().delete_document(file_id)
+            database_file = FICHIER.query.get(file_id)
+            db.session.delete(database_file)
+            os.remove(
+                os.path.join(
+                    current_app.root_path,
+                    "storage",
+                    str(database_file.id_Dossier),
+                    f"{file_id}.{database_file.extension_Fichier}",
+                )
+            )
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('files_deleted', {'fileIds': file_ids}, namespace='/administration')

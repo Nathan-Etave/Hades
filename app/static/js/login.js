@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     reactivationButton.addEventListener('click', function () {
         let email_user = document.getElementById("email").value;
         let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        console.log(email_user);
         fetch("/connexion/notification", {
             method: "POST",
             body: JSON.stringify({
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.href = "/connexion";
                 }
                 if (response.status === 404) {
-                    console.log(response.body.error);
                     if (response.body.error === "user not found") {
                         alert("Aucun utilisateur n'est associé à cet email.");
                     }
