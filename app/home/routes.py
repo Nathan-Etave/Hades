@@ -212,8 +212,8 @@ def is_accessible(folder):
 
 @socketio.on('search_files', namespace='/home')
 def search_files(data):
-    search_query = data.get('query')
-    with InterProcessLock(f'{current_app.root_path}/whoosh.lock'):
-        search_results = Whoosh().search(search_query)
-    search_results = create_rendered_list(search_results)
-    socketio.emit('search_results', search_results, namespace='/search')
+    search_query = data.get("query")
+    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
+        search_results = [result["id"] for result in search_results]
+    socketio.emit("search_results", {'query': search_query, 'results': search_results, 'folderId': data.get("folderId")}, namespace="/home")
