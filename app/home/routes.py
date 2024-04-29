@@ -29,8 +29,6 @@ def home():
     Returns:
         The rendered home page template.
     """
-    favorite_files = get_files_favoris(current_user.id_Utilisateur)
-    researches = get_user_researches(current_user.id_Utilisateur)
     form = SearchForm()
 
     query = ""
@@ -41,6 +39,8 @@ def home():
         query = form.search.data
     results = whoosh.search(query)
     results = create_rendered_list(results)
+    favorite_files = get_files_favoris(current_user.id_Utilisateur)
+    researches = get_user_researches(current_user.id_Utilisateur)
     return render_template(
         "home/index.html",
         is_authenticated=True,
