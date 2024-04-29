@@ -23,8 +23,9 @@
 {% macro render_folder(folder) %}
 <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item folder-{{ folder.id_Dossier }}"
     style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;"
-    data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}"{% else %}data-parent="0"{% endif %}
-    data-color="{{ folder.couleur_Dossier }}" data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}">
+    data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}" {%
+    else %}data-parent="0" {% endif %} data-color="{{ folder.couleur_Dossier }}"
+    data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
             aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};"
@@ -44,7 +45,9 @@
                             <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
                         <div data-trigger-accordion="">
-                            <span id="fileCount" data-trigger-accordion="">{{ folder.FICHIER|length }}</span> <span id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count(folder) }})</span>
+                            <span id="fileCount" data-trigger-accordion="">{{ folder.FICHIER|length }}</span> <span
+                                id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count(folder)
+                                }})</span>
                         </div>
                     </div>
                     <div class="d-flex me-2" style="margin-left: 1rem;">
@@ -98,8 +101,9 @@
                                 </div>
                             </div>
                             <div class="me-2 d-flex">
-                                <input type="checkbox" class="me-2 file-checkbox" style="cursor: pointer; transform: scale(1.5);"
-                                    data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}">
+                                <input type="checkbox" class="me-2 file-checkbox"
+                                    style="cursor: pointer; transform: scale(1.5);" data-file="{{ file.id_Fichier }}"
+                                    data-folder="{{ folder.id_Dossier }}">
                             </div>
                         </div>
                     </div>
@@ -205,7 +209,9 @@
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
                         data-bs-target="#addFolderModal">Créer un classeur</button>
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                    data-bs-target="#modifyFolderModal">Modifier un classeur</button>
+                        data-bs-target="#modifyFolderModal">Modifier un classeur</button>
+                    <button class="position-relative btn btn-danger mt-2" data-bs-toggle="modal"
+                        data-bs-target="#deleteFolderModal">Supprimer un classeur</button>
                 </div>
             </div>
             <h3 class="text-center">Gestion des utilisateurs</h3>
@@ -244,7 +250,8 @@
                         {% for role in roles %}
                         {% if role.id_Role != 1 %}
                         <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}" id="role{{ role.id_Role }}">
+                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                id="role{{ role.id_Role }}">
                             <label class="form-check-label" for="role{{ role.id_Role }}">
                                 {{ role.nom_Role }}
                             </label>
@@ -264,7 +271,8 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel" aria-hidden="true">
+<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -294,7 +302,8 @@
                         {% for role in roles %}
                         {% if role.id_Role != 1 %}
                         <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}" id="role{{ role.id_Role }}">
+                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                id="role{{ role.id_Role }}">
                             <label class="form-check-label" for="role{{ role.id_Role }}">
                                 {{ role.nom_Role }}
                             </label>
@@ -307,7 +316,34 @@
                         <input type="color" class="form-control" id="folderColor" required>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le classeur</button>
+                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le
+                            classeur</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteFolderModalLabel">Supprimer un classeur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="existingFolder" class="form-label
+                        ">Classeur à supprimer</label>
+                        <select class="form-control" id="existingFolderDelete">
+                            <option value="0">Aucun</option>
+                        </select>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-danger" id="deleteFolderButton">Supprimer le
+                            classeur</button>
                     </div>
                 </form>
             </div>
@@ -315,12 +351,14 @@
     </div>
 </div>
 <div class="dropdown position-fixed bottom-0 end-0 m-3 d-none" id="actionsDropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="actionsMenu" data-bs-toggle="dropdown" aria-expanded="false">
-      Actions
+    <button class="btn btn-primary dropdown-toggle" type="button" id="actionsMenu" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Actions
     </button>
     <ul class="dropdown-menu" aria-labelledby="actionsMenu">
-        <li class="dropdown-item text-dark" id="actionDownload" style="cursor: pointer;">Télécharger les éléments sélectionnés</li>
+        <li class="dropdown-item text-dark" id="actionDownload" style="cursor: pointer;">Télécharger les éléments
+            sélectionnés</li>
     </ul>
-  </div>    
+</div>
 {% include 'components/preview.html' %}
 {% endblock %}

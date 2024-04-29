@@ -176,7 +176,7 @@ def create_folder(data):
     parent_folder_id = data.get('parentFolderId')
     folder_roles = data.get('folderRoles')
     folder_color = data.get('folderColor')
-    last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).scalar()
+    last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).filter(DOSSIER.id_Dossier != 10).scalar()
     folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=last_priority + 1, couleur_Dossier=folder_color)
     db.session.add(folder)
     try:
@@ -223,7 +223,7 @@ def modify_folder(data):
     folder.couleur_Dossier = folder_color
     try:
         if parent_folder_id == folder_id:
-            socketio.emit('folder_not_modified', {'error': 'Un dossier ne peut pas être son propre parent.'}, namespace='/administration')
+            socketio.emit('folder_not_modified', {'error': 'Un classeur ne peut pas être son propre parent.'}, namespace='/administration')
             return
         if parent_folder_id != 0:
             db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
@@ -254,6 +254,38 @@ def modify_folder(data):
         return
     db.session.commit()
     socketio.emit('folder_modified', {'folderId': folder_id, 'folderName': folder_name, 'folderColor': folder_color}, namespace='/administration')
+
+@socketio.on('delete_folder', namespace='/administration')
+def delete_folder(data):
+    folder = DOSSIER.query.get(data.get('folderId'))
+    if folder.id_Dossier == 10:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur d\'archive ne peut pas être supprimé.'}, namespace='/administration')
+        return
+    if len(folder.DOSSIER_) > 0:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des sous-classeurs.'}, namespace='/administration')
+        return
+    if len(folder.FICHIER) > 0:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des fichiers.'}, namespace='/administration')
+        return
+    try:
+        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder.id_Dossier))
+        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Parent == folder.id_Dossier))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    try:
+        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    db.session.delete(folder)
+    db.session.commit()
+    socketio.emit('folder_deleted', {'folderId': folder.id_Dossier}, namespace='/administration')
+
 
 @socketio.on('archive_folders', namespace='/administration')
 def archive_folders(data):
