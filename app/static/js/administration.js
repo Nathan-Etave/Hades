@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     type: 'upload',
                     dialogOptions: {
                         title: 'Fichier existant',
-                        text: `Un fichier nommé "${data.filename}" existe déjà dans le dossier ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Voulez-vous remplacer ce fichier et le placer dans le dossier ${data.attemptedFolder} ?`,
+                        text: `Un fichier nommé "${data.filename}" existe déjà dans le classeur ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Voulez-vous remplacer ce fichier et le placer dans le classeur ${data.attemptedFolder} ?`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Oui',
