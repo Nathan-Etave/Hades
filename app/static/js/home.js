@@ -76,7 +76,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (deskList.includes(fileId)) {
                     desktop.className = "desktop-true";
                     deskBtn.className = "fa-regular fa-square-minus fa-lg";
-                    deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+                    if (deskHomeBtn !== null) {
+                        deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+                    }
                 }
                 else {
                     desktop.className = "desktop-false";
@@ -84,19 +86,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 desktop.addEventListener('click', function (event) {
                     event.preventDefault();
                     let newDeskList = JSON.parse(localStorage.getItem('desktop'));
+                    let deskHomeBtn = document.getElementById("desk-home-" + fileId);
                     if (desktop.className === "desktop-true") {
                         newDeskList = newDeskList.filter(file => file !== fileId);
                         localStorage.setItem('desktop', JSON.stringify(newDeskList));
                         desktop.className = "desktop-false";
                         deskBtn.className = "fa-regular fa-square-plus fa-lg";
-                        deskHomeBtn.className = "fa-regular fa-square-plus fa-lg";
+                        if (deskHomeBtn !== null) {
+                            deskHomeBtn.className = "fa-regular fa-square-plus fa-lg";
+                        }
                     }
                     else {
                         newDeskList.push(fileId);
                         localStorage.setItem('desktop', JSON.stringify(newDeskList));
                         desktop.className = "desktop-true";
                         deskBtn.className = "fa-regular fa-square-minus fa-lg";
-                        deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+                        if (deskHomeBtn !== null) {
+                            deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+                        }
                     }
                     baseAfterRender(newDeskList.length);
                 });
@@ -196,4 +203,94 @@ document.addEventListener('DOMContentLoaded', function () {
         desktopAfterRender();
         previewAfterRender();
     }
+
+
+    // Get the accordions list from the local storage
+    let accordionList = JSON.parse(localStorage.getItem('accordion'));
+    if (accordionList === null) {
+        accordionList = [];
+        localStorage.setItem('accordion', JSON.stringify(accordionList));
+    }
+
+    accordionList.forEach(
+        accordion => {
+            let accordionElement = document.getElementById(accordion);
+            let accordionButton = document.getElementById(accordion + "-button");
+            accordionElement.classList.add('show');
+            accordionButton.setAttribute('aria-expanded', 'true');
+        }
+    );
+
+    // Handle the accordions buttons
+    let accordions = document.querySelectorAll('.accordion-collapse');
+        accordions.forEach(
+            accordion => {
+                accordion.addEventListener('show.bs.collapse', function (event) {
+                    event.stopPropagation();
+                    let id = accordion.id;
+                    let accordionList = JSON.parse(localStorage.getItem('accordion'));
+                    accordionList.push(id);
+                    localStorage.setItem('accordion', JSON.stringify(accordionList));
+                });
+
+                accordion.addEventListener('hide.bs.collapse', function (event) {
+                    event.stopPropagation();
+                    let id = accordion.id;
+                    let accordionList = JSON.parse(localStorage.getItem('accordion'));
+                    accordionList = accordionList.filter(accordion => accordion !== id);
+                    localStorage.setItem('accordion', JSON.stringify(accordionList));
+                });
+            }
+        )
+
+    // prevent the accordion to close when clicking on the input
+    const folders = document.querySelectorAll('#folder');
+    folders.forEach((folder) => {
+        folder.addEventListener('click', function (event) {
+            event.stopPropagation();
+            if (event.target.dataset.triggerAccordion !== undefined) {
+                var collapse = new bootstrap.Collapse(folder.querySelector('.accordion-collapse'));
+                collapse.show();
+            }
+        });
+    });
+
+    const socket = io.connect('/home');
+
+    // Handle dynamique search inside a folder
+    let folderSearch = document.querySelectorAll("#fileSearch");
+    folderSearch.forEach((folder) => {
+        folder.addEventListener('input', function () {
+            let folderId = folder.getAttribute("data-folder");
+            let search = folder.value;
+            socket.emit('search_files', { folderId: folderId, query: search });
+        });
+    });
+
+    // Display the correct results for a specific folder research
+    socket.on('search_results', function (data) {
+        console.log(data);
+        let fileContainer = document.getElementById("fichierAccordion"+data.folderId);
+        let fileElements = fileContainer.querySelectorAll('.file-element');
+        let countElement = document.getElementById('collapse'+data.folderId+'-button').querySelector('#fileCount');
+        if (data.query === "") {
+            fileElements.forEach(file => {
+                file.style.display = "block";
+                countElement.innerHTML = fileElements.length;
+            });
+        }
+        else {
+            fileElements.forEach(file => {
+                let id = file.id.split("-")[1];
+                if (data.results.includes(id)) {
+                    file.style.display = "block";
+                }
+                else {
+                    file.style.display = "none";
+                }
+                countElement.innerHTML = data.results.length;
+            });
+        }
+    });
+    
 });

@@ -36,24 +36,29 @@
     <h2 class="accordion-header" id="heading{{ folder.id }}">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
             data-bs-target="#collapse{{ folder.id }}" aria-expanded="false" aria-controls="collapse{{ folder.id }}"
-            style="background-color: {{ folder.color }};">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-                <div class="me-2 d-flex align-items-center">
-                    <div class="d-flex">
-                        <div class="me-2">
-                            <i class="fas fa-folder"></i>
+            style="background-color: {{ folder.color }};" id="collapse{{ folder.id }}-button" data-trigger-accordion="">
+            <div class="d-flex w-100 align-items-center justify-content-between" data-trigger-accordion="">
+                <div class="me-2 d-flex align-items-center" data-trigger-accordion="">
+                    <div class="d-flex" data-trigger-accordion="">
+                        <div class="me-2" data-trigger-accordion="">
+                            <i class="fas fa-folder" data-trigger-accordion=""></i>
                         </div>
-                        <div>
+                        <div data-trigger-accordion="">
                             {{ folder.name }}
                         </div>
                     </div>
-                    <div class="d-flex me-2" style="margin-left: 1rem;">
-                        <div class="me-2">
-                            <i class="fas fa-file"></i>
+                    <div class="d-flex me-2" style="margin-left: 1rem;" data-trigger-accordion="">
+                        <div class="me-2" data-trigger-accordion="">
+                            <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
-                        <div>
+                        <div data-trigger-accordion="" id="fileCount">
                             {{ folder.files|length }}
                         </div>
+                    </div>
+                    <div class="d-flex me-2" style="margin-left: 1rem;" onclick="event.stopPropagation();">
+                        <input data-folder="{{ folder.id }}" type="text" id="fileSearch"
+                            placeholder="Rechercher dans le dossier" class="form-control"
+                            style="border-radius: 50px; padding: 5px 10px;" onclick="event.stopPropagation();">
                     </div>
                 </div>
             </div>
@@ -70,7 +75,7 @@
             <div class="accordion" id="fichierAccordion{{ folder.id }}"
             style="height: 50vh; overflow: auto;">
                 {% for file in folder.files %}
-                    <div class="card mt-1 mb-1" style="height: 5vh" id="file-{{ file.id }}">
+                    <div class="card mt-1 mb-1 file-element" style="height: 5vh" id="file-{{ file.id }}">
                         <div class="card-body">
                             <div class="d-flex me-2 w-100 justify-content-between align-items-baseline" style="cursor: pointer;">
                                 <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file" data-file="{{ file.id }}" data-folder="{{ folder.id }}" data-type="{{ file.extension }}" data-name="{{ file.title }}">
