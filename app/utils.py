@@ -26,7 +26,12 @@ from app.extensions import db
 from flask_login import current_user
 from app.models.favoris import FAVORIS
 from app.models.notification import NOTIFICATION
+from app.models.fichier import FICHIER
+from app.models.dossier import DOSSIER
 import re
+import zipfile
+import os
+import uuid
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -249,6 +254,26 @@ class FileReader(metaclass=SingletonMeta):
                 if hasattr(shape, "text"):
                     text += shape.text
         return text
+
+class FileDownloader(metaclass=SingletonMeta):
+    def create_zip(self, file_ids):
+        if not os.path.exists(f"{current_app.root_path}/storage/downloads"):
+            os.makedirs(f"{current_app.root_path}/storage/downloads")
+        zip_filename = f"{uuid.uuid4().hex}.zip"
+        zip_path = f"{current_app.root_path}/storage/downloads/{zip_filename}"
+        files = db.session.query(FICHIER).filter(FICHIER.id_Fichier.in_(file_ids)).all()
+        files_by_folder = {}
+        for file in files:
+            if file.DOSSIER_.id_Dossier not in files_by_folder:
+                files_by_folder[file.DOSSIER_.id_Dossier] = []
+            files_by_folder[file.DOSSIER_.id_Dossier].append(file)
+        with zipfile.ZipFile(zip_path, "w") as zip_file:
+            for folder_id in files_by_folder:
+                database_folder = db.session.query(DOSSIER).filter(DOSSIER.id_Dossier == folder_id).first()
+                for file in files_by_folder[folder_id]:
+                    file_path = os.path.join(current_app.root_path, 'storage', str(folder_id), f'{file.id_Fichier}.{file.extension_Fichier}')
+                    zip_file.write(file_path, arcname=os.path.join(database_folder.nom_Dossier.replace('/', '-'), f'{file.nom_Fichier}.{file.extension_Fichier}'))
+        return zip_path
 
 def check_notitications():
     """Check if there is any notification in the database.

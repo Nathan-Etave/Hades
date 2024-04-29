@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    let checkboxes = document.querySelectorAll('input[type=checkbox]');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+
     let progressBar = document.querySelector('.progress-bar');
     let fileInput = document.querySelectorAll('.file-input');
     let fileTotal = 0
@@ -380,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isFolderChecked) {
                 actionsDropdown.classList.remove('d-none');
                 if (!document.querySelector('#actionArchive')) {
-                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item" id="actionArchive" style="cursor: pointer;">Archiver le/les classeur(s) sélectionné(s)</li>');
+                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item text-dark" id="actionArchive" style="cursor: pointer;">Archiver le/les classeur(s) sélectionné(s)</li>');
                     if (document.querySelector('#actionDelete')) {
                         actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
                     }
@@ -399,10 +405,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                         let folderFilesIds = Array.from(new Set(allFiles));
                         if (folderFilesIds.length === fileIds.length) {
-                            let confirmation = confirm('Voulez-vous vraiment archiver le/les classeurs(s) sélectionné(s) ?');
-                            if (confirmation) {
-                                console.log('Archive');
-                                console.log(folderIds);
+                            if (fileTotal === fileUploadTotal) {
+                                let confirmation = confirm('Voulez-vous vraiment archiver le/les classeurs(s) sélectionné(s) ?');
+                                if (confirmation) {
+                                    socket.emit('archive_folders', { folderIds: folderIds });
+                                }
+                            }
+                            else {
+                                alert('Veuillez attendre la fin du téléversement des fichiers avant d\'archiver un classeur.');
                             }
                         }
                         else {
@@ -422,33 +432,73 @@ document.addEventListener('DOMContentLoaded', function () {
     filesCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', function (event) {
             let folderId = event.target.dataset.folder;
-            let folderCheckbox = document.querySelector(`.folder-checkbox[data-folder="${folderId}"]`);
             let files = document.querySelectorAll(`.folder-${folderId} .file-checkbox`);
             let filesChecked = Array.from(files).filter(cb => cb.checked);
             if (filesChecked.length > 0) {
-                isFolderChecked = true;
                 actionsDropdown.classList.remove('d-none');
-                if (!document.querySelector('#actionDelete')) {
-                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item" id="actionDelete" style="cursor: pointer;">Supprimer le/les fichier(s) sélectionné(s)</li>');
+                if (!document.querySelector('#actionDelete') && !isFolderChecked) {
+                    actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item text-dark" id="actionDelete" style="cursor: pointer;">Supprimer le/les fichier(s) sélectionné(s)</li>');
                     actionsDropdown.querySelector('#actionDelete').addEventListener('click', async function (event) {
                         let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
                         let fileIds = files.map(cb => cb.dataset.file);
-                        let confirmation = confirm('Voulez-vous vraiment supprimer le/les fichier(s) sélectionné(s) ?');
-                        if (confirmation) {
-                            console.log('Delete');
-                            console.log(fileIds);
+                        if (fileTotal === fileUploadTotal) {
+                            let confirmation = confirm('Voulez-vous vraiment supprimer le/les fichier(s) sélectionné(s) ?');
+                            if (confirmation) {
+                                socket.emit('delete_files', { fileIds: fileIds });
+                            }
+                        }
+                        else {
+                            alert('Veuillez attendre la fin du téléversement des fichiers avant de supprimer un fichier.');
                         }
                     });
                 }
             }
-            else {
-                isFolderChecked = Array.from(folderCheckboxes).some(cb => cb.checked);
-                if (!isFolderChecked) {
-                    actionsDropdown.classList.add('d-none');
-                    actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
-                    actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
-                }
-            }
         });
     });
-}); 
+
+    actionsDropdown.querySelector('#actionDownload').addEventListener('click', function (event) {
+        let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
+        let fileIds = files.map(cb => cb.dataset.file);
+        if (fileIds.length > 0) {
+            let confirmation = confirm('Voulez-vous vraiment télécharger le/les fichier(s) sélectionné(s) ?');
+            if (confirmation) {
+                fetch('/download/archive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ fileIds: fileIds })
+                }).then(response => {
+                    if (response.ok) {
+                        response.blob().then(blob => {
+                            let url = window.URL.createObjectURL(blob);
+                            let a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'archive.zip';
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        });
+                    }
+                });
+            }
+        }
+    });
+
+    socket.on('folders_archived', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('folders_not_archived', function (data) {
+        alert('L\'archivage des classeurs a échoué.');
+    });
+
+    socket.on('files_deleted', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('files_not_deleted', function (data) {
+        alert('La suppression des fichiers a échoué.');
+    });
+});
