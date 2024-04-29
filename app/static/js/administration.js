@@ -269,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
             modifyFolderModal.querySelectorAll('.role-checkbox:checked').forEach((cb) => {
                 cb.checked = false;
             });
+            modifyFolderModal.querySelector('#folderPriority').value = '';
             modifyFolderModal.querySelector('#folderColor').value = '#000000';
             return;
         }
@@ -281,6 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 modifyFolderModal.querySelector(`#role${role}`).checked = true;
             }
         });
+        modifyFolderModal.querySelector('#folderPriority').value = folder.dataset.priority;
         modifyFolderModal.querySelector('#folderColor').value = folder.dataset.color;
     });
 
@@ -293,10 +295,11 @@ document.addEventListener('DOMContentLoaded', function () {
         let folderName = addFolderModal.querySelector('#folderName').value;
         let parentFolderId = addFolderModal.querySelector('#parentFolder').value;
         let folderRoles = Array.from(addFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
+        let folderPriority = addFolderModal.querySelector('#folderPriority').value;
         let folderColor = addFolderModal.querySelector('#folderColor').value;
         createFolderButton.disabled = true;
-        if (folderName !== '') {
-            socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+        if (folderName !== '' && folderPriority !== '') {
+            socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
             alert('Veuillez remplir tous les champs.');
@@ -331,10 +334,11 @@ document.addEventListener('DOMContentLoaded', function () {
         let folderName = modifyFolderModal.querySelector('#folderName').value;
         let parentFolderId = modifyFolderModal.querySelector('#parentFolder').value;
         let folderRoles = Array.from(modifyFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
+        let folderPriority = modifyFolderModal.querySelector('#folderPriority').value;
         let folderColor = modifyFolderModal.querySelector('#folderColor').value;
         modifyFolderButton.disabled = true;
-        if (folderName !== '' && folderId !== '0') {
-            socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderColor: folderColor });
+        if (folderName !== '' && folderId !== '0' && folderPriority !== '') {
+            socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
             alert('Veuillez remplir tous les champs.');
