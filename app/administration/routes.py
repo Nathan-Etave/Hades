@@ -5,7 +5,8 @@ from app import redis, socketio
 from app.administration import bp
 from app.tasks import process_file
 from unidecode import unidecode
-from flask import render_template, request, current_app, Response
+from flask import render_template, request, current_app, Response, jsonify
+from flask_login import current_user
 from werkzeug.utils import secure_filename
 from flask_login import login_required
 from app.decorators import admin_required
@@ -52,7 +53,19 @@ def upload():
     folder_id = json_data.get("folderId")
     file_data = json_data.get("data")
     filename = unidecode(secure_filename(json_data.get("filename"))).lower()
-    user_tags = ' '.join(json_data.get("tags").replace(' ', ';').split(';'))
+    existing_file = FICHIER.query.filter_by(nom_Fichier=filename).first()
+    force = json_data.get("force")
+    if existing_file is not None:
+        if force:
+            delete_file(str(existing_file.id_Fichier))
+        else:
+            return jsonify({'filename': filename,
+                            'existingFolder': existing_file.DOSSIER_.nom_Dossier,
+                            'attemptedFolder': DOSSIER.query.get(folder_id).nom_Dossier,
+                            'existingFileAuthorFirstName': existing_file.AUTEUR.prenom_Utilisateur,
+                            'existingFileAuthorLastName': existing_file.AUTEUR.nom_Utilisateur,
+                            'existingFileDate': existing_file.date_Fichier.strftime('%d/%m/%Y à %H:%M')}), 409
+    user_tags = unidecode(' '.join(json_data.get("tags").replace(' ', ';').split(';'))).lower()
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -60,6 +73,7 @@ def upload():
         id_Dossier=folder_id,
         nom_Fichier=filename,
         extension_Fichier=filename.split(".")[-1],
+        id_Utilisateur=current_user.id_Utilisateur,
     )
     db.session.add(file)
     db.session.commit()
@@ -96,33 +110,6 @@ def connect():
         redis.get("total_files_processed").decode("utf-8"),
         namespace="/administration",
     )
-
-
-@socketio.on("trash_file", namespace="/administration")
-def trash_file(data):
-    try:
-        file_id = data.get("fileId")
-        folder_id = data.get("folderId")
-        with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
-            Whoosh().delete_document(file_id)
-        file = FICHIER.query.get(file_id)
-        db.session.delete(file)
-        os.remove(
-            os.path.join(
-                current_app.root_path,
-                "storage",
-                folder_id,
-                f"{file_id}.{file.extension_Fichier}",
-            )
-        )
-        db.session.commit()
-        socketio.emit("file_deleted", data, namespace="/administration")
-    except Exception as e:
-        socketio.emit(
-            "file_deletion_failed",
-            {**data, "error": str(e)},
-            namespace="/administration",
-        )
 
 
 @socketio.on("search_files", namespace="/administration")
@@ -203,8 +190,11 @@ def create_folder(data):
     parent_folder_id = data.get('parentFolderId')
     folder_roles = data.get('folderRoles')
     folder_color = data.get('folderColor')
-    last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).scalar()
-    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=last_priority + 1, couleur_Dossier=folder_color)
+    folder_priority = data.get('folderPriority')
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority).filter(DOSSIER.id_Dossier != 10).all()
+    for folder_to_update in folders_to_update:
+        folder_to_update.priorite_Dossier += 1
+    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=folder_priority, couleur_Dossier=folder_color)
     db.session.add(folder)
     try:
         db.session.commit()
@@ -244,11 +234,25 @@ def modify_folder(data):
     folder_name = data.get('folderName')
     parent_folder_id = data.get('parentFolderId')
     folder_roles = data.get('folderRoles')
+    folder_priority = data.get('folderPriority')
     folder_color = data.get('folderColor')
     folder = DOSSIER.query.get(folder_id)
     folder.nom_Dossier = folder_name
     folder.couleur_Dossier = folder_color
+    if folder.priorite_Dossier != int(folder_priority):
+        if int(folder_priority) > folder.priorite_Dossier:
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier).filter(DOSSIER.priorite_Dossier <= int(folder_priority)).filter(DOSSIER.id_Dossier != 10).all()
+            for folder_to_update in folders_to_update:
+                folder_to_update.priorite_Dossier -= 1
+        else:
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority)).filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier).filter(DOSSIER.id_Dossier != 10).all()
+            for folder_to_update in folders_to_update:
+                folder_to_update.priorite_Dossier += 1
+        folder.priorite_Dossier = folder_priority
     try:
+        if parent_folder_id == folder_id:
+            socketio.emit('folder_not_modified', {'error': 'Un classeur ne peut pas être son propre parent.'}, namespace='/administration')
+            return
         if parent_folder_id != 0:
             db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
             db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder_id))
@@ -278,3 +282,102 @@ def modify_folder(data):
         return
     db.session.commit()
     socketio.emit('folder_modified', {'folderId': folder_id, 'folderName': folder_name, 'folderColor': folder_color}, namespace='/administration')
+
+@socketio.on('delete_folder', namespace='/administration')
+def delete_folder(data):
+    folder = DOSSIER.query.get(data.get('folderId'))
+    if folder.id_Dossier == 10:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur d\'archive ne peut pas être supprimé.'}, namespace='/administration')
+        return
+    if len(folder.DOSSIER_) > 0:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des sous-classeurs.'}, namespace='/administration')
+        return
+    if len(folder.FICHIER) > 0:
+        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des fichiers.'}, namespace='/administration')
+        return
+    try:
+        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder.id_Dossier))
+        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Parent == folder.id_Dossier))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    try:
+        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    deleted_priority = folder.priorite_Dossier
+    db.session.delete(folder)
+    db.session.commit()
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority).filter(DOSSIER.id_Dossier != 10).all()
+    for folder_to_update in folders_to_update:
+        folder_to_update.priorite_Dossier -= 1
+    db.session.commit()
+    socketio.emit('folder_deleted', {'folderId': folder.id_Dossier}, namespace='/administration')
+
+
+@socketio.on('archive_folders', namespace='/administration')
+def archive_folders(data):
+    folder_ids = data.get('folderIds')
+    try:
+        for folder_id in folder_ids:
+            database_folder = DOSSIER.query.get(folder_id)
+            if folder_id == '10':
+                pass
+            elif database_folder.DOSSIER != [] and database_folder.DOSSIER[0].id_Dossier == 10:
+                pass
+            elif database_folder.DOSSIER != [] and str(database_folder.DOSSIER[0].id_Dossier) in folder_ids:
+                pass
+            else:
+                if database_folder.DOSSIER != []:
+                    db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
+                db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=10, id_Dossier_Enfant=folder_id))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('folders_not_archived', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('folders_archived', {'folderIds': folder_ids}, namespace='/administration')
+
+@socketio.on('delete_files', namespace='/administration')
+def delete_files(data):
+    file_ids = data.get('fileIds')
+    try:
+        for file_id in file_ids:
+            with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+                Whoosh().delete_document(file_id)
+            database_file = FICHIER.query.get(file_id)
+            db.session.delete(database_file)
+            os.remove(
+                os.path.join(
+                    current_app.root_path,
+                    "storage",
+                    str(database_file.id_Dossier),
+                    f"{file_id}.{database_file.extension_Fichier}",
+                )
+            )
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('files_deleted', {'fileIds': file_ids}, namespace='/administration')
+
+def delete_file(file_id):
+    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        Whoosh().delete_document(file_id)
+    database_file = FICHIER.query.get(file_id)
+    db.session.delete(database_file)
+    os.remove(
+        os.path.join(
+            current_app.root_path,
+            "storage",
+            str(database_file.id_Dossier),
+            f"{file_id}.{database_file.extension_Fichier}",
+        )
+    )
+    db.session.commit()

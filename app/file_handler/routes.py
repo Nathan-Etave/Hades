@@ -1,12 +1,17 @@
+import time
+import os
 from app.file_handler import bp
-from flask import send_from_directory, abort, current_app, request
+from flask import send_from_directory, abort, current_app, request, send_file
 from app.models.fichier import FICHIER
 from flask_login import current_user, login_required
 from app import socketio
 from app.extensions import db
 from app.models.favoris import FAVORIS
+from app.utils import FileDownloader
+from app.decorators import admin_required
+from threading import Timer
 
-@bp.route('/dossier/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
+@bp.route('/classeur/<int:folder_id>/fichier/<int:file_id>', methods=['GET'])
 @login_required
 def file(folder_id, file_id):
     file = FICHIER.query.get(file_id)
@@ -33,3 +38,20 @@ def get_files_details(data):
         dict_file['is_favorite'] = file.id_Fichier in favoris_ids
         files.append(dict_file)
     socketio.emit('files_details', files, namespace='/file_handler')
+
+
+@bp.route('/download/archive', methods=['POST'])
+@login_required
+@admin_required
+def download_archive():
+    zip_path = FileDownloader().create_zip(request.json['fileIds'])
+    delete_file_after_delay(43200, zip_path)
+    return send_file(zip_path, 'archive.zip', as_attachment=True)
+
+def delete_file_after_delay(delay, path):
+    def delete_file():
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
+    Timer(delay, delete_file).start()

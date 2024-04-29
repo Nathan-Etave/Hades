@@ -17,14 +17,16 @@
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/css/bootstrap5-toggle.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/js/bootstrap5-toggle.ecmas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
 
 {% macro render_folder(folder) %}
 <div id="folder" data-folder="{{ folder.id_Dossier }}" class="accordion-item folder-{{ folder.id_Dossier }}"
     style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;"
-    data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}"{% else %}data-parent="0"{% endif %}
-    data-color="{{ folder.couleur_Dossier }}" data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}">
+    data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}" {%
+    else %}data-parent="0" {% endif %} data-color="{{ folder.couleur_Dossier }}"
+    data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}" data-priority="{{ folder.priorite_Dossier }}">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
             aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};"
@@ -43,27 +45,33 @@
                         <div class="me-2" data-trigger-accordion="">
                             <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
-                        <div data-trigger-accordion="" id="fileCount">
-                            {{ folder.FICHIER|length }}
+                        <div data-trigger-accordion="">
+                            <span id="fileCount" data-trigger-accordion="">{{ folder.FICHIER|length }}</span> <span
+                                id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count(folder)
+                                }})</span>
                         </div>
                     </div>
                     <div class="d-flex me-2" style="margin-left: 1rem;">
                         <input data-folder="{{ folder.id_Dossier }}" type="text" id="fileSearch"
-                            placeholder="Rechercher dans le dossier" class="form-control"
+                            placeholder="Rechercher dans le classeur" class="form-control"
                             style="border-radius: 50px; padding: 5px 10px;">
                     </div>
                 </div>
                 <div class="me-2">
                     <form method="POST" enctype="multipart/form-data">
-                        <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un/plusieurs fichier(s)
+                        <label for="file{{ folder.id_Dossier }}" class="btn btn-dark">Importer un/plusieurs fichier(s)
                             <input type="file" name="file" id="file{{ folder.id_Dossier }}" style="display: none;"
                                 multiple class="file-input" data-folder="{{ folder.id_Dossier }}">
                         </label>
-                        <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Ajouter un dossier
+                        <label for="folder{{ folder.id_Dossier }}" class="btn btn-dark">Importer un dossier
                             <input type="file" name="folder" id="folder{{ folder.id_Dossier }}" style="display: none;"
                                 multiple webkitdirectory class="file-input" data-folder="{{ folder.id_Dossier }}">
                         </label>
                     </form>
+                </div>
+                <div class="me-2">
+                    <input type="checkbox" class="me-2 folder-checkbox" style="cursor: pointer; transform: scale(1.5);"
+                        data-folder="{{ folder.id_Dossier }}">
                 </div>
             </div>
         </button>
@@ -79,8 +87,8 @@
             <div class="accordion mt-2 pt-2" id="filesAccordion{{ folder.id_Dossier }}"
                 style="height: 50vh; overflow: auto;">
                 {% for file in folder.FICHIER %}
-                <div class="card mt-1 mb-1 me-2" style="height: 5vh" id="file-{{ file.id_Fichier }}">
-                    <div class="card-body">
+                <div class="card mt-1 mb-1 me-2" id="file-{{ file.id_Fichier }}">
+                    <div class="card-body text-wrap">
                         <div class="d-flex me-2 w-100 justify-content-between align-items-baseline"
                             style="cursor: pointer;">
                             <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file"
@@ -94,13 +102,9 @@
                                 </div>
                             </div>
                             <div class="me-2 d-flex">
-                                <a href="/dossier/{{ folder.id_Dossier }}/fichier/{{ file.id_Fichier }}?as_attachment=true"
-                                    style="display: inherit;">
-                                    <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;"
-                                        data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
-                                </a>
-                                <i id="trash-btn" class="fas fa-trash-alt" style="cursor: pointer;"
-                                    data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"></i>
+                                <input type="checkbox" class="me-2 file-checkbox"
+                                    style="cursor: pointer; transform: scale(1.5);" data-file="{{ file.id_Fichier }}"
+                                    data-folder="{{ folder.id_Dossier }}">
                             </div>
                         </div>
                     </div>
@@ -204,9 +208,11 @@
                 {% endfor %}
                 <div class="text-end">
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#addFolderModal">Créer un dossier</button>
+                        data-bs-target="#addFolderModal">Créer un classeur</button>
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                    data-bs-target="#modifyFolderModal">Modifier un dossier</button>
+                        data-bs-target="#modifyFolderModal">Modifier un classeur</button>
+                    <button class="position-relative btn btn-danger mt-2" data-bs-toggle="modal"
+                        data-bs-target="#deleteFolderModal">Supprimer un classeur</button>
                 </div>
             </div>
             <h3 class="text-center">Gestion des utilisateurs</h3>
@@ -225,17 +231,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addFolderModalLabel">Créer un dossier</h5>
+                <h5 class="modal-title" id="addFolderModalLabel">Créer un classeur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <label for="folderName" class="form-label">Nom du classeur</label>
                         <input type="text" class="form-control" id="folderName" required>
                     </div>
                     <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <label for="parentFolder" class="form-label">Classeur parent</label>
                         <select class="form-control" id="parentFolder">
                             <option value="0">Aucun</option>
                         </select>
@@ -245,7 +251,8 @@
                         {% for role in roles %}
                         {% if role.id_Role != 1 %}
                         <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}" id="role{{ role.id_Role }}">
+                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                id="role{{ role.id_Role }}">
                             <label class="form-check-label" for="role{{ role.id_Role }}">
                                 {{ role.nom_Role }}
                             </label>
@@ -254,38 +261,43 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
+                        <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderColor" class="form-label">Couleur du classeur</label>
                         <input type="color" class="form-control" id="folderColor" required>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le dossier</button>
+                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le classeur</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel" aria-hidden="true">
+<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un dossier</h5>
+                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un classeur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form>
                     <div class="mb-3">
-                        <label for="existingFolder" class="form-label">Dossier à modifier</label>
+                        <label for="existingFolder" class="form-label">Classeur à modifier</label>
                         <select class="form-control" id="existingFolder">
                             <option value="0">Aucun</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du dossier</label>
+                        <label for="folderName" class="form-label">Nom du classeur</label>
                         <input type="text" class="form-control" id="folderName" required>
                     </div>
                     <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Dossier parent</label>
+                        <label for="parentFolder" class="form-label">Classeur parent</label>
                         <select class="form-control" id="parentFolder">
                             <option value="0">Aucun</option>
                         </select>
@@ -295,7 +307,8 @@
                         {% for role in roles %}
                         {% if role.id_Role != 1 %}
                         <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}" id="role{{ role.id_Role }}">
+                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                id="role{{ role.id_Role }}">
                             <label class="form-check-label" for="role{{ role.id_Role }}">
                                 {{ role.nom_Role }}
                             </label>
@@ -304,16 +317,57 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du dossier</label>
+                        <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
+                        <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderColor" class="form-label">Couleur du classeur</label>
                         <input type="color" class="form-control" id="folderColor" required>
                     </div>
                     <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le dossier</button>
+                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le
+                            classeur</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>
+<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteFolderModalLabel">Supprimer un classeur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="existingFolder" class="form-label
+                        ">Classeur à supprimer</label>
+                        <select class="form-control" id="existingFolderDelete">
+                            <option value="0">Aucun</option>
+                        </select>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-danger" id="deleteFolderButton">Supprimer le
+                            classeur</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="dropdown position-fixed bottom-0 end-0 m-3 d-none" id="actionsDropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="actionsMenu" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Actions
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="actionsMenu">
+        <li class="dropdown-item text-dark" id="actionDownload" style="cursor: pointer;">Télécharger les éléments
+            sélectionnés</li>
+    </ul>
 </div>
 {% include 'components/preview.html' %}
 {% endblock %}
