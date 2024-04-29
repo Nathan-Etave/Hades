@@ -176,8 +176,11 @@ def create_folder(data):
     parent_folder_id = data.get('parentFolderId')
     folder_roles = data.get('folderRoles')
     folder_color = data.get('folderColor')
-    last_priority = db.session.query(db.func.max(DOSSIER.priorite_Dossier)).filter(DOSSIER.id_Dossier != 10).scalar()
-    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=last_priority + 1, couleur_Dossier=folder_color)
+    folder_priority = data.get('folderPriority')
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority).filter(DOSSIER.id_Dossier != 10).all()
+    for folder_to_update in folders_to_update:
+        folder_to_update.priorite_Dossier += 1
+    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=folder_priority, couleur_Dossier=folder_color)
     db.session.add(folder)
     try:
         db.session.commit()
@@ -217,10 +220,21 @@ def modify_folder(data):
     folder_name = data.get('folderName')
     parent_folder_id = data.get('parentFolderId')
     folder_roles = data.get('folderRoles')
+    folder_priority = data.get('folderPriority')
     folder_color = data.get('folderColor')
     folder = DOSSIER.query.get(folder_id)
     folder.nom_Dossier = folder_name
     folder.couleur_Dossier = folder_color
+    if folder.priorite_Dossier != int(folder_priority):
+        if int(folder_priority) > folder.priorite_Dossier:
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier).filter(DOSSIER.priorite_Dossier <= int(folder_priority)).filter(DOSSIER.id_Dossier != 10).all()
+            for folder_to_update in folders_to_update:
+                folder_to_update.priorite_Dossier -= 1
+        else:
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority)).filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier).filter(DOSSIER.id_Dossier != 10).all()
+            for folder_to_update in folders_to_update:
+                folder_to_update.priorite_Dossier += 1
+        folder.priorite_Dossier = folder_priority
     try:
         if parent_folder_id == folder_id:
             socketio.emit('folder_not_modified', {'error': 'Un classeur ne peut pas être son propre parent.'}, namespace='/administration')
@@ -282,7 +296,12 @@ def delete_folder(data):
         db.session.rollback()
         socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
         return
+    deleted_priority = folder.priorite_Dossier
     db.session.delete(folder)
+    db.session.commit()
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority).filter(DOSSIER.id_Dossier != 10).all()
+    for folder_to_update in folders_to_update:
+        folder_to_update.priorite_Dossier -= 1
     db.session.commit()
     socketio.emit('folder_deleted', {'folderId': folder.id_Dossier}, namespace='/administration')
 
