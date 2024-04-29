@@ -251,11 +251,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const modalParentFolders = document.querySelectorAll('#parentFolder');
     const modalExistingFolders = document.querySelector('#existingFolder');
+    const modalExistingFoldersDelete = document.querySelector('#existingFolderDelete');
     folders.forEach((folder) => {
         modalParentFolders.forEach((select) => {
             select.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
         });
         modalExistingFolders.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
+        modalExistingFoldersDelete.innerHTML += `<option value="${folder.dataset.folder}">${folder.dataset.name}</option>`;
     });
 
     const modifyFolderModal = document.querySelector('#modifyFolderModal');
@@ -354,6 +356,39 @@ document.addEventListener('DOMContentLoaded', function () {
         if (fileTotal != fileUploadTotal) {
             event.preventDefault();
             alert('Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.');
+            return;
+        }
+    });
+
+    const deleteFolderModal = document.querySelector('#deleteFolderModal');
+    const deleteFolderButton = document.querySelector('#deleteFolderButton');
+    deleteFolderButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (fileTotal != fileUploadTotal) {
+            return;
+        }
+        let folderId = deleteFolderModal.querySelector('#existingFolderDelete').value;
+        if (folderId !== '0') {
+            socket.emit('delete_folder', { folderId: folderId });
+        }
+        else {
+            alert('Veuillez sélectionner un classeur.');
+        }
+    });
+
+    socket.on('folder_deleted', function (data) {
+        window.location.reload();
+    });
+
+    socket.on('folder_not_deleted', function (data) {
+        alert(`La suppression du classeur a échoué: ${data.error}`);
+    });
+
+    const formDeleteFolder = document.querySelector('#deleteFolderModal').querySelector('form');
+    formDeleteFolder.addEventListener('submit', function (event) {
+        if (fileTotal != fileUploadTotal) {
+            event.preventDefault();
+            alert('Veuillez attendre la fin du téléversement des fichiers avant de supprimer un classeur.');
             return;
         }
     });
