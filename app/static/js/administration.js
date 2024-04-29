@@ -5,15 +5,73 @@ document.addEventListener('DOMContentLoaded', function () {
         checkbox.checked = false;
     });
 
+    let dialogQueue = [];
+    let dialogIsOpen = false;
     let progressBar = document.querySelector('.progress-bar');
     let fileInput = document.querySelectorAll('.file-input');
     let fileTotal = 0
     let fileUploadTotal = 0
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    async function uploadFile(file, folderId, tags) {
+        let reader = new FileReader();
+        reader.onload = async function (ev) {
+            updateProgressBar();
+            let response = await fetch('/administration/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    folderId: folderId,
+                    filename: file.name,
+                    data: ev.target.result,
+                    tags: tags
+                })
+            });
+            let status = response.status;
+            if (status === 200) {
+                fileUploadTotal++;
+                updateProgressBar();
+            }
+            else if (status === 409) {
+                let data = await response.json();
+                dialogQueue.push({
+                    type: 'upload',
+                    dialogOptions: {
+                        title: 'Fichier existant',
+                        text: `Un fichier nommé "${data.filename}" existe déjà dans le dossier ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Voulez-vous remplacer ce fichier et le placer dans le dossier ${data.attemptedFolder} ?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Oui',
+                        cancelButtonText: 'Non',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    },
+                    fileData: {
+                        folderId: folderId,
+                        filename: file.name,
+                        data: ev.target.result,
+                        tags: tags,
+                        force: true
+                    }
+                });
+                showNextDialog();
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
     fileInput.forEach((input) => {
         input.addEventListener('change', async function (event) {
-            let tags = prompt('Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags.');
-            if (tags === null) {
+            let { value: tags } = await Swal.fire({
+                title: 'Tags communs',
+                text: 'Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags.',
+                input: 'text',
+                showCancelButton: true,
+            });
+            if (tags === undefined) {
                 event.target.value = '';
                 return;
             }
@@ -21,40 +79,46 @@ document.addEventListener('DOMContentLoaded', function () {
             let files = event.target.files;
             fileTotal += files.length;
             for (let file of files) {
-                await new Promise((resolve, reject) => {
-                    let reader = new FileReader();
-                    reader.onload = async function (ev) {
-                        progressBar.style.width = `${(fileUploadTotal / fileTotal) * 100}%`;
-                        progressBar.ariaValueNow = `${(fileUploadTotal / fileTotal) * 100}`;
-                        progressBar.innerHTML = `${fileUploadTotal} / ${fileTotal}`;
-                        let response = await fetch('/administration/upload', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': csrfToken
-                            },
-                            body: JSON.stringify({
-                                folderId: folderId,
-                                filename: file.name,
-                                data: ev.target.result,
-                                tags: tags
-                            })
-                        });
-                        let status = await response.status;
-                        if (status === 200) {
-                            fileUploadTotal++;
-                            progressBar.style.width = `${(fileUploadTotal / fileTotal) * 100}%`;
-                            progressBar.ariaValueNow = `${(fileUploadTotal / fileTotal) * 100}`;
-                            progressBar.innerHTML = `${fileUploadTotal} / ${fileTotal}`;
-                            resolve();
-                        }
-                    }
-                    reader.readAsDataURL(file);
-                });
+                uploadFile(file, folderId, tags);
             }
             event.target.value = '';
         });
     });
+
+    function updateProgressBar() {
+        progressBar.style.width = `${(fileUploadTotal / fileTotal) * 100}%`;
+        progressBar.ariaValueNow = `${(fileUploadTotal / fileTotal) * 100}`;
+        progressBar.innerHTML = `${fileUploadTotal} / ${fileTotal}`;
+    }
+
+    async function showNextDialog() {
+        if (dialogQueue.length > 0 && !dialogIsOpen) {
+            dialogIsOpen = true;
+            let { type, dialogOptions, fileData } = dialogQueue.shift();
+            let result = await Swal.fire(dialogOptions);
+            if (result.isConfirmed && type === 'upload') {
+                let response = await fetch('/administration/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(fileData)
+                });
+                let status = response.status;
+                if (status === 200) {
+                    fileUploadTotal++;
+                    updateProgressBar();
+                }
+            }
+            else if (type === 'upload') {
+                fileTotal--;
+                updateProgressBar();
+            }
+            dialogIsOpen = false;
+            showNextDialog();
+        }
+    }
 
     const socket = io.connect('/administration');
 

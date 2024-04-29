@@ -5,7 +5,8 @@ from app import redis, socketio
 from app.administration import bp
 from app.tasks import process_file
 from unidecode import unidecode
-from flask import render_template, request, current_app, Response
+from flask import render_template, request, current_app, Response, jsonify
+from flask_login import current_user
 from werkzeug.utils import secure_filename
 from flask_login import login_required
 from app.decorators import admin_required
@@ -52,7 +53,19 @@ def upload():
     folder_id = json_data.get("folderId")
     file_data = json_data.get("data")
     filename = unidecode(secure_filename(json_data.get("filename"))).lower()
-    user_tags = ' '.join(json_data.get("tags").replace(' ', ';').split(';'))
+    existing_file = FICHIER.query.filter_by(nom_Fichier=filename).first()
+    force = json_data.get("force")
+    if existing_file is not None:
+        if force:
+            delete_file(str(existing_file.id_Fichier))
+        else:
+            return jsonify({'filename': filename,
+                            'existingFolder': existing_file.DOSSIER_.nom_Dossier,
+                            'attemptedFolder': DOSSIER.query.get(folder_id).nom_Dossier,
+                            'existingFileAuthorFirstName': existing_file.AUTEUR.prenom_Utilisateur,
+                            'existingFileAuthorLastName': existing_file.AUTEUR.nom_Utilisateur,
+                            'existingFileDate': existing_file.date_Fichier.strftime('%d/%m/%Y à %H:%M')}), 409
+    user_tags = unidecode(' '.join(json_data.get("tags").replace(' ', ';').split(';'))).lower()
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -60,6 +73,7 @@ def upload():
         id_Dossier=folder_id,
         nom_Fichier=filename,
         extension_Fichier=filename.split(".")[-1],
+        id_Utilisateur=current_user.id_Utilisateur,
     )
     db.session.add(file)
     db.session.commit()
@@ -352,3 +366,18 @@ def delete_files(data):
         socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')
         return
     socketio.emit('files_deleted', {'fileIds': file_ids}, namespace='/administration')
+
+def delete_file(file_id):
+    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        Whoosh().delete_document(file_id)
+    database_file = FICHIER.query.get(file_id)
+    db.session.delete(database_file)
+    os.remove(
+        os.path.join(
+            current_app.root_path,
+            "storage",
+            str(database_file.id_Dossier),
+            f"{file_id}.{database_file.extension_Fichier}",
+        )
+    )
+    db.session.commit()
