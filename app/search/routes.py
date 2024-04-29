@@ -20,7 +20,7 @@ def search():
     Returns:
         A rendered template with the search results, query, and search form.
     """
-    query = request.args.get("query")
+    query = request.args.get("q")
     whoosh = Whoosh()
     results = whoosh.search(query)
     results = create_rendered_list(results)
@@ -76,7 +76,7 @@ def create_folder_dict(folder, files):
         dict: A dictionary representation of the folder, including its name, files, color, id, and subfolders.
     """
     files_in_folder = [
-        result for result in files if result["path"].startswith(str(folder.id_Dossier))
+        result for result in files if result["path"] == (str(folder.id_Dossier))
     ]
     subfolders = recursive_subfolder(folder, files)
     return {
