@@ -43,7 +43,7 @@ def register() -> any:
             db.session.commit()
             notification = NOTIFICATION(
                 datetime_Notification=datetime.now(),
-                type_Notification="Inscription",
+                type_Notification=1,
                 id_Utilisateur=user.id_Utilisateur,
             )
             db.session.add(notification)

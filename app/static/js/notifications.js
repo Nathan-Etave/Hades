@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectId = event.target.value;
         });
 
-        if (!['Inscription', 'Reactivation'].includes(notificationType)) {
+        if (!["1", "2"].includes(notificationType)) {
             alert(`Impossible de procéder à l'action demandée, la page va être rechargée.`);
             return window.location.reload();
         }

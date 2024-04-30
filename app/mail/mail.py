@@ -57,7 +57,7 @@ def send_reactivation_rejection_email(email):
     send_email(subject, sender, recipients, html_body)
 
 
-def send_forgotten_password_email(email, new_password):
+def send_forgotten_password_email(email, uuid):
     """
     Sends a forgotten password email to the specified email address.
 
@@ -71,5 +71,5 @@ def send_forgotten_password_email(email, new_password):
     subject = "Réinitialisation de votre mot de passe"
     sender = f'NOM_DE_LA_PLATEFORME <{os.environ.get("MAIL_USERNAME")}>'
     recipients = email
-    html_body = f"<p>Bonjour, votre mot de passe a été réinitialisé. \n Votre nouveau mot de passe est: {new_password}</p>"
+    html_body = f"<p>Bonjour, une demande de réinitialisation de mot de passe a été faite sur votre compte. \n Pour la valider, cliquez sur le lien suivant :</p> <a href='http://127.0.0.1:5000/connexion/reinitialisation/{uuid}'>Réinitialisation du mot de passe</a>"
     send_email(subject, sender, recipients, html_body)

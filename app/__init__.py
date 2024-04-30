@@ -20,8 +20,8 @@ from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
+from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
 from app.models.lien import LIEN
-from app.utils import check_notitications, get_total_file_count
 
 
 crsf = CSRFProtect()
@@ -50,6 +50,13 @@ def create_app(config_class = Config, is_worker=False):
         fill_db()
         if not os.path.exists(f'{current_app.root_path}/storage'):
             os.makedirs(f'{current_app.root_path}/storage')
+
+        if not os.path.exists(f'{current_app.root_path}/storage/password'):
+            os.makedirs(f'{current_app.root_path}/storage/password')
+        json_file_path = f'{current_app.root_path}/storage/password/password.json'
+        if not os.path.exists(json_file_path):
+            with open(json_file_path, 'w') as json_file:
+                json.dump({}, json_file)
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
@@ -85,6 +92,7 @@ def create_app(config_class = Config, is_worker=False):
     @app.context_processor
     def utility_processor():
         return dict(get_total_file_count=get_total_file_count,
+                    get_total_file_count_by_id=get_total_file_count_by_id,
                     check_notitications=check_notitications)
 
     app.register_blueprint(register_bp, url_prefix='/inscription')

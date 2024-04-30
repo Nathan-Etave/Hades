@@ -2,7 +2,7 @@
 Module for handling login routes.
 """
 
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, current_app
 from flask_login import login_user, current_user
 from flask_bcrypt import check_password_hash, generate_password_hash
 from app.login import bp
@@ -17,6 +17,9 @@ from flask import jsonify, request
 import secrets
 import string
 from app.mail.mail import send_forgotten_password_email
+import uuid
+import json 
+import os
 
 
 @login_manager.user_loader
@@ -108,11 +111,45 @@ def add_notification():
     db.session.commit()
     return jsonify(notification.to_dict()), 200
 
+@bp.route("/reinitialisation/<string:uuid>", methods=["GET"])
+def reinitialisation(uuid):
+    """
+    Reinitializes the password for a user identified by the given UUID.
+
+    Args:
+        uuid (str): The UUID of the user.
+
+    Returns:
+        redirect: A redirect response to the login page.
+
+    Raises:
+        None
+
+    """
+    json_file_path = f'{current_app.root_path}/storage/password/password.json'
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
+        if str(uuid) in data:
+            user = UTILISATEUR.query.filter_by(id_Utilisateur=data[str(uuid)]).first()
+            password = "".join(
+                secrets.choice(string.ascii_letters + string.digits + string.punctuation)
+                for _ in range(10)
+            )
+            user.mdp_Utilisateur = generate_password_hash(password)
+            db.session.commit()
+            flash (f"votre mot de passe a bien été réinitialisé, voici le nouveau : {password}", "success")
+
+            del data[str(uuid)]
+            with open(json_file_path, 'w') as json_file:
+                json.dump(data, json_file)
+        else:
+            flash ("La demande de réinitialisation n'est plus valide.", "danger")
+    return redirect(url_for("login.login"))
+
 
 def forgot_password(email):
     """
-    Sends a forgotten password email to the user and updates their password in the database.
-
+    Sends a forgotten password email to the user with the specified email address.
     Args:
         email (str): The email address of the user.
 
@@ -120,15 +157,22 @@ def forgot_password(email):
         list: A list containing a message and a status indicating the result of the operation.
     """
     user = UTILISATEUR.query.filter_by(email_Utilisateur=email).first()
-    password = "".join(
-        secrets.choice(string.ascii_letters + string.digits + string.punctuation)
-        for i in range(10)
-    )
-    user.mdp_Utilisateur = generate_password_hash(password)
+    uuid4 = uuid.uuid4()
+
+    json_file_path = f'{current_app.root_path}/storage/password/password.json'
+    with open(json_file_path, 'r') as json_file:
+        data = json.load(json_file)
+
+    for key, value in data.items():
+        if value == user.id_Utilisateur:
+            del data[key]
+            break
+    data[str(uuid4)] = user.id_Utilisateur
+    with open(json_file_path, 'w') as json_file:
+        json.dump(data, json_file)
+
     try:
-        send_forgotten_password_email(user.email_Utilisateur, password)
-        db.session.commit()
+        send_forgotten_password_email(user.email_Utilisateur, uuid4)
     except OSError:
-        db.session.rollback()
-        return ["Erreur lors de l'envoie du mail de confirmation", "danger"]
-    return ["Un email vous a été envoyé avec votre nouveau mot de passe.", "success"]
+        return ["Erreur lors de l'envoie du mail de réinitialisation.", "danger"]
+    return ["Un email vous a été envoyé pour réinitialiser mot de passe.", "success"]

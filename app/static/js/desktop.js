@@ -126,9 +126,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 'X-CSRFToken': csrfToken
                             }
                         })
-                            .then(response => response.json())
+                            .then(response => response.json().then(data => ({ status: response.status, body: data })))
                             .then(data => {
-                                if (data.status === "ok") {
+                                if (data.status === 200) {
                                     fav.className = "favori-false";
                                     etoile.className = "fa-regular fa-star fa-lg me-2";
                                 }
@@ -138,16 +138,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                     }
                     else {
-                        fetch("/recherche/favori/" + id, {
+                        fetch("/favori/" + id, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
                                 'X-CSRFToken': csrfToken
                             }
                         })
-                            .then(response => response.json())
+                            .then(response => response.json().then(data => ({ status: response.status, body: data })))
                             .then(data => {
-                                if (data.status === "ok") {
+                                if (data.status === 200) {
                                     fav.className = "favori-true";
                                     etoile.className = "fa-solid fa-star fa-lg me-2";
                                 }

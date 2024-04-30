@@ -55,7 +55,7 @@ def handle_acceptance(notification, send_email_function, success_message):
     user = UTILISATEUR.query.get(notification.id_Utilisateur)
     user.id_Role = request.json.get("role_id")
     user.est_Actif_Utilisateur = True
-    if notification.type_Notification == "Inscription":
+    if notification.type_Notification == "1":
         password = "".join(
             secrets.choice(string.ascii_letters + string.digits + string.punctuation)
             for i in range(10)
@@ -63,7 +63,7 @@ def handle_acceptance(notification, send_email_function, success_message):
         user.mdp_Utilisateur = generate_password_hash(password)
     db.session.delete(notification)
     try:
-        if notification.type_Notification == "Inscription":
+        if notification.type_Notification == "1":
             send_email_function(user.email_Utilisateur, password)
         else:
             send_email_function(user.email_Utilisateur)
@@ -93,7 +93,7 @@ def handle_rejection(notification, send_email_function, success_message):
     db.session.delete(notification)
     try:
         send_email_function(user.email_Utilisateur)
-        if notification.type_Notification == "Inscription":
+        if notification.type_Notification == "1":
             db.session.delete(user)
         db.session.commit()
     except (SMTPException, ConnectionError, TimeoutError):
@@ -119,11 +119,11 @@ def accept(id_notification):
         JSON: The JSON response.
     """
     notification = NOTIFICATION.query.get(id_notification)
-    if notification.type_Notification == "Inscription":
+    if notification.type_Notification == "1":
         return handle_acceptance(
             notification, send_registration_confirmation_email, "Inscription validée."
         )
-    elif notification.type_Notification == "Reactivation":
+    elif notification.type_Notification == "2":
         return handle_acceptance(
             notification, send_reactivation_confirmation_email, "Réactivation validée."
         )
@@ -142,11 +142,11 @@ def reject(id_notification):
         JSON: The JSON response.
     """
     notification = NOTIFICATION.query.get(id_notification)
-    if notification.type_Notification == "Inscription":
+    if notification.type_Notification == "1":
         return handle_rejection(
             notification, send_registration_rejection_email, "Inscription refusée."
         )
-    elif notification.type_Notification == "Reactivation":
+    elif notification.type_Notification == "2":
         return handle_rejection(
             notification, send_reactivation_rejection_email, "Réactivation refusée."
         )
