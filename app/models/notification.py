@@ -15,7 +15,7 @@ class NOTIFICATION(db.Model):
 
     id_Notification = mapped_column(Integer, primary_key=True)
     datetime_Notification = mapped_column(DateTime)
-    type_Notification = mapped_column(String(255))
+    type_Notification = mapped_column(Integer)
     id_Utilisateur = mapped_column(Integer)
     id_Fichier = mapped_column(Integer)
 

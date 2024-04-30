@@ -7,9 +7,9 @@
         </div>
         <div class="card-body">
             <p class="card-subtitle text-muted">
-                {% if notification.type_Notification == 'Inscription' %}
+                {% if notification.type_Notification == "1" %}
                     Demande d'inscription
-                {% elif notification.type_Notification == 'Reactivation' %}
+                {% elif notification.type_Notification == "2" %}
                     Demande de réactivation
                 {% endif %}
                 <span class="fw-bold">{{ notification.UTILISATEUR_.prenom_Utilisateur }} {{ notification.UTILISATEUR_.nom_Utilisateur }}</span> ({{ notification.UTILISATEUR_.email_Utilisateur }})</p>
@@ -50,9 +50,9 @@
         <div class="row row-cols-1 row-cols-md-2 g-4">
             {% for notification in notifications %}
                 <div class="col">
-                    {% if notification.type_Notification == 'Inscription' %}
+                    {% if notification.type_Notification == "1" %}
                         {{ card(notification, 'Demande d\'inscription', roles) }}
-                    {% elif notification.type_Notification == 'Reactivation' %}
+                    {% elif notification.type_Notification == "2" %}
                         {{ card(notification, 'Demande de réactivation', roles) }}
                     {% endif %}
                 </div>
