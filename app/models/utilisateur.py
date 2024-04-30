@@ -33,3 +33,4 @@ class UTILISATEUR(db.Model, UserMixin):
     ROLE_: Mapped[Optional['ROLE']] = relationship('ROLE', back_populates='UTILISATEUR')
     A_RECHERCHE: Mapped[List['A_RECHERCHE']] = relationship('A_RECHERCHE', uselist=True, back_populates='UTILISATEUR_')
     NOTIFICATION: Mapped[List['NOTIFICATION']] = relationship('NOTIFICATION', uselist=True, back_populates='UTILISATEUR_')
+    LIEN: Mapped[List['LIEN']] = relationship('LIEN', uselist=True, back_populates='UTILISATEUR')

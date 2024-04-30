@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <a href="#" id="${ file.id_Fichier }" class="desktop-btn" onclick="event.stopPropagation();">
                                         <i class="fa-regular fa-square-minus fa-lg me-2" id="desk-${ file.id_Fichier }"></i>
                                     </a>
-                                    <a href="/dossier/${ file.id_Dossier }/fichier/${ file.id_Fichier }?as_attachment=true"
+                                    <a href="/classeur/${ file.id_Dossier }/fichier/${ file.id_Fichier }?as_attachment=true"
                                         style="display: inherit;">
                                         <i class="fa fa-download mt-1" aria-hidden="true" style="cursor: pointer;"
                                             data-file="${ file.id_Fichier }" data-folder="${ file.id_Dossier }"></i>

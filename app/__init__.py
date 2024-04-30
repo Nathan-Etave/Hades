@@ -20,6 +20,7 @@ from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
+from app.models.lien import LIEN
 from app.utils import check_notitications, get_total_file_count
 
 
