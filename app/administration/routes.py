@@ -33,7 +33,7 @@ def administration():
     all_users = [user for user in all_users if user.id_Role is not None]
     all_roles = ROLE.query.all()
     all_links = LIEN.query.all()
-    all_links = sorted(all_links, key=lambda x: x.nom_Lien)
+    all_links = sorted(all_links, key=lambda x: x.nom_Lien.lower())
     return render_template(
         "administration/index.html",
         folders=all_root_folders,
@@ -91,7 +91,10 @@ def upload():
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
     )
-    return Response(status=200)
+    file_dict = file.to_dict()
+    file_dict.update({"old_file_id": existing_file.id_Fichier if existing_file is not None else None})
+    file_dict.update({"old_folder_id": existing_file.id_Dossier if existing_file is not None else None})
+    return jsonify(file_dict), 200
 
 
 @socketio.on("connect", namespace="/administration")
