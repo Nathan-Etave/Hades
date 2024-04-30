@@ -50,6 +50,13 @@ def create_app(config_class = Config, is_worker=False):
         if not os.path.exists(f'{current_app.root_path}/storage'):
             os.makedirs(f'{current_app.root_path}/storage')
 
+        if not os.path.exists(f'{current_app.root_path}/storage/password'):
+            os.makedirs(f'{current_app.root_path}/storage/password')
+        json_file_path = f'{current_app.root_path}/storage/password/password.json'
+        if not os.path.exists(json_file_path):
+            with open(json_file_path, 'w') as json_file:
+                json.dump({}, json_file)
+
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
 
