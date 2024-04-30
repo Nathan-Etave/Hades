@@ -17,6 +17,7 @@ from app.models.fichier import FICHIER
 from app.models.utilisateur import UTILISATEUR
 from app.models.a_acces import A_ACCES
 from app.models.role import ROLE
+from app.models.lien import LIEN
 from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
 
@@ -31,11 +32,14 @@ def administration():
     all_users = UTILISATEUR.query.all()
     all_users = [user for user in all_users if user.id_Role is not None]
     all_roles = ROLE.query.all()
+    all_links = LIEN.query.all()
+    all_links = sorted(all_links, key=lambda x: x.nom_Lien)
     return render_template(
         "administration/index.html",
         folders=all_root_folders,
         users=all_users,
         roles=all_roles,
+        links=all_links,
         is_admin=True,
         is_authenticated=True,
         has_notifications=check_notitications(),
@@ -191,7 +195,7 @@ def create_folder(data):
     folder_roles = data.get('folderRoles')
     folder_color = data.get('folderColor')
     folder_priority = data.get('folderPriority')
-    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority).filter(DOSSIER.id_Dossier != 10).all()
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority).filter(DOSSIER.id_Dossier != 9).all()
     for folder_to_update in folders_to_update:
         folder_to_update.priorite_Dossier += 1
     folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=folder_priority, couleur_Dossier=folder_color)
@@ -241,11 +245,11 @@ def modify_folder(data):
     folder.couleur_Dossier = folder_color
     if folder.priorite_Dossier != int(folder_priority):
         if int(folder_priority) > folder.priorite_Dossier:
-            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier).filter(DOSSIER.priorite_Dossier <= int(folder_priority)).filter(DOSSIER.id_Dossier != 10).all()
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier).filter(DOSSIER.priorite_Dossier <= int(folder_priority)).filter(DOSSIER.id_Dossier != 9).all()
             for folder_to_update in folders_to_update:
                 folder_to_update.priorite_Dossier -= 1
         else:
-            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority)).filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier).filter(DOSSIER.id_Dossier != 10).all()
+            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority)).filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier).filter(DOSSIER.id_Dossier != 9).all()
             for folder_to_update in folders_to_update:
                 folder_to_update.priorite_Dossier += 1
         folder.priorite_Dossier = folder_priority
@@ -286,7 +290,7 @@ def modify_folder(data):
 @socketio.on('delete_folder', namespace='/administration')
 def delete_folder(data):
     folder = DOSSIER.query.get(data.get('folderId'))
-    if folder.id_Dossier == 10:
+    if folder.id_Dossier == 9:
         socketio.emit('folder_not_deleted', {'error': 'Le classeur d\'archive ne peut pas être supprimé.'}, namespace='/administration')
         return
     if len(folder.DOSSIER_) > 0:
@@ -313,7 +317,7 @@ def delete_folder(data):
     deleted_priority = folder.priorite_Dossier
     db.session.delete(folder)
     db.session.commit()
-    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority).filter(DOSSIER.id_Dossier != 10).all()
+    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority).filter(DOSSIER.id_Dossier != 9).all()
     for folder_to_update in folders_to_update:
         folder_to_update.priorite_Dossier -= 1
     db.session.commit()
@@ -326,16 +330,16 @@ def archive_folders(data):
     try:
         for folder_id in folder_ids:
             database_folder = DOSSIER.query.get(folder_id)
-            if folder_id == '10':
+            if folder_id == '9':
                 pass
-            elif database_folder.DOSSIER != [] and database_folder.DOSSIER[0].id_Dossier == 10:
+            elif database_folder.DOSSIER != [] and database_folder.DOSSIER[0].id_Dossier == 0:
                 pass
             elif database_folder.DOSSIER != [] and str(database_folder.DOSSIER[0].id_Dossier) in folder_ids:
                 pass
             else:
                 if database_folder.DOSSIER != []:
                     db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
-                db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=10, id_Dossier_Enfant=folder_id))
+                db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=9, id_Dossier_Enfant=folder_id))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -381,3 +385,31 @@ def delete_file(file_id):
         )
     )
     db.session.commit()
+
+@socketio.on('delete_link', namespace='/administration')
+def delete_link(data):
+    try:
+        link = LIEN.query.get(data.get('linkId'))
+        db.session.delete(link)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('link_not_deleted', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('link_deleted', {'linkId': data.get('linkId')}, namespace='/administration')
+
+@socketio.on('create_link', namespace='/administration')
+def create_link(data):
+    link_name = data.get('linkName')
+    link_url = data.get('linkUrl')
+    link_description = data.get('linkDescription')
+    try:
+        link = LIEN(nom_Lien=link_name, lien_Lien=link_url, description_Lien=link_description, id_Utilisateur=current_user.id_Utilisateur)
+        db.session.add(link)
+        db.session.commit()
+        link_date = link.date_Lien.strftime('%d/%m/%Y à %H:%M')
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit('link_not_created', {'error': str(e)}, namespace='/administration')
+        return
+    socketio.emit('link_created', {'linkId': link.id_Lien, 'linkName': link_name, 'linkUrl': link_url, 'linkDescription': link_description, 'linkDate': link_date, 'linkAuthor': f'{current_user.prenom_Utilisateur} {current_user.nom_Utilisateur}'}, namespace='/administration')
