@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch("/connexion/notification", {
             method: "POST",
             body: JSON.stringify({
-                "type": "Reactivation",
+                "type": 2,
                 "email_user": email_user,
             }),
             headers: {

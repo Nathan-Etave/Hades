@@ -51,8 +51,10 @@
                         <div class="me-2" data-trigger-accordion="">
                             <i class="fas fa-file" data-trigger-accordion=""></i>
                         </div>
-                        <div data-trigger-accordion="" id="fileCount">
-                            {{ folder.files|length }}
+                        <div data-trigger-accordion="">
+                            <span id="fileCount" data-trigger-accordion="">{{ folder.files|length }}</span> <span
+                                id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count_by_id(folder.id)
+                                }})</span>
                         </div>
                     </div>
                     <div class="d-flex me-2" style="margin-left: 1rem;" onclick="event.stopPropagation();">
