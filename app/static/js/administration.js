@@ -1,7 +1,113 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    const socket = io.connect('/administration');
+
+    const DIALOG_TYPES = {
+        UPLOAD_OVERWRITE: 'uploadOverwrite',
+        DELETE_LINK: 'deleteLink',
+        ALERT: 'alert',
+        DOWNLOAD_CONFIRM: 'downloadConfirm',
+        DELETE_USER_CONFIRM: 'deleteUserConfirm',
+        DELETE_FILES_CONFIRM: 'deleteFilesConfirm',
+        ARCHIVE_FOLDERS_CONFIRM: 'archiveFoldersConfirm'
+    };
+
+    async function handleUploadOverwriteDialog(data) {
+        let response = await fetch('/administration/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(data)
+        });
+        let status = response.status;
+        if (status === 200) {
+            fileUploadTotal++;
+            updateProgressBar();
+        }
+    }
+
+    function handleDeleteLinkDialog(data) {
+        socket.emit('delete_link', { linkId: data });
+    }
+
+    async function handleDownloadConfirmDialog(data) {
+        let response = await fetch('/download/archive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ fileIds: data })
+        });
+        if (response.ok) {
+            response.blob().then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = 'archive.zip';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
+    }
+
+    function handleDeleteUserConfirmDialog(data) {
+        socket.emit('delete_user', { userId: data });
+    }
+
+    function handleDeleteFilesConfirmDialog(data) {
+        socket.emit('delete_files', { fileIds: data });
+    }
+
+    function handleArchiveFoldersConfirmDialog(data) {
+        socket.emit('archive_folders', { folderIds: data });
+    }
+
+    async function showNextDialog() {
+        if (dialogQueue.length > 0 && !dialogIsOpen) {
+            dialogIsOpen = true;
+            let { type, dialogOptions, data } = dialogQueue.shift();
+            let result = await Swal.fire(dialogOptions);
+            if (result.isConfirmed) {
+                switch (type) {
+                    case DIALOG_TYPES.UPLOAD_OVERWRITE:
+                        await handleUploadOverwriteDialog(data);
+                        break;
+                    case DIALOG_TYPES.DELETE_LINK:
+                        handleDeleteLinkDialog(data);
+                        break;
+                    case DIALOG_TYPES.DOWNLOAD_CONFIRM:
+                        handleDownloadConfirmDialog(data);
+                        break;
+                    case DIALOG_TYPES.DELETE_USER_CONFIRM:
+                        handleDeleteUserConfirmDialog(data);
+                        break;
+                    case DIALOG_TYPES.DELETE_FILES_CONFIRM:
+                        handleDeleteFilesConfirmDialog(data);
+                        break;
+                    case DIALOG_TYPES.ARCHIVE_FOLDERS_CONFIRM:
+                        handleArchiveFoldersConfirmDialog(data);
+                        break;
+                }
+            }
+            else if (type === DIALOG_TYPES.UPLOAD_OVERWRITE) {
+                fileTotal--;
+                updateProgressBar();
+            }
+            dialogIsOpen = false;
+            showNextDialog();
+        }
+    }
+
+
     let checkboxes = document.querySelectorAll('input[type=checkbox]');
     checkboxes.forEach((checkbox) => {
+        if (checkbox.classList.contains('status-toggle')) {
+            return;
+        }
         checkbox.checked = false;
     });
 
@@ -14,59 +120,63 @@ document.addEventListener('DOMContentLoaded', function () {
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     async function uploadFile(file, folderId, tags) {
-        let reader = new FileReader();
-        reader.onload = async function (ev) {
-            updateProgressBar();
-            let response = await fetch('/administration/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    folderId: folderId,
-                    filename: file.name,
-                    data: ev.target.result,
-                    tags: tags
-                })
-            });
-            let status = response.status;
-            if (status === 200) {
-                fileUploadTotal++;
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onload = async function (ev) {
                 updateProgressBar();
-            }
-            else if (status === 409) {
-                let data = await response.json();
-                dialogQueue.push({
-                    type: 'upload',
-                    dialogOptions: {
-                        title: 'Fichier existant',
-                        text: `Un fichier nommé "${data.filename}" existe déjà dans le classeur ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Voulez-vous remplacer ce fichier et le placer dans le classeur ${data.attemptedFolder} ?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Oui',
-                        cancelButtonText: 'Non',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false
+                let response = await fetch('/administration/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
                     },
-                    fileData: {
+                    body: JSON.stringify({
                         folderId: folderId,
                         filename: file.name,
                         data: ev.target.result,
-                        tags: tags,
-                        force: true
-                    }
+                        tags: tags
+                    })
                 });
-                showNextDialog();
-            }
-        };
-        reader.readAsDataURL(file);
+                let status = response.status;
+                if (status === 200) {
+                    fileUploadTotal++;
+                    updateProgressBar();
+                    resolve();
+                }
+                else if (status === 409) {
+                    let data = await response.json();
+                    dialogQueue.push({
+                        type: DIALOG_TYPES.UPLOAD_OVERWRITE,
+                        dialogOptions: {
+                            title: 'Fichier existant.',
+                            text: `Un fichier nommé "${data.filename}" existe déjà dans le classeur ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Voulez-vous remplacer ce fichier et le placer dans le classeur ${data.attemptedFolder} ?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Oui',
+                            cancelButtonText: 'Non',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        },
+                        data: {
+                            folderId: folderId,
+                            filename: file.name,
+                            data: ev.target.result,
+                            tags: tags,
+                            force: true
+                        }
+                    });
+                    showNextDialog();
+                    resolve();
+                }
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     fileInput.forEach((input) => {
         input.addEventListener('change', async function (event) {
             let { value: tags } = await Swal.fire({
-                title: 'Tags communs',
+                title: 'Tags communs.',
                 text: 'Veuillez entrer les tags communs à tous les fichiers séparés par un point-virgule, ou laissez vide pour ne pas ajouter de tags.',
                 input: 'text',
                 showCancelButton: true,
@@ -79,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let files = event.target.files;
             fileTotal += files.length;
             for (let file of files) {
-                uploadFile(file, folderId, tags);
+                await uploadFile(file, folderId, tags);
             }
             event.target.value = '';
         });
@@ -90,37 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
         progressBar.ariaValueNow = `${(fileUploadTotal / fileTotal) * 100}`;
         progressBar.innerHTML = `${fileUploadTotal} / ${fileTotal}`;
     }
-
-    async function showNextDialog() {
-        if (dialogQueue.length > 0 && !dialogIsOpen) {
-            dialogIsOpen = true;
-            let { type, dialogOptions, fileData } = dialogQueue.shift();
-            let result = await Swal.fire(dialogOptions);
-            if (result.isConfirmed && type === 'upload') {
-                let response = await fetch('/administration/upload', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(fileData)
-                });
-                let status = response.status;
-                if (status === 200) {
-                    fileUploadTotal++;
-                    updateProgressBar();
-                }
-            }
-            else if (type === 'upload') {
-                fileTotal--;
-                updateProgressBar();
-            }
-            dialogIsOpen = false;
-            showNextDialog();
-        }
-    }
-
-    const socket = io.connect('/administration');
 
     socket.on('worker_status', function (data) {
         const workers = [
@@ -159,16 +238,20 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('#totalFilesProcessed').innerHTML = data;
     });
 
-    socket.on('file_deleted', function (data) {
-        let file = document.querySelector(`#file-${data.fileId}`);
-        file.remove();
-        let fileCount = document.querySelector(`.folder-${data.folderId}`).querySelector('#fileCount').innerHTML;
-        fileCount--;
-        document.querySelector(`.folder-${data.folderId}`).querySelector('#fileCount').innerHTML = fileCount;
-    });
-
     socket.on('file_deletion_failed', function (data) {
-        alert('La suppression du fichier a échoué.');
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'La suppression du fichier a échoué.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     const folders = document.querySelectorAll('#folder');
@@ -223,12 +306,36 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('user_role_updated', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: data.message,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     socket.on('user_role_not_updated', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
         document.querySelector(`#role-select-${data.userId}`).value = data.roleId;
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     const statusToggles = document.querySelectorAll('.status-toggle');
@@ -240,44 +347,94 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('user_status_updated', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: data.message,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     socket.on('user_status_not_updated', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
         let statusToggle = document.querySelector(`#status-toggle-${data.userId}`);
         statusToggle.parentElement.classList.remove('off');
         statusToggle.parentElement.classList.replace('btn-danger', 'btn-success');
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     const deleteUserButtons = document.querySelectorAll('.delete-user-button');
     deleteUserButtons.forEach((button) => {
         button.addEventListener('click', async function (event) {
             let userId = event.target.dataset.user;
-            let confirmation = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');
-            if (!confirmation) return;
-            socket.emit('delete_user', { userId: userId });
+            dialogQueue.push({
+                type: DIALOG_TYPES.DELETE_USER_CONFIRM,
+                dialogOptions: {
+                    title: 'Supprimer l\'utilisateur.',
+                    text: 'Voulez-vous vraiment supprimer cet utilisateur ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Non',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                },
+                data: userId
+            });
+            showNextDialog();
         });
     });
 
     socket.on('user_deleted', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('success', data.message));
         document.querySelector(`#user-${data.userId}`).remove();
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: data.message,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
 
     socket.on('user_not_deleted', function (data) {
-        document.querySelector('.user-alert').appendChild(createAlert('danger', data.error));
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
     });
-
-    function createAlert(type, message) {
-        let alert = document.createElement('div');
-        alert.classList.add('alert', `alert-${type}`, 'alert-dismissible');
-        alert.innerHTML = `<p class="mb-0">${message}</p><button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-        setTimeout(() => {
-            alert.remove();
-        }, 5000);
-        return alert;
-    }
 
     const searchUser = document.querySelector('#searchUser');
     const initialUsers = Array.from(document.querySelectorAll('.user'));
@@ -354,6 +511,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const createFolderButton = document.querySelector('#createFolderButton');
     createFolderButton.addEventListener('click', function (event) {
         if (fileTotal != fileUploadTotal) {
+            event.preventDefault();
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez attendre la fin du téléversement des fichiers avant de créer un classeur.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
             return;
         }
         let folderName = addFolderModal.querySelector('#folderName').value;
@@ -361,13 +531,22 @@ document.addEventListener('DOMContentLoaded', function () {
         let folderRoles = Array.from(addFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
         let folderPriority = addFolderModal.querySelector('#folderPriority').value;
         let folderColor = addFolderModal.querySelector('#folderColor').value;
-        createFolderButton.disabled = true;
         if (folderName !== '' && folderPriority !== '') {
             socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
-            alert('Veuillez remplir tous les champs.');
-            createFolderButton.disabled = false;
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez remplir tous les champs.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
         }
     });
 
@@ -376,17 +555,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_created', function (data) {
-        alert(`La création du classeur a échoué: ${data.error}`);
-        createFolderButton.disabled = false;
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: `La création du classeur a échoué.`,
+                text: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
     });
 
     const formCreateFolder = document.querySelector('#addFolderModal').querySelector('form');
     formCreateFolder.addEventListener('submit', function (event) {
-        if (fileTotal != fileUploadTotal) {
-            event.preventDefault();
-            alert('Veuillez attendre la fin du téléversement des fichiers avant de créer un classeur.');
-            return;
-        }
+        event.preventDefault();
     });
 
     const modifyFolderButton = document.querySelector('#modifyFolderButton');
@@ -400,13 +586,22 @@ document.addEventListener('DOMContentLoaded', function () {
         let folderRoles = Array.from(modifyFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
         let folderPriority = modifyFolderModal.querySelector('#folderPriority').value;
         let folderColor = modifyFolderModal.querySelector('#folderColor').value;
-        modifyFolderButton.disabled = true;
         if (folderName !== '' && folderId !== '0' && folderPriority !== '') {
             socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
-            alert('Veuillez remplir tous les champs.');
-            modifyFolderButton.disabled = false;
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez remplir tous les champs.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
         }
     });
 
@@ -415,15 +610,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_modified', function (data) {
-        alert(`La modification du classeur a échoué: ${data.error}`);
-        modifyFolderButton.disabled = false;
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: `La modification du classeur a échoué.`,
+                text: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
     });
 
     const formModifyFolder = document.querySelector('#modifyFolderModal').querySelector('form');
     formModifyFolder.addEventListener('submit', function (event) {
+        event.preventDefault();
         if (fileTotal != fileUploadTotal) {
-            event.preventDefault();
-            alert('Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.');
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
             return;
         }
     });
@@ -433,6 +650,18 @@ document.addEventListener('DOMContentLoaded', function () {
     deleteFolderButton.addEventListener('click', function (event) {
         event.preventDefault();
         if (fileTotal != fileUploadTotal) {
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un classeur.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
             return;
         }
         let folderId = deleteFolderModal.querySelector('#existingFolderDelete').value;
@@ -440,7 +669,18 @@ document.addEventListener('DOMContentLoaded', function () {
             socket.emit('delete_folder', { folderId: folderId });
         }
         else {
-            alert('Veuillez sélectionner un classeur.');
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez sélectionner un classeur.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
         }
     });
 
@@ -449,16 +689,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folder_not_deleted', function (data) {
-        alert(`La suppression du classeur a échoué: ${data.error}`);
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: `La suppression du classeur a échoué.`,
+                text: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
     });
 
     const formDeleteFolder = document.querySelector('#deleteFolderModal').querySelector('form');
     formDeleteFolder.addEventListener('submit', function (event) {
-        if (fileTotal != fileUploadTotal) {
-            event.preventDefault();
-            alert('Veuillez attendre la fin du téléversement des fichiers avant de supprimer un classeur.');
-            return;
-        }
+        event.preventDefault();
     });
 
     let isFolderChecked = false;
@@ -509,17 +757,50 @@ document.addEventListener('DOMContentLoaded', function () {
                         let folderFilesIds = Array.from(new Set(allFiles));
                         if (folderFilesIds.length === fileIds.length) {
                             if (fileTotal === fileUploadTotal) {
-                                let confirmation = confirm('Voulez-vous vraiment archiver le/les classeurs(s) sélectionné(s) ?');
-                                if (confirmation) {
-                                    socket.emit('archive_folders', { folderIds: folderIds });
-                                }
+                                dialogQueue.push({
+                                    type: DIALOG_TYPES.ARCHIVE_FOLDERS_CONFIRM,
+                                    dialogOptions: {
+                                        title: 'Archiver le/les classeur(s) sélectionné(s).',
+                                        text: 'Voulez-vous vraiment archiver le(s) classeur(s) ?',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Oui',
+                                        cancelButtonText: 'Non',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false
+                                    },
+                                    data: folderIds
+                                });
+                                showNextDialog();
                             }
                             else {
-                                alert('Veuillez attendre la fin du téléversement des fichiers avant d\'archiver un classeur.');
+                                dialogQueue.push({
+                                    type: DIALOG_TYPES.ALERT,
+                                    dialogOptions: {
+                                        position: 'top-end',
+                                        icon: 'error',
+                                        title: 'Veuillez attendre la fin du téléversement des fichiers avant d\'archiver un classeur.',
+                                        showConfirmButton: false,
+                                        timer: 1000,
+                                        backdrop: false
+                                    }
+                                });
+                                showNextDialog();
                             }
                         }
                         else {
-                            alert('Les fichiers sélectionnés ne sont pas tous dans les classeurs sélectionnés.');
+                            dialogQueue.push({
+                                type: DIALOG_TYPES.ALERT,
+                                dialogOptions: {
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: 'Les fichiers sélectionnés ne sont pas tous dans les classeurs sélectionnés.',
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    backdrop: false
+                                }
+                            });
+                            showNextDialog();
                         }
                     });
                 }
@@ -545,13 +826,35 @@ document.addEventListener('DOMContentLoaded', function () {
                         let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
                         let fileIds = files.map(cb => cb.dataset.file);
                         if (fileTotal === fileUploadTotal) {
-                            let confirmation = confirm('Voulez-vous vraiment supprimer le/les fichier(s) sélectionné(s) ?');
-                            if (confirmation) {
-                                socket.emit('delete_files', { fileIds: fileIds });
-                            }
+                            dialogQueue.push({
+                                type: DIALOG_TYPES.DELETE_FILES_CONFIRM,
+                                dialogOptions: {
+                                    title: 'Supprimer le/les fichier(s) sélectionné(s).',
+                                    text: 'Voulez-vous vraiment supprimer le(s) fichier(s) ?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Oui',
+                                    cancelButtonText: 'Non',
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false
+                                },
+                                data: fileIds
+                            });
+                            showNextDialog();
                         }
                         else {
-                            alert('Veuillez attendre la fin du téléversement des fichiers avant de supprimer un fichier.');
+                            dialogQueue.push({
+                                type: DIALOG_TYPES.ALERT,
+                                dialogOptions: {
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un fichier.',
+                                    showConfirmButton: false,
+                                    timer: 1000,
+                                    backdrop: false
+                                }
+                            });
+                            showNextDialog();
                         }
                     });
                 }
@@ -563,29 +866,34 @@ document.addEventListener('DOMContentLoaded', function () {
         let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
         let fileIds = files.map(cb => cb.dataset.file);
         if (fileIds.length > 0) {
-            let confirmation = confirm('Voulez-vous vraiment télécharger le/les fichier(s) sélectionné(s) ?');
-            if (confirmation) {
-                fetch('/download/archive', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ fileIds: fileIds })
-                }).then(response => {
-                    if (response.ok) {
-                        response.blob().then(blob => {
-                            let url = window.URL.createObjectURL(blob);
-                            let a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'archive.zip';
-                            document.body.appendChild(a);
-                            a.click();
-                            window.URL.revokeObjectURL(url);
-                        });
-                    }
-                });
-            }
+            dialogQueue.push({
+                type: DIALOG_TYPES.DOWNLOAD_CONFIRM,
+                dialogOptions: {
+                    icon: 'info',
+                    title: 'Télécharger le/les fichier(s) sélectionné(s) ?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Non',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                },
+                data: fileIds
+            });
+            showNextDialog();
+        }
+        else {
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez sélectionner au moins un fichier.',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false
+                }
+            });
+            showNextDialog();
         }
     });
 
@@ -594,14 +902,206 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('folders_not_archived', function (data) {
-        alert('L\'archivage des classeurs a échoué.');
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'L\'archivage des classeurs a échoué.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
     });
 
     socket.on('files_deleted', function (data) {
-        window.location.reload();
+        let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
+        files.forEach((file) => {
+            let deletedFile = document.querySelector(`#file-${file.dataset.file}`);
+            deletedFile.remove();
+            let fileCount = document.querySelector(`.folder-${file.dataset.folder}`).querySelector('#fileCount').innerHTML;
+            fileCount--;
+            document.querySelector(`.folder-${file.dataset.folder}`).querySelector('#fileCount').innerHTML = fileCount;
+        });
     });
 
     socket.on('files_not_deleted', function (data) {
-        alert('La suppression des fichiers a échoué.');
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'La suppression des fichiers a échoué.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+    });
+
+    const deleteLinkButtons = document.querySelectorAll('#deleteLinkButton');
+    deleteLinkButtons.forEach((button) => {
+        button.addEventListener('click', function (event) {
+            buttonClick(event);
+        });
+    });
+
+    function buttonClick(event) {
+        event.preventDefault();
+        dialogQueue.push({
+            type: DIALOG_TYPES.DELETE_LINK,
+            dialogOptions: {
+                title: 'Supprimer le lien.',
+                text: 'Voulez-vous vraiment supprimer ce lien ?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui',
+                cancelButtonText: 'Non',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            },
+            data: event.target.dataset.link
+        });
+        showNextDialog();
+    }
+
+    socket.on('link_deleted', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: 'Lien supprimé avec succès.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
+        let link = document.querySelector(`#link-${data.linkId}`);
+        link.remove();
+        let grid = document.querySelector('.link-container');
+        grid.style.display = 'none';
+        grid.offsetHeight;
+        grid.style.display = '';
+    });
+
+    socket.on('link_not_deleted', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'La suppression du lien a échoué.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
+    });
+
+    socket.on('link_created', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: 'Lien créé avec succès.',
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            },
+            data: data
+        });
+        showNextDialog();
+        let linkContainer = document.querySelector('.link-container');
+        let link = document.createElement('div');
+        link.classList.add('col-4');
+        link.id = `link-${data.linkId}`;
+        link.innerHTML = `
+        <a href="${data.linkUrl}" class="text-decoration-none text-dark" target="_blank" title="${data.linkDescription}">
+            <div class="card border-warning position-relative">
+                <button type="button" class="btn btn-danger position-absolute top-0 end-0" id="deleteLinkButton" data-link="${data.linkId}" style="transform: scale(0.8);">✖</button>
+                <div class="card-header bg-secondary" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${data.linkName}
+                </div>
+                <div class="card-body bg-light small" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${data.linkDescription}
+                </div>
+                <div class="card-footer bg-secondary">
+                    <div class="row">
+                        <div class="col text-start text-muted" style="font-size: 0.75rem;">
+                            ${data.linkAuthor}
+                        </div>
+                        <div class="col text-end text-muted" style="font-size: 0.75rem;">
+                            Le ${data.linkDate}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        `;
+        linkContainer.appendChild(link);
+        let grid = document.querySelector('.link-container');
+        grid.style.display = 'none';
+        grid.offsetHeight;
+        grid.style.display = '';
+        let deleteLinkButton = link.querySelector('#deleteLinkButton');
+        deleteLinkButton.addEventListener('click', function (event) {
+            buttonClick(event);
+        });
+    });
+
+    const addLinkModal = document.querySelector('#addLinkModal');
+    const createLinkButton = document.querySelector('#createLinkButton');
+    createLinkButton.addEventListener('click', function (event) {
+        let linkName = addLinkModal.querySelector('#linkName').value;
+        let linkUrl = addLinkModal.querySelector('#linkUrl').value;
+        let linkDescription = addLinkModal.querySelector('#linkDescription').value;
+        if (linkName !== '' && linkUrl !== '') {
+            socket.emit('create_link', { linkName: linkName, linkUrl: linkUrl, linkDescription: linkDescription });
+            addLinkModal.querySelector('button[data-bs-dismiss="modal"]').click();
+        }
+        else {
+            dialogQueue.push({
+                type: DIALOG_TYPES.ALERT,
+                dialogOptions: {
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Veuillez remplir tous les champs (Nom et URL).',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    backdrop: false,
+                }
+            });
+            showNextDialog();
+        }
+    });
+
+    socket.on('link_not_created', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'La création du lien a échoué.',
+                text: data.error,
+                showConfirmButton: false,
+                timer: 1000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+    });
+
+    const formCreateLink = document.querySelector('#addLinkModal').querySelector('form');
+    formCreateLink.addEventListener('submit', function (event) {
+        event.preventDefault();
     });
 });
