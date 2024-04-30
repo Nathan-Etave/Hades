@@ -20,7 +20,7 @@ from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
-from app.utils import check_notitications, get_total_file_count
+from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
 
 
 crsf = CSRFProtect()
@@ -91,6 +91,7 @@ def create_app(config_class = Config, is_worker=False):
     @app.context_processor
     def utility_processor():
         return dict(get_total_file_count=get_total_file_count,
+                    get_total_file_count_by_id=get_total_file_count_by_id,
                     check_notitications=check_notitications)
 
     app.register_blueprint(register_bp, url_prefix='/inscription')

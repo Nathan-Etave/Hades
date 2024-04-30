@@ -288,3 +288,7 @@ def get_total_file_count(folder):
     for subfolder in folder.DOSSIER_:
         total += get_total_file_count(subfolder)
     return total
+
+def get_total_file_count_by_id(folder_id):
+    folder = DOSSIER.query.filter_by(id_Dossier=folder_id).first()
+    return get_total_file_count(folder)
