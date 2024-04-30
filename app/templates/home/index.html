@@ -111,6 +111,35 @@
 </div>
 {% endmacro %}
 
+<!-- handle the display of the links in the home page. -->
+{% macro render_link(link) %}
+<div class="col-4 mt-3 link-element" id="link-{{ link.id_Lien }}" style="width: 90%;">
+    <a href="{{ link.lien_Lien }}" class="text-decoration-none text-dark" target="_blank"
+        title="{{ link.description_Lien }}">
+        <div class="card border-warning position-relative link-name">
+            <div class="card-header bg-secondary"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ link.nom_Lien }}
+            </div>
+            <div class="card-body bg-light small link-description"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ link.description_Lien }}
+            </div>
+            <div class="card-footer bg-secondary">
+                <div class="row">
+                    <div class="col text-start text-muted" style="font-size: 0.75rem;">
+                        {{ link.UTILISATEUR.prenom_Utilisateur }} {{ link.UTILISATEUR.nom_Utilisateur }}
+                    </div>
+                    <div class="col text-end text-muted" style="font-size: 0.75rem;">
+                        Le {{ link.date_Lien.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+{% endmacro %}
+
 {% block content %}
 
 <!-- display the search bar and the folders with their files in the home page. -->
@@ -139,10 +168,16 @@
     </div>
 </div>
 
-<!-- display the offcanvas with the old searches and the favorites files. -->
+<!-- button to display the offcanvas with the old searches and the favorites files. -->
 <button class="btn btn-light button-class" type="button" data-bs-toggle="offcanvas" data-bs-target="#detail_offcanvas"
     aria-controls="detail_offcanvas" id="menu-button">
     <i class="fa-solid fa-arrow-right fa-lg"></i>
+</button>
+
+<!-- button to dispay the offcanvas with the links -->
+<button class="btn btn-light button-class" type="button" data-bs-toggle="offcanvas" data-bs-target="#link_offcanvas"
+    aria-controls="detail_offcanvas" id="link-button">
+    <i class="fa-solid fa-arrow-left fa-lg"></i>
 </button>
 
 <!-- the offcanvas with the old searches and the favorites files. -->
@@ -166,7 +201,9 @@
             <!-- Display the favorite files. -->
             {% for favori in favorite_files %}
                 <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fav{{ favori.id_Fichier }}" id="file" data-file="{{ favori.id_Fichier }}" data-folder="{{ favori.DOSSIER_.id_Dossier }}" data-type="{{ favori.extension_Fichier }}">
-                        <p style="margin-bottom: 0; word-break: break-all;">{{ favori.nom_Fichier }}</p>
+                        <div>
+                            <p style="margin-bottom: 0; word-break: break-all;">{{ favori.nom_Fichier }}</p>
+                        </div>
                         <div class="d-flex justify-content-end">
                             <a href="#" id="{{ favori.id_Fichier }}" class="favori-home" onclick="event.stopPropagation();">
                                 <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
@@ -180,5 +217,28 @@
         </div>
     </div>
 </div>
+
+<!-- the offcanvas with the links. -->
+<div class="offcanvas offcanvas-end bg-light" tabindex="-1" id="link_offcanvas"
+    aria-labelledby="link_offcanvasLabel" style="width: 30%;">
+    <div class="offcanvas-header">
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="d-flex justify-content-center">
+            <h2 class="mt-2" style="font-size: 2.5rem;">Liens utiles :</h2>
+        </div>
+        <div class="d-flex justify-content-center mt-4">
+            <input type="text" id="search-link" class="form-control mb-1" placeholder="Rechercher un lien"
+                style="border-radius: 50px; padding: 5px 10px; width: 80%;">
+        </div>
+        <div class="d-flex justify-content-center flex-wrap">
+            {% for link in links %}
+                {{ render_link(link) }}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% include 'components/preview.html' %} <!--Modal for the document preview -->
 {% endblock %}
