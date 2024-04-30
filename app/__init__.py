@@ -21,6 +21,7 @@ from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
+from app.models.lien import LIEN
 
 
 crsf = CSRFProtect()
