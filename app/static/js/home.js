@@ -289,5 +289,29 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    // Handle de dynamique search for the links in the right panal
+    let searchLink = document.getElementById("search-link");
+    let links = document.querySelectorAll(".link-element");
+    searchLink.addEventListener('input', function () {
+        let search = searchLink.value;
+        if (search === "") {
+            links.forEach(link => {
+                link.style.display = "block";
+            });
+        }
+        else {
+            links.forEach(link => {
+                let name = link.querySelector(".link-name").innerHTML;
+                let description = link.querySelector(".link-description").innerHTML;
+                if (name.toLowerCase().includes(search.toLowerCase()) | description.toLowerCase().includes(search.toLowerCase())) {
+                    link.style.display = "block";
+                }
+                else {
+                    link.style.display = "none";
+                }
+            });
+        }
+    });
     
 });
