@@ -26,7 +26,8 @@
     style="background-color: {{ folder.couleur_Dossier }}; border: 1px solid black;"
     data-name="{{ folder.nom_Dossier }}" {% if folder.DOSSIER[0] %}data-parent="{{ folder.DOSSIER[0].id_Dossier }}" {%
     else %}data-parent="0" {% endif %} data-color="{{ folder.couleur_Dossier }}"
-    data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}" data-priority="{{ folder.priorite_Dossier }}">
+    data-roles="{% for role in folder.ROLE %}{{ role.id_Role }}{% if not loop.last %},{% endif %}{% endfor %}"
+    data-priority="{{ folder.priorite_Dossier }}">
     <h2 class="accordion-header" id="heading{{ folder.id_Dossier }}">
         <button class="accordion-button collapsed" type="button" aria-expanded="false"
             aria-controls="collapse{{ folder.id_Dossier }}" style="background-color: {{ folder.couleur_Dossier }};"
@@ -144,6 +145,36 @@
 </div>
 {% endmacro %}
 
+{% macro render_link(link) %}
+<div class="col-4" id="link-{{ link.id_Lien }}">
+    <a href="{{ link.lien_Lien }}" class="text-decoration-none text-dark" target="_blank"
+        title="{{ link.description_Lien }}">
+        <div class="card border-warning position-relative">
+            <button type="button" class="btn btn-danger position-absolute top-0 end-0" id="deleteLinkButton"
+                data-link="{{ link.id_Lien }}" style="transform: scale(0.8);">✖</button>
+            <div class="card-header bg-secondary"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ link.nom_Lien }}
+            </div>
+            <div class="card-body bg-light small"
+                style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ link.description_Lien }}
+            </div>
+            <div class="card-footer bg-secondary">
+                <div class="row">
+                    <div class="col text-start text-muted" style="font-size: 0.75rem;">
+                        {{ link.UTILISATEUR.prenom_Utilisateur }} {{ link.UTILISATEUR.nom_Utilisateur }}
+                    </div>
+                    <div class="col text-end text-muted" style="font-size: 0.75rem;">
+                        Le {{ link.date_Lien.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+{% endmacro %}
+
 {% block content %}
 <h1 class="text-center mb-5">Administration</h1>
 <div class="container-fluid" style="margin: unset;">
@@ -215,17 +246,30 @@
                         data-bs-target="#deleteFolderModal">Supprimer un classeur</button>
                 </div>
             </div>
-            <h3 class="text-center">Gestion des utilisateurs</h3>
-            <div class="user-alert"></div>
-            <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
+            <h3 class="text-center">Gestion des liens</h3>
+            <input type="text" id="searchLink" class="form-control mb-1" placeholder="Rechercher un lien"
                 style="border-radius: 50px; padding: 5px 10px; width: 25%; float: left; margin-left: 0.75rem;">
-            <div class="container mt-3 mb-4 pt-2" style="height: 50vh; overflow: auto;">
-                {% for user in users %}
-                {{ render_user(user) }}
+            <div class="container mt-3 pt-2" style="overflow: auto; height: 50vh;">
+                <div class="row row-cols-1 row-cols-md-3 g-4 link-container">
+                    {% for link in links %}
+                    {{ render_link(link) }}
                 {% endfor %}
             </div>
         </div>
+        <div class="text-end mb-5">
+            <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
+                data-bs-target="#addLinkModal">Créer un lien</button>
+        </div>
+        <h3 class="text-center">Gestion des utilisateurs</h3>
+        <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
+            style="border-radius: 50px; padding: 5px 10px; width: 25%; float: left; margin-left: 0.75rem;">
+        <div class="container mt-3 mb-4 pt-2" style="height: 50vh; overflow: auto;">
+            {% for user in users %}
+            {{ render_user(user) }}
+            {% endfor %}
+        </div>
     </div>
+</div>
 </div>
 <div class="modal fade" id="addFolderModal" tabindex="-1" aria-labelledby="addFolderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -353,6 +397,35 @@
                     <div class="text-end">
                         <button type="submit" class="btn btn-danger" id="deleteFolderButton">Supprimer le
                             classeur</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addLinkModal" tabindex="-1" aria-labelledby="addLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLinkModalLabel">Créer un lien</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="linkName" class="form-label">Nom du lien</label>
+                        <input type="text" class="form-control" id="linkName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="linkDescription" class="form-label">Description du lien</label>
+                        <input type="text" class="form-control" id="linkDescription">
+                    </div>
+                    <div class="mb-3">
+                        <label for="linkURL" class="form-label">URL du lien</label>
+                        <input type="url" class="form-control" id="linkUrl" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary" id="createLinkButton">Créer le lien</button>
                     </div>
                 </form>
             </div>

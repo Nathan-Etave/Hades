@@ -144,8 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 fav.className = "favori-false";
                                 etoile.className = "fa-regular fa-star fa-lg me-2";
                                 let favTile = document.querySelector(".fav" + id);
-                                console.log(favTile);
-                                console.log(id);
                                 if (favTile !== null) {
                                     favTile.remove();
                                 }
@@ -269,7 +267,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Display the correct results for a specific folder research
     socket.on('search_results', function (data) {
-        console.log(data);
         let fileContainer = document.getElementById("fichierAccordion"+data.folderId);
         let fileElements = fileContainer.querySelectorAll('.file-element');
         let countElement = document.getElementById('collapse'+data.folderId+'-button').querySelector('#fileCount');
