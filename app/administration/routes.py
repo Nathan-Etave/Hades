@@ -354,12 +354,13 @@ def archive_folders(data):
 def delete_files(data):
     file_ids = data.get('fileIds')
     try:
+        file_paths = []
+        with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+            Whoosh().delete_documents(file_ids)
         for file_id in file_ids:
-            with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
-                Whoosh().delete_document(file_id)
             database_file = FICHIER.query.get(file_id)
             db.session.delete(database_file)
-            os.remove(
+            file_paths.append(
                 os.path.join(
                     current_app.root_path,
                     "storage",
@@ -368,6 +369,8 @@ def delete_files(data):
                 )
             )
         db.session.commit()
+        for file_path in file_paths:
+            os.remove(file_path)
     except Exception as e:
         db.session.rollback()
         socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')

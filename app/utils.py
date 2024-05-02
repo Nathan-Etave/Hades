@@ -77,6 +77,14 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
+    def delete_documents(self, ids):
+        writer = self.open_index.writer()
+        try:
+            for id in ids:
+                writer.delete_by_term("id", id)
+        finally:
+            writer.commit()
+
     def search(self, query, path=None):
         if query.strip() == "":
             subquery = Every()
