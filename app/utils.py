@@ -77,6 +77,14 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
+    def delete_documents(self, ids):
+        writer = self.open_index.writer()
+        try:
+            for id in ids:
+                writer.delete_by_term("id", id)
+        finally:
+            writer.commit()
+
     def search(self, query, path=None):
         if query.strip() == "":
             subquery = Every()
@@ -112,7 +120,7 @@ class Whoosh(metaclass=SingletonMeta):
 class NLPProcessor(metaclass=SingletonMeta):
     def __init__(self, batch_size=100000):
         self.batch_size = batch_size
-        self.tokenizer_nlp = load(f"{current_app.root_path}/storage/model")
+        self.tokenizer_nlp = load(f"fr_application_model")
         self.lemmatizer_nlp = load("fr_core_news_sm")
         self.tokenizer_nlp.max_length = batch_size
         self.lemmatizer_nlp.max_length = batch_size

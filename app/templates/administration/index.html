@@ -10,7 +10,7 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
     integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
     crossorigin="anonymous"></script>
-<script src="{{ url_for('static', filename='js/administration.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/administration.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/preview.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
 <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -48,7 +48,7 @@
                         </div>
                         <div data-trigger-accordion="">
                             <span id="fileCount" data-trigger-accordion="">{{ folder.FICHIER|length }}</span> <span
-                                id="foldersFileCount" data-trigger-accordion="">({{ get_total_file_count(folder)
+                                id="folderFileCount" data-trigger-accordion="">({{ get_total_file_count(folder)
                                 }})</span>
                         </div>
                     </div>
@@ -88,13 +88,13 @@
             <div class="accordion mt-2 pt-2" id="filesAccordion{{ folder.id_Dossier }}"
                 style="height: 50vh; overflow: auto;">
                 {% for file in folder.FICHIER %}
-                <div class="card mt-1 mb-1 me-2" id="file-{{ file.id_Fichier }}">
+                <div class="card mt-1 mb-1 me-2 file" id="file-{{ file.id_Fichier }}">
                     <div class="card-body text-wrap">
                         <div class="d-flex me-2 w-100 justify-content-between align-items-baseline"
                             style="cursor: pointer;">
                             <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file"
                                 data-file="{{ file.id_Fichier }}" data-folder="{{ folder.id_Dossier }}"
-                                data-type="{{ file.extension_Fichier }}">
+                                data-type="{{ file.extension_Fichier }}" data-filename="{{ file.nom_Fichier }}">
                                 <div class="me-2">
                                     <i class="fas fa-file"></i>
                                 </div>
@@ -146,7 +146,7 @@
 {% endmacro %}
 
 {% macro render_link(link) %}
-<div class="col-4" id="link-{{ link.id_Lien }}">
+<div class="col-4 link" id="link-{{ link.id_Lien }}" data-name="{{ link.nom_Lien }}" data-description="{{ link.description_Lien }}">
     <a href="{{ link.lien_Lien }}" class="text-decoration-none text-dark" target="_blank"
         title="{{ link.description_Lien }}">
         <div class="card border-warning position-relative">
@@ -239,7 +239,7 @@
                 {% endfor %}
                 <div class="text-end">
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#addFolderModal">Créer un classeur</button>
+                        data-bs-target="#createFolderModal">Créer un classeur</button>
                     <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
                         data-bs-target="#modifyFolderModal">Modifier un classeur</button>
                     <button class="position-relative btn btn-danger mt-2" data-bs-toggle="modal"
@@ -258,7 +258,7 @@
         </div>
         <div class="text-end mb-5">
             <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                data-bs-target="#addLinkModal">Créer un lien</button>
+                data-bs-target="#createLinkModal">Créer un lien</button>
         </div>
         <h3 class="text-center">Gestion des utilisateurs</h3>
         <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
@@ -271,11 +271,11 @@
     </div>
 </div>
 </div>
-<div class="modal fade" id="addFolderModal" tabindex="-1" aria-labelledby="addFolderModalLabel" aria-hidden="true">
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addFolderModalLabel">Créer un classeur</h5>
+                <h5 class="modal-title" id="createFolderModalLabel">Créer un classeur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -403,11 +403,11 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="addLinkModal" tabindex="-1" aria-labelledby="addLinkModalLabel" aria-hidden="true">
+<div class="modal fade" id="createLinkModal" tabindex="-1" aria-labelledby="createLinkModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addLinkModalLabel">Créer un lien</h5>
+                <h5 class="modal-title" id="createLinkModalLabel">Créer un lien</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
