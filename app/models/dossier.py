@@ -12,6 +12,9 @@ class DOSSIER(db.Model):
     priorite_Dossier = mapped_column(Integer)
     couleur_Dossier = mapped_column(String(255))
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     ROLE: Mapped[List['ROLE']] = relationship('ROLE', secondary='A_ACCES', back_populates='DOSSIER_')
     DOSSIER: Mapped[List['DOSSIER']] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, back_populates='DOSSIER_',uselist=True)
     DOSSIER_: Mapped[List['DOSSIER']] = relationship('DOSSIER', secondary='SOUS_DOSSIER', primaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Parent, secondaryjoin=lambda: DOSSIER.id_Dossier == SOUS_DOSSIER.c.id_Dossier_Enfant, back_populates='DOSSIER', uselist=True)
