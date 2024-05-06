@@ -94,7 +94,7 @@ def upload():
     )
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags, current_user.to_dict_secure()])
+    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags, current_user.to_dict_secure(), file.to_dict()])
     redis.incr("total_files")
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
@@ -441,3 +441,7 @@ def create_link(data):
         socketio.emit('link_not_created', {'error': str(e)}, namespace='/administration')
         return
     socketio.emit('link_created', {'linkId': link.id_Lien, 'linkName': link_name, 'linkUrl': link_url, 'linkDescription': link_description, 'linkDate': link_date, 'linkAuthor': f'{current_user.prenom_Utilisateur} {current_user.nom_Utilisateur}'}, namespace='/administration')
+
+@socketio.on('verify_index', namespace='/administration')
+def verify_index():
+    pass

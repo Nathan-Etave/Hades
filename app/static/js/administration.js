@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Actions dropdown variable
     const actionsDropdown = document.querySelector('#actionsDropdown');
 
+    // Verify index button
+    const verifyIndexButton = document.querySelector('#verifyIndexButton');
+
     // Dialog types variable
     const DIALOG_TYPES = {
         UPLOAD_OVERWRITE: 'uploadOverwrite',
@@ -69,7 +72,8 @@ document.addEventListener('DOMContentLoaded', function () {
         DELETE_USER_CONFIRM: 'deleteUserConfirm',
         DELETE_FILES_CONFIRM: 'deleteFilesConfirm',
         ARCHIVE_FOLDERS_CONFIRM: 'archiveFoldersConfirm',
-        UPLOAD_OVERWRITE_UNPROCESSABLE: 'uploadOverwriteUnprocessable'
+        UPLOAD_OVERWRITE_UNPROCESSABLE: 'uploadOverwriteUnprocessable',
+        VERIFY_INDEX: 'verifyIndex'
     };
 
     // Functions
@@ -141,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         break;
                     case DIALOG_TYPES.ARCHIVE_FOLDERS_CONFIRM:
                         handleArchiveFoldersConfirmDialog(data);
+                        break;
+                    case DIALOG_TYPES.VERIFY_INDEX:
+                        handleVerifyIndexConfirmDialog();
                         break;
                 }
             }
@@ -239,6 +246,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleArchiveFoldersConfirmDialog(data) {
         socket.emit('archive_folders', { folderIds: data });
+    }
+
+    function handleVerifyIndexConfirmDialog() {
+        socket.emit('verify_index');
     }
 
     function updateFolderFileCount(folderId, minus = false, baseFileCount = null) {
@@ -523,6 +534,29 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function (event) {
             downloadButtonClick();
         });
+    }
+
+    function handleVerifyIndexButtonClick(button) {
+        button.addEventListener('click', function (event) {
+            verifyIndexButtonClick();
+        });
+    }
+
+    function verifyIndexButtonClick() {
+        dialogQueue.push({
+            type: DIALOG_TYPES.VERIFY_INDEX,
+            dialogOptions: {
+                title: 'Vérifier l\'index.',
+                text: 'Voulez-vous vraiment vérifier l\'indexation de tous les fichiers ?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui',
+                cancelButtonText: 'Non',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }
+        });
+        showNextDialog();
     }
 
     function downloadButtonClick() {
@@ -1294,4 +1328,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     handleDownloadButtonClick(actionsDropdown.querySelector('#actionDownload'));
+
+    handleVerifyIndexButtonClick(verifyIndexButton);
 });
