@@ -1,14 +1,30 @@
 @import url(https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap);
+@import url('https://fonts.googleapis.com/css2?family=Honk:MORF,SHLN@0..45,0..100&display=swap');
+
+@font-palette-values --color {
+    font-family: "Honk";
+    base-palette: 7;
+    override-colors: 1 #ecb900;
+  }
+
+.honk-title {
+    font-family: "Honk", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings:
+      "MORF" 15,
+      "SHLN" 35;
+    font-size: 8rem;
+    font-palette: --color;
+    letter-spacing: 0.1rem;
+  }
 
 body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: "Poppins",sans-serif
-}
-
-h1 {
-    color: #000000;
 }
 
 header {
@@ -22,6 +38,7 @@ header {
 .logo-container {
     margin-left: 2rem;
     gap: 2rem;
+    align-items: center;
 }
 
 .logo-img {
@@ -45,7 +62,11 @@ header {
 
 .nav-item>li:last-child>a {
     display: inline-block;
-    width: 2rem;
+    width: 2.3rem;
+}
+
+.nav-item>li:last-child {
+    margin-left: 1.5rem;
 }
 
 .nav-item,.navbar {

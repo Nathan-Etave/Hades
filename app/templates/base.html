@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.3">
     <link rel="stylesheet" href="https://bootswatch.com/5/lumen/bootstrap.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <script type="module" src="{{ url_for('static', filename='js/base.js') }}"></script>
@@ -15,8 +16,8 @@
     <header class="d-flex flex-row">
         <a href="{{ url_for('home.home') }}" class="text-decoration-none">
             <div class="logo-container d-flex flex-row">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo NRBC" class="logo-img">
-                <h1 class="logo-text text-center align-self-center m-0">APPLICATION</h1>
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="NRBC" class="logo-img">
+                <h1 class="logo-text text-center align-self-center honk-title">PINPON</h1>
             </div>
         </a>
         <nav class="navbar">
