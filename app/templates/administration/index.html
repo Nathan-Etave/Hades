@@ -237,14 +237,16 @@
                 {% for folder in folders %}
                 {{ render_folder(folder) }}
                 {% endfor %}
-                <div class="text-end">
-                    <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#createFolderModal">Créer un classeur</button>
-                    <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#modifyFolderModal">Modifier un classeur</button>
-                    <button class="position-relative btn btn-danger mt-2" data-bs-toggle="modal"
-                        data-bs-target="#deleteFolderModal">Supprimer un classeur</button>
-                </div>
+                {% if current_user.id_Role == 1 or current_user.id_Role == 2 %}
+                    <div class="text-end">
+                        <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
+                            data-bs-target="#createFolderModal">Créer un classeur</button>
+                        <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
+                            data-bs-target="#modifyFolderModal">Modifier un classeur</button>
+                        <button class="position-relative btn btn-danger mt-2" data-bs-toggle="modal"
+                            data-bs-target="#deleteFolderModal">Supprimer un classeur</button>
+                    </div>
+                {% endif %}
             </div>
             <h3 class="text-center">Gestion des liens</h3>
             <input type="text" id="searchLink" class="form-control mb-1" placeholder="Rechercher un lien"
@@ -260,149 +262,153 @@
             <button class="position-relative btn btn-primary mt-2" data-bs-toggle="modal"
                 data-bs-target="#createLinkModal">Créer un lien</button>
         </div>
-        <h3 class="text-center">Gestion des utilisateurs</h3>
-        <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
-            style="border-radius: 50px; padding: 5px 10px; width: 25%; float: left; margin-left: 0.75rem;">
-        <div class="container mt-3 mb-4 pt-2" style="height: 50vh; overflow: auto;">
-            {% for user in users %}
-            {{ render_user(user) }}
-            {% endfor %}
-        </div>
+        {% if current_user.id_Role == 1 or current_user.id_Role == 2 %}
+            <h3 class="text-center">Gestion des utilisateurs</h3>
+            <input type="text" id="searchUser" class="form-control mb-1" placeholder="Rechercher un utilisateur"
+                style="border-radius: 50px; padding: 5px 10px; width: 25%; float: left; margin-left: 0.75rem;">
+            <div class="container mt-3 mb-4 pt-2" style="height: 50vh; overflow: auto;">
+                {% for user in users %}
+                {{ render_user(user) }}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 </div>
 </div>
-<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createFolderModalLabel">Créer un classeur</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du classeur</label>
-                        <input type="text" class="form-control" id="folderName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Classeur parent</label>
-                        <select class="form-control" id="parentFolder">
-                            <option value="0">Aucun</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rôles autorisés</label>
-                        {% for role in roles %}
-                        {% if role.id_Role != 1 %}
-                        <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
-                                id="role{{ role.id_Role }}">
-                            <label class="form-check-label" for="role{{ role.id_Role }}">
-                                {{ role.nom_Role }}
-                            </label>
+{% if current_user.id_Role == 1 or current_user.id_Role == 2 %}
+    <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFolderModalLabel">Créer un classeur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="folderName" class="form-label">Nom du classeur</label>
+                            <input type="text" class="form-control" id="folderName" required>
                         </div>
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
-                        <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
-                    </div>
-                    <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du classeur</label>
-                        <input type="color" class="form-control" id="folderColor" required>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le classeur</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un classeur</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="existingFolder" class="form-label">Classeur à modifier</label>
-                        <select class="form-control" id="existingFolder">
-                            <option value="0">Aucun</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="folderName" class="form-label">Nom du classeur</label>
-                        <input type="text" class="form-control" id="folderName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="parentFolder" class="form-label">Classeur parent</label>
-                        <select class="form-control" id="parentFolder">
-                            <option value="0">Aucun</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rôles autorisés</label>
-                        {% for role in roles %}
-                        {% if role.id_Role != 1 %}
-                        <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
-                                id="role{{ role.id_Role }}">
-                            <label class="form-check-label" for="role{{ role.id_Role }}">
-                                {{ role.nom_Role }}
-                            </label>
+                        <div class="mb-3">
+                            <label for="parentFolder" class="form-label">Classeur parent</label>
+                            <select class="form-control" id="parentFolder">
+                                <option value="0">Aucun</option>
+                            </select>
                         </div>
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
-                        <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
-                    </div>
-                    <div class="mb-3">
-                        <label for="folderColor" class="form-label">Couleur du classeur</label>
-                        <input type="color" class="form-control" id="folderColor" required>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le
-                            classeur</button>
-                    </div>
-                </form>
+                        <div class="mb-3">
+                            <label class="form-label">Rôles autorisés</label>
+                            {% for role in roles %}
+                            {% if role.id_Role != 1 %}
+                            <div class="form-check">
+                                <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                    id="role{{ role.id_Role }}">
+                                <label class="form-check-label" for="role{{ role.id_Role }}">
+                                    {{ role.nom_Role }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
+                            <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderColor" class="form-label">Couleur du classeur</label>
+                            <input type="color" class="form-control" id="folderColor" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary" id="createFolderButton">Créer le classeur</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteFolderModalLabel">Supprimer un classeur</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="existingFolder" class="form-label
-                        ">Classeur à supprimer</label>
-                        <select class="form-control" id="existingFolderDelete">
-                            <option value="0">Aucun</option>
-                        </select>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-danger" id="deleteFolderButton">Supprimer le
-                            classeur</button>
-                    </div>
-                </form>
+    <div class="modal fade" id="modifyFolderModal" tabindex="-1" aria-labelledby="modifyFolderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modifyFolderModalLabel">Modifier un classeur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="existingFolder" class="form-label">Classeur à modifier</label>
+                            <select class="form-control" id="existingFolder">
+                                <option value="0">Aucun</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderName" class="form-label">Nom du classeur</label>
+                            <input type="text" class="form-control" id="folderName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parentFolder" class="form-label">Classeur parent</label>
+                            <select class="form-control" id="parentFolder">
+                                <option value="0">Aucun</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rôles autorisés</label>
+                            {% for role in roles %}
+                            {% if role.id_Role != 1 %}
+                            <div class="form-check">
+                                <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
+                                    id="role{{ role.id_Role }}">
+                                <label class="form-check-label" for="role{{ role.id_Role }}">
+                                    {{ role.nom_Role }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
+                            <input type="number" class="form-control" id="folderPriority" required min="1" step="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="folderColor" class="form-label">Couleur du classeur</label>
+                            <input type="color" class="form-control" id="folderColor" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary" id="modifyFolderButton">Modifier le
+                                classeur</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFolderModalLabel">Supprimer un classeur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="existingFolder" class="form-label
+                            ">Classeur à supprimer</label>
+                            <select class="form-control" id="existingFolderDelete">
+                                <option value="0">Aucun</option>
+                            </select>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-danger" id="deleteFolderButton">Supprimer le
+                                classeur</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 <div class="modal fade" id="createLinkModal" tabindex="-1" aria-labelledby="createLinkModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -442,6 +448,8 @@
             sélectionnés</li>
     </ul>
 </div>
+{% if current_user.id_Role == 1 %}
 <button id="verifyIndexButton" class="btn btn-danger position-fixed bottom-0 start-0 m-3">Vérifier l'intégrité<br>de l'indexation</button>
+{% endif %}
 {% include 'components/preview.html' %}
 {% endblock %}

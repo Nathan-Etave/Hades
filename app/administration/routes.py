@@ -18,6 +18,8 @@ from app.models.utilisateur import UTILISATEUR
 from app.models.a_acces import A_ACCES
 from app.models.role import ROLE
 from app.models.lien import LIEN
+from app.models.a_recherche import A_RECHERCHE
+from app.models.favoris import FAVORIS
 from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
 
@@ -31,6 +33,15 @@ def administration():
     all_root_folders.sort(key=lambda x: x.priorite_Dossier)
     all_users = UTILISATEUR.query.all()
     all_users = [user for user in all_users if user.id_Role is not None]
+    if current_user.id_Role == 2:
+        all_users = [
+            user
+            for user in all_users
+            if user.id_Role != current_user.id_Role and user.id_Role != 1
+        ]
+    all_users = [
+        user for user in all_users if user.id_Utilisateur != current_user.id_Utilisateur
+    ]
     all_roles = ROLE.query.all()
     all_links = LIEN.query.all()
     all_links = sorted(all_links, key=lambda x: x.nom_Lien.lower())
@@ -61,23 +72,45 @@ def upload():
     force = json_data.get("force")
     if existing_file is not None:
         processed_files = redis.lrange("processed_files", 0, -1)
-        processed_files = [json.loads(file.decode("utf-8"))["filename"] for file in processed_files]
+        processed_files = [
+            json.loads(file.decode("utf-8"))["filename"] for file in processed_files
+        ]
         if not existing_file.nom_Fichier in processed_files:
-            return jsonify({'filename': filename,
-                            'existingFolder': existing_file.DOSSIER_.nom_Dossier,
-                            'existingFileAuthorFirstName': existing_file.AUTEUR.prenom_Utilisateur,
-                            'existingFileAuthorLastName': existing_file.AUTEUR.nom_Utilisateur,
-                            'existingFileDate': existing_file.date_Fichier.strftime('%d/%m/%Y à %H:%M')}), 422
+            return (
+                jsonify(
+                    {
+                        "filename": filename,
+                        "existingFolder": existing_file.DOSSIER_.nom_Dossier,
+                        "existingFileAuthorFirstName": existing_file.AUTEUR.prenom_Utilisateur,
+                        "existingFileAuthorLastName": existing_file.AUTEUR.nom_Utilisateur,
+                        "existingFileDate": existing_file.date_Fichier.strftime(
+                            "%d/%m/%Y à %H:%M"
+                        ),
+                    }
+                ),
+                422,
+            )
         if force:
             delete_file(str(existing_file.id_Fichier))
         else:
-            return jsonify({'filename': filename,
-                            'existingFolder': existing_file.DOSSIER_.nom_Dossier,
-                            'attemptedFolder': DOSSIER.query.get(folder_id).nom_Dossier,
-                            'existingFileAuthorFirstName': existing_file.AUTEUR.prenom_Utilisateur,
-                            'existingFileAuthorLastName': existing_file.AUTEUR.nom_Utilisateur,
-                            'existingFileDate': existing_file.date_Fichier.strftime('%d/%m/%Y à %H:%M')}), 409
-    user_tags = unidecode(' '.join(json_data.get("tags").replace(' ', ';').split(';'))).lower()
+            return (
+                jsonify(
+                    {
+                        "filename": filename,
+                        "existingFolder": existing_file.DOSSIER_.nom_Dossier,
+                        "attemptedFolder": DOSSIER.query.get(folder_id).nom_Dossier,
+                        "existingFileAuthorFirstName": existing_file.AUTEUR.prenom_Utilisateur,
+                        "existingFileAuthorLastName": existing_file.AUTEUR.nom_Utilisateur,
+                        "existingFileDate": existing_file.date_Fichier.strftime(
+                            "%d/%m/%Y à %H:%M"
+                        ),
+                    }
+                ),
+                409,
+            )
+    user_tags = unidecode(
+        " ".join(json_data.get("tags").replace(" ", ";").split(";"))
+    ).lower()
     storage_directory = os.path.join(current_app.root_path, "storage")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
@@ -94,19 +127,40 @@ def upload():
     )
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags, current_user.to_dict_secure(), file.to_dict()])
+    process_file.apply_async(
+        args=[
+            file_path,
+            filename,
+            folder_id,
+            str(file.id_Fichier),
+            user_tags,
+            current_user.to_dict_secure(),
+            file.to_dict(),
+            file.DOSSIER_.to_dict()
+        ]
+    )
     redis.incr("total_files")
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
     )
     file_dict = file.to_dict()
-    file_dict.update({"old_file_id": existing_file.id_Fichier if existing_file is not None else None})
-    file_dict.update({"old_folder_id": existing_file.id_Dossier if existing_file is not None else None})
+    file_dict.update(
+        {"old_file_id": existing_file.id_Fichier if existing_file is not None else None}
+    )
+    file_dict.update(
+        {
+            "old_folder_id": (
+                existing_file.id_Dossier if existing_file is not None else None
+            )
+        }
+    )
     return jsonify(file_dict), 200
 
 
 @socketio.on("connect", namespace="/administration")
 def connect():
+    if not (current_user.is_authenticated and current_user.is_admin):
+        return
     workers = redis.keys("worker:*") if len(redis.keys("worker:*")) > 0 else []
     for worker in workers:
         socketio.emit(
@@ -137,18 +191,41 @@ def search_files(data):
 
 @socketio.on("update_user_role", namespace="/administration")
 def update_user_role(data):
-    user_id = data.get("userId")
-    role_id = data.get("roleId")
-    user = UTILISATEUR.query.get(user_id)
-    if user.id_Role == 1 and role_id != 1:
-        data["roleId"] = 1
+    if current_user.id_Utilisateur == data.get("userId"):
         socketio.emit(
             "user_role_not_updated",
-            {**data, "error": "Le rôle de l'administrateur ne peut pas être modifié."},
+            {**data, "error": "Vous ne pouvez pas modifier votre propre rôle."},
             namespace="/administration",
         )
         return
-    user.id_Role = role_id
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "user_role_not_updated",
+            {
+                **data,
+                "error": "Vous n'avez pas l'autorisation de modifier les rôles des utilisateurs.",
+            },
+            namespace="/administration",
+        )
+        return
+    user_id = data.get("userId")
+    role_id = data.get("roleId")
+    user = UTILISATEUR.query.get(user_id)
+    if current_user.id_Role == 1 and role_id in ["1", "2", "3", "4"]:
+        user.id_Role = role_id
+    elif current_user.id_Role == 2 and role_id in ["3", "4"]:
+        user.id_Role = role_id
+    else:
+        data["roleId"] = user.id_Role
+        socketio.emit(
+            "user_role_not_updated",
+            {
+                **data,
+                "error": "Vous n'avez pas l'autorisation d'affecter ce rôle à cet utilisateur.",
+            },
+            namespace="/administration",
+        )
+        return
     db.session.commit()
     socketio.emit(
         "user_role_updated",
@@ -159,19 +236,39 @@ def update_user_role(data):
 
 @socketio.on("update_user_status", namespace="/administration")
 def update_user_status(data):
-    user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
-    if user.id_Role == 1:
+    if current_user.id_Utilisateur == data.get("userId"):
+        socketio.emit(
+            "user_status_not_updated",
+            {**data, "error": "Vous ne pouvez pas modifier votre propre statut."},
+            namespace="/administration",
+        )
+        return
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
         socketio.emit(
             "user_status_not_updated",
             {
                 **data,
-                "error": "Le statut de l'administrateur ne peut pas être modifié.",
+                "error": "Vous n'avez pas l'autorisation de modifier les statuts des utilisateurs.",
             },
             namespace="/administration",
         )
         return
-    user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
+    user_id = data.get("userId")
+    user = UTILISATEUR.query.get(user_id)
+    if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
+        user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
+    elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
+        user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
+    else:
+        socketio.emit(
+            "user_status_not_updated",
+            {
+                **data,
+                "error": "Vous n'avez pas l'autorisation de modifier le statut de cet utilisateur.",
+            },
+            namespace="/administration",
+        )
+        return
     db.session.commit()
     socketio.emit(
         "user_status_updated",
@@ -182,190 +279,409 @@ def update_user_status(data):
 
 @socketio.on("delete_user", namespace="/administration")
 def delete_user(data):
-    user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
-    if user.id_Role == 1:
+    if current_user.id_Utilisateur == data.get("userId"):
         socketio.emit(
             "user_not_deleted",
-            {**data, "error": "L'administrateur ne peut pas être supprimé."},
+            {**data, "error": "Vous ne pouvez pas supprimer votre propre compte."},
             namespace="/administration",
         )
         return
-    db.session.delete(user)
-    db.session.commit()
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "user_not_deleted",
+            {
+                **data,
+                "error": "Vous n'avez pas l'autorisation de supprimer des utilisateurs.",
+            },
+            namespace="/administration",
+        )
+        return
+    user_id = data.get("userId")
+    user = UTILISATEUR.query.get(user_id)
+    try:
+        if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
+            delete_user(user_id)
+        elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
+            delete_user(user_id)
+        else:
+            socketio.emit(
+                "user_not_deleted",
+                {
+                    **data,
+                    "error": "Vous n'avez pas l'autorisation de supprimer cet utilisateur.",
+                },
+                namespace="/administration",
+            )
+            return
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit(
+            "user_not_deleted",
+            {**data, "error": str(e)},
+            namespace="/administration",
+        )
+        return
     socketio.emit(
         "user_deleted",
         {**data, "message": "L'utilisateur a été supprimé avec succès."},
         namespace="/administration",
     )
 
-@socketio.on('create_folder', namespace='/administration')
+
+def delete_user(user_id):
+    files = FICHIER.query.filter_by(id_Utilisateur=user_id).all()
+    for file in files:
+        file.id_Utilisateur = current_user.id_Utilisateur
+    links = LIEN.query.filter_by(id_Utilisateur=user_id).all()
+    for link in links:
+        link.id_Utilisateur = current_user.id_Utilisateur
+    associated_searches = A_RECHERCHE.query.filter_by(id_Utilisateur=user_id).all()
+    for search in associated_searches:
+        db.session.delete(search)
+    favorites = (
+        db.session.query(FAVORIS).filter(FAVORIS.c.id_Utilisateur == user_id).all()
+    )
+    for favorite in favorites:
+        db.session.delete(favorite)
+    user = UTILISATEUR.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+
+
+@socketio.on("create_folder", namespace="/administration")
 def create_folder(data):
-    folder_name = data.get('folderName')
-    parent_folder_id = data.get('parentFolderId')
-    folder_roles = data.get('folderRoles')
-    folder_color = data.get('folderColor')
-    folder_priority = data.get('folderPriority')
-    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority).filter(DOSSIER.id_Dossier != 9).all()
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "folder_not_created",
+            {"error": "Vous n'avez pas l'autorisation de créer des classeurs."},
+            namespace="/administration",
+        )
+        return
+    folder_name = data.get("folderName")
+    parent_folder_id = data.get("parentFolderId")
+    folder_roles = data.get("folderRoles")
+    folder_color = data.get("folderColor")
+    folder_priority = data.get("folderPriority")
+    folders_to_update = (
+        DOSSIER.query.filter(DOSSIER.priorite_Dossier >= folder_priority)
+        .filter(DOSSIER.id_Dossier != 9)
+        .all()
+    )
     for folder_to_update in folders_to_update:
         folder_to_update.priorite_Dossier += 1
-    folder = DOSSIER(nom_Dossier=folder_name, priorite_Dossier=folder_priority, couleur_Dossier=folder_color)
+    folder = DOSSIER(
+        nom_Dossier=folder_name,
+        priorite_Dossier=folder_priority,
+        couleur_Dossier=folder_color,
+    )
     db.session.add(folder)
     try:
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_created", {"error": str(e)}, namespace="/administration"
+        )
         return
     try:
-        db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=folder.id_Dossier))
+        db.session.execute(
+            A_ACCES.insert().values(id_Role=1, id_Dossier=folder.id_Dossier)
+        )
         for role in folder_roles:
-            db.session.execute(A_ACCES.insert().values(id_Role=role, id_Dossier=folder.id_Dossier))
+            db.session.execute(
+                A_ACCES.insert().values(id_Role=role, id_Dossier=folder.id_Dossier)
+            )
         db.session.commit()
     except Exception as e:
         db.session.rollback()
         db.session.delete(folder)
         db.session.commit()
-        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_created", {"error": str(e)}, namespace="/administration"
+        )
         return
     try:
         if parent_folder_id != 0:
-            db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder.id_Dossier))
+            db.session.execute(
+                SOUS_DOSSIER.insert().values(
+                    id_Dossier_Parent=parent_folder_id,
+                    id_Dossier_Enfant=folder.id_Dossier,
+                )
+            )
             db.session.commit()
     except Exception as e:
         db.session.rollback()
-        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Role == 1).where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+        db.session.execute(
+            A_ACCES.delete()
+            .where(A_ACCES.c.id_Role == 1)
+            .where(A_ACCES.c.id_Dossier == folder.id_Dossier)
+        )
         for role in folder_roles:
-            db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Role == role).where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+            db.session.execute(
+                A_ACCES.delete()
+                .where(A_ACCES.c.id_Role == role)
+                .where(A_ACCES.c.id_Dossier == folder.id_Dossier)
+            )
         db.session.delete(folder)
         db.session.commit()
-        socketio.emit('folder_not_created', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_created", {"error": str(e)}, namespace="/administration"
+        )
         return
-    socketio.emit('folder_created', {'folderId': folder.id_Dossier, 'folderName': folder_name, 'folderColor': folder.couleur_Dossier, 'parentFolderId': parent_folder_id}, namespace='/administration')
+    socketio.emit(
+        "folder_created",
+        {
+            "folderId": folder.id_Dossier,
+            "folderName": folder_name,
+            "folderColor": folder.couleur_Dossier,
+            "parentFolderId": parent_folder_id,
+        },
+        namespace="/administration",
+    )
 
-@socketio.on('modify_folder', namespace='/administration')
+
+@socketio.on("modify_folder", namespace="/administration")
 def modify_folder(data):
-    folder_id = data.get('folderId')
-    folder_name = data.get('folderName')
-    parent_folder_id = data.get('parentFolderId')
-    folder_roles = data.get('folderRoles')
-    folder_priority = data.get('folderPriority')
-    folder_color = data.get('folderColor')
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "folder_not_modified",
+            {"error": "Vous n'avez pas l'autorisation de modifier des classeurs."},
+            namespace="/administration",
+        )
+        return
+    folder_id = data.get("folderId")
+    folder_name = data.get("folderName")
+    parent_folder_id = data.get("parentFolderId")
+    folder_roles = data.get("folderRoles")
+    folder_priority = data.get("folderPriority")
+    folder_color = data.get("folderColor")
     folder = DOSSIER.query.get(folder_id)
     folder.nom_Dossier = folder_name
     folder.couleur_Dossier = folder_color
     if folder.priorite_Dossier != int(folder_priority):
         if int(folder_priority) > folder.priorite_Dossier:
-            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier).filter(DOSSIER.priorite_Dossier <= int(folder_priority)).filter(DOSSIER.id_Dossier != 9).all()
+            folders_to_update = (
+                DOSSIER.query.filter(DOSSIER.priorite_Dossier > folder.priorite_Dossier)
+                .filter(DOSSIER.priorite_Dossier <= int(folder_priority))
+                .filter(DOSSIER.id_Dossier != 9)
+                .all()
+            )
             for folder_to_update in folders_to_update:
                 folder_to_update.priorite_Dossier -= 1
         else:
-            folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority)).filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier).filter(DOSSIER.id_Dossier != 9).all()
+            folders_to_update = (
+                DOSSIER.query.filter(DOSSIER.priorite_Dossier >= int(folder_priority))
+                .filter(DOSSIER.priorite_Dossier < folder.priorite_Dossier)
+                .filter(DOSSIER.id_Dossier != 9)
+                .all()
+            )
             for folder_to_update in folders_to_update:
                 folder_to_update.priorite_Dossier += 1
         folder.priorite_Dossier = folder_priority
     try:
         if parent_folder_id == folder_id:
-            socketio.emit('folder_not_modified', {'error': 'Un classeur ne peut pas être son propre parent.'}, namespace='/administration')
+            socketio.emit(
+                "folder_not_modified",
+                {"error": "Un classeur ne peut pas être son propre parent."},
+                namespace="/administration",
+            )
             return
         if parent_folder_id != 0:
-            db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
-            db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder_id))
+            db.session.execute(
+                SOUS_DOSSIER.delete().where(
+                    SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id
+                )
+            )
+            db.session.execute(
+                SOUS_DOSSIER.insert().values(
+                    id_Dossier_Parent=parent_folder_id, id_Dossier_Enfant=folder_id
+                )
+            )
             db.session.commit()
         else:
-            db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
+            db.session.execute(
+                SOUS_DOSSIER.delete().where(
+                    SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id
+                )
+            )
             db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+        )
         return
     try:
         db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder_id))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+        )
         return
     try:
         db.session.execute(A_ACCES.insert().values(id_Role=1, id_Dossier=folder_id))
         for role in folder_roles:
-            db.session.execute(A_ACCES.insert().values(id_Role=role, id_Dossier=folder_id))
+            db.session.execute(
+                A_ACCES.insert().values(id_Role=role, id_Dossier=folder_id)
+            )
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_modified', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+        )
         return
     db.session.commit()
-    socketio.emit('folder_modified', {'folderId': folder_id, 'folderName': folder_name, 'folderColor': folder_color}, namespace='/administration')
+    socketio.emit(
+        "folder_modified",
+        {"folderId": folder_id, "folderName": folder_name, "folderColor": folder_color},
+        namespace="/administration",
+    )
 
-@socketio.on('delete_folder', namespace='/administration')
+
+@socketio.on("delete_folder", namespace="/administration")
 def delete_folder(data):
-    folder = DOSSIER.query.get(data.get('folderId'))
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "folder_not_deleted",
+            {"error": "Vous n'avez pas l'autorisation de supprimer des classeurs."},
+            namespace="/administration",
+        )
+        return
+    folder = DOSSIER.query.get(data.get("folderId"))
     if folder.id_Dossier == 9:
-        socketio.emit('folder_not_deleted', {'error': 'Le classeur d\'archive ne peut pas être supprimé.'}, namespace='/administration')
+        socketio.emit(
+            "folder_not_deleted",
+            {"error": "Le classeur d'archive ne peut pas être supprimé."},
+            namespace="/administration",
+        )
         return
     if len(folder.DOSSIER_) > 0:
-        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des sous-classeurs.'}, namespace='/administration')
+        socketio.emit(
+            "folder_not_deleted",
+            {"error": "Le classeur contient des sous-classeurs."},
+            namespace="/administration",
+        )
         return
     if len(folder.FICHIER) > 0:
-        socketio.emit('folder_not_deleted', {'error': 'Le classeur contient des fichiers.'}, namespace='/administration')
+        socketio.emit(
+            "folder_not_deleted",
+            {"error": "Le classeur contient des fichiers."},
+            namespace="/administration",
+        )
         return
     try:
-        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder.id_Dossier))
-        db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Parent == folder.id_Dossier))
+        db.session.execute(
+            SOUS_DOSSIER.delete().where(
+                SOUS_DOSSIER.c.id_Dossier_Enfant == folder.id_Dossier
+            )
+        )
+        db.session.execute(
+            SOUS_DOSSIER.delete().where(
+                SOUS_DOSSIER.c.id_Dossier_Parent == folder.id_Dossier
+            )
+        )
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_deleted", {"error": str(e)}, namespace="/administration"
+        )
         return
     try:
-        db.session.execute(A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder.id_Dossier))
+        db.session.execute(
+            A_ACCES.delete().where(A_ACCES.c.id_Dossier == folder.id_Dossier)
+        )
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folder_not_deleted', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folder_not_deleted", {"error": str(e)}, namespace="/administration"
+        )
         return
     deleted_priority = folder.priorite_Dossier
     db.session.delete(folder)
     db.session.commit()
-    folders_to_update = DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority).filter(DOSSIER.id_Dossier != 9).all()
+    folders_to_update = (
+        DOSSIER.query.filter(DOSSIER.priorite_Dossier > deleted_priority)
+        .filter(DOSSIER.id_Dossier != 9)
+        .all()
+    )
     for folder_to_update in folders_to_update:
         folder_to_update.priorite_Dossier -= 1
     db.session.commit()
-    socketio.emit('folder_deleted', {'folderId': folder.id_Dossier}, namespace='/administration')
+    socketio.emit(
+        "folder_deleted", {"folderId": folder.id_Dossier}, namespace="/administration"
+    )
 
 
-@socketio.on('archive_folders', namespace='/administration')
+@socketio.on("archive_folders", namespace="/administration")
 def archive_folders(data):
-    folder_ids = data.get('folderIds')
+    if current_user.id_Role != 1 and current_user.id_Role != 2:
+        socketio.emit(
+            "folders_not_archived",
+            {"error": "Vous n'avez pas l'autorisation d'archiver des classeurs."},
+            namespace="/administration",
+        )
+        return
+    folder_ids = data.get("folderIds")
     try:
         for folder_id in folder_ids:
             database_folder = DOSSIER.query.get(folder_id)
-            if folder_id == '9':
+            if folder_id == "9":
                 pass
-            elif database_folder.DOSSIER != [] and database_folder.DOSSIER[0].id_Dossier == 0:
+            elif (
+                database_folder.DOSSIER != []
+                and database_folder.DOSSIER[0].id_Dossier == 0
+            ):
                 pass
-            elif database_folder.DOSSIER != [] and str(database_folder.DOSSIER[0].id_Dossier) in folder_ids:
+            elif (
+                database_folder.DOSSIER != []
+                and str(database_folder.DOSSIER[0].id_Dossier) in folder_ids
+            ):
                 pass
             else:
                 if database_folder.DOSSIER != []:
-                    db.session.execute(SOUS_DOSSIER.delete().where(SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id))
-                db.session.execute(SOUS_DOSSIER.insert().values(id_Dossier_Parent=9, id_Dossier_Enfant=folder_id))
+                    db.session.execute(
+                        SOUS_DOSSIER.delete().where(
+                            SOUS_DOSSIER.c.id_Dossier_Enfant == folder_id
+                        )
+                    )
+                db.session.execute(
+                    SOUS_DOSSIER.insert().values(
+                        id_Dossier_Parent=9, id_Dossier_Enfant=folder_id
+                    )
+                )
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('folders_not_archived', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "folders_not_archived", {"error": str(e)}, namespace="/administration"
+        )
         return
-    socketio.emit('folders_archived', {'folderIds': folder_ids}, namespace='/administration')
+    socketio.emit(
+        "folders_archived", {"folderIds": folder_ids}, namespace="/administration"
+    )
 
-@socketio.on('delete_files', namespace='/administration')
+
+@socketio.on("delete_files", namespace="/administration")
 def delete_files(data):
-    file_ids = data.get('fileIds')
+    file_ids = data.get("fileIds")
     processed_files = redis.lrange("processed_files", 0, -1)
-    processed_files_ids = [json.loads(file.decode("utf-8"))["file_id"] for file in processed_files]
+    processed_files_ids = [
+        json.loads(file.decode("utf-8"))["file_id"] for file in processed_files
+    ]
     for file_id in file_ids:
         if not file_id in processed_files_ids:
-            socketio.emit('files_not_deleted', {'error': 'Un ou plusieurs fichiers sélectionnés sont en cours de traitement. Veuillez réessayer ultérieurement.'}, namespace='/administration')
+            socketio.emit(
+                "files_not_deleted",
+                {
+                    "error": "Un ou plusieurs fichiers sélectionnés sont en cours de traitement. Veuillez réessayer ultérieurement."
+                },
+                namespace="/administration",
+            )
             return
     try:
         file_paths = []
@@ -390,9 +706,12 @@ def delete_files(data):
                 redis.lrem("processed_files", 0, file)
     except Exception as e:
         db.session.rollback()
-        socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "files_not_deleted", {"error": str(e)}, namespace="/administration"
+        )
         return
-    socketio.emit('files_deleted', {'fileIds': file_ids}, namespace='/administration')
+    socketio.emit("files_deleted", {"fileIds": file_ids}, namespace="/administration")
+
 
 def delete_file(file_id):
     with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
@@ -414,34 +733,94 @@ def delete_file(file_id):
             break
     db.session.commit()
 
-@socketio.on('delete_link', namespace='/administration')
+
+@socketio.on("delete_link", namespace="/administration")
 def delete_link(data):
     try:
-        link = LIEN.query.get(data.get('linkId'))
+        link = LIEN.query.get(data.get("linkId"))
         db.session.delete(link)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        socketio.emit('link_not_deleted', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "link_not_deleted", {"error": str(e)}, namespace="/administration"
+        )
         return
-    socketio.emit('link_deleted', {'linkId': data.get('linkId')}, namespace='/administration')
+    socketio.emit(
+        "link_deleted", {"linkId": data.get("linkId")}, namespace="/administration"
+    )
 
-@socketio.on('create_link', namespace='/administration')
+
+@socketio.on("create_link", namespace="/administration")
 def create_link(data):
-    link_name = data.get('linkName')
-    link_url = data.get('linkUrl')
-    link_description = data.get('linkDescription')
+    link_name = data.get("linkName")
+    link_url = data.get("linkUrl")
+    link_description = data.get("linkDescription")
     try:
-        link = LIEN(nom_Lien=link_name, lien_Lien=link_url, description_Lien=link_description, id_Utilisateur=current_user.id_Utilisateur)
+        link = LIEN(
+            nom_Lien=link_name,
+            lien_Lien=link_url,
+            description_Lien=link_description,
+            id_Utilisateur=current_user.id_Utilisateur,
+        )
         db.session.add(link)
         db.session.commit()
-        link_date = link.date_Lien.strftime('%d/%m/%Y à %H:%M')
+        link_date = link.date_Lien.strftime("%d/%m/%Y à %H:%M")
     except Exception as e:
         db.session.rollback()
-        socketio.emit('link_not_created', {'error': str(e)}, namespace='/administration')
+        socketio.emit(
+            "link_not_created", {"error": str(e)}, namespace="/administration"
+        )
         return
-    socketio.emit('link_created', {'linkId': link.id_Lien, 'linkName': link_name, 'linkUrl': link_url, 'linkDescription': link_description, 'linkDate': link_date, 'linkAuthor': f'{current_user.prenom_Utilisateur} {current_user.nom_Utilisateur}'}, namespace='/administration')
+    socketio.emit(
+        "link_created",
+        {
+            "linkId": link.id_Lien,
+            "linkName": link_name,
+            "linkUrl": link_url,
+            "linkDescription": link_description,
+            "linkDate": link_date,
+            "linkAuthor": f"{current_user.prenom_Utilisateur} {current_user.nom_Utilisateur}",
+        },
+        namespace="/administration",
+    )
 
-@socketio.on('verify_index', namespace='/administration')
+
+@socketio.on("verify_index", namespace="/administration")
 def verify_index():
-    pass
+    if current_user.id_Role != 1:
+        socketio.emit(
+            "index_not_verified",
+            {
+                "error": "Vous n'avez pas l'autorisation de vérifier l'indexation des fichiers."
+            },
+            namespace="/administration",
+        )
+        return
+    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        woosh_documents = Whoosh().get_all_documents()
+    database_documents = FICHIER.query.all()
+    for woosh_document in woosh_documents:
+        if str(woosh_document["id"]) not in [
+            str(database_document.id_Fichier)
+            for database_document in database_documents
+        ]:
+            Whoosh().delete_document(woosh_document["id"])
+    for database_document in database_documents:
+        if not Whoosh().document_exists(str(database_document.id_Fichier)):
+            process_file.apply_async(
+                args=[
+                    os.path.join(
+                        current_app.root_path,
+                        "storage",
+                        str(database_document.id_Dossier),
+                        f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+                    ),
+                    database_document.nom_Fichier,
+                    str(database_document.id_Dossier),
+                    str(database_document.id_Fichier),
+                    "",
+                    current_user.to_dict_secure(),
+                    database_document.to_dict(),
+                ]
+            )

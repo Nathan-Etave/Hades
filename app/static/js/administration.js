@@ -2,6 +2,9 @@ import { previewAfterRender } from "./preview.js";
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Dummy element
+    const dummyElement = { addEventListener: () => {}, querySelector: () => {} };
+
     // Socket & dialog variables
     const socket = io.connect('/administration');
     let dialogQueue = [];
@@ -25,23 +28,23 @@ document.addEventListener('DOMContentLoaded', function () {
     let isFolderChecked = false;
     const folders = document.querySelectorAll('#folder');
     const folderCheckboxes = document.querySelectorAll('.folder-checkbox');
-    const modalParentFolders = document.querySelectorAll('#parentFolder');
-    const modalExistingFolders = document.querySelector('#existingFolder');
-    const modalExistingFoldersDelete = document.querySelector('#existingFolderDelete');
-    const modifyFolderModal = document.querySelector('#modifyFolderModal');
-    const modifyFolderButton = document.querySelector('#modifyFolderButton');
-    const createFolderModal = document.querySelector('#createFolderModal');
-    const createFolderButton = document.querySelector('#createFolderButton');
-    const deleteFolderModal = document.querySelector('#deleteFolderModal');
-    const deleteFolderButton = document.querySelector('#deleteFolderButton');
-    const formCreateFolder = document.querySelector('#createFolderModal').querySelector('form');
-    const formModifyFolder = document.querySelector('#modifyFolderModal').querySelector('form');
-    const formDeleteFolder = document.querySelector('#deleteFolderModal').querySelector('form');
+    const modalParentFolders = document.querySelectorAll('#parentFolder') || dummyElement;
+    const modalExistingFolders = document.querySelector('#existingFolder') || dummyElement;
+    const modalExistingFoldersDelete = document.querySelector('#existingFolderDelete') || dummyElement;
+    const modifyFolderModal = document.querySelector('#modifyFolderModal') || dummyElement;
+    const modifyFolderButton = document.querySelector('#modifyFolderButton') || dummyElement;
+    const createFolderModal = document.querySelector('#createFolderModal') || dummyElement;
+    const createFolderButton = document.querySelector('#createFolderButton') || dummyElement;
+    const deleteFolderModal = document.querySelector('#deleteFolderModal') || dummyElement;
+    const deleteFolderButton = document.querySelector('#deleteFolderButton') || dummyElement;
+    const formCreateFolder = createFolderModal.querySelector('form') || dummyElement;
+    const formModifyFolder = modifyFolderModal.querySelector('form') || dummyElement;
+    const formDeleteFolder = deleteFolderModal.querySelector('form') || dummyElement;
 
     // Search bars variables
     let lastInputEvent = null;
     const searchBars = [];
-    const searchUser = document.querySelector('#searchUser');
+    const searchUser = document.querySelector('#searchUser') || dummyElement;
     const searchLink = document.querySelector('#searchLink');
 
     // Users variables
@@ -61,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const actionsDropdown = document.querySelector('#actionsDropdown');
 
     // Verify index button
-    const verifyIndexButton = document.querySelector('#verifyIndexButton');
+    const verifyIndexButton = document.querySelector('#verifyIndexButton') || dummyElement;
 
     // Dialog types variable
     const DIALOG_TYPES = {
@@ -1048,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 position: 'top-end',
                 icon: 'error',
                 title: 'L\'archivage des classeurs a échoué.',
+                text: data.error,
                 showConfirmButton: false,
                 timer: 2000,
                 backdrop: false
@@ -1191,6 +1195,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 position: 'top-end',
                 icon: 'error',
                 title: 'La création du lien a échoué.',
+                text: data.error,
+                showConfirmButton: false,
+                timer: 2000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+    });
+
+    socket.on('index_not_verified', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'La vérification de l\'index a échoué.',
                 text: data.error,
                 showConfirmButton: false,
                 timer: 2000,
