@@ -444,4 +444,12 @@ def create_link(data):
 
 @socketio.on('verify_index', namespace='/administration')
 def verify_index():
-    pass
+    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        woosh_documents = Whoosh().get_all_documents()
+    database_documents = FICHIER.query.all()
+    for woosh_document in woosh_documents:
+        if str(woosh_document['id']) not in [str(database_document.id_Fichier) for database_document in database_documents]:
+            Whoosh().delete_document(woosh_document['id'])
+    for database_document in database_documents:
+        if not Whoosh().document_exists(str(database_document.id_Fichier)):
+            process_file.apply_async(args=[os.path.join(current_app.root_path, 'storage', str(database_document.id_Dossier), f'{database_document.id_Fichier}.{database_document.extension_Fichier}'), database_document.nom_Fichier, str(database_document.id_Dossier), str(database_document.id_Fichier), '', current_user.to_dict_secure(), database_document.to_dict()])
