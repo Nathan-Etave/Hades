@@ -60,6 +60,14 @@ def upload():
     existing_file = FICHIER.query.filter_by(nom_Fichier=filename).first()
     force = json_data.get("force")
     if existing_file is not None:
+        processed_files = redis.lrange("processed_files", 0, -1)
+        processed_files = [json.loads(file.decode("utf-8"))["filename"] for file in processed_files]
+        if not existing_file.nom_Fichier in processed_files:
+            return jsonify({'filename': filename,
+                            'existingFolder': existing_file.DOSSIER_.nom_Dossier,
+                            'existingFileAuthorFirstName': existing_file.AUTEUR.prenom_Utilisateur,
+                            'existingFileAuthorLastName': existing_file.AUTEUR.nom_Utilisateur,
+                            'existingFileDate': existing_file.date_Fichier.strftime('%d/%m/%Y à %H:%M')}), 422
         if force:
             delete_file(str(existing_file.id_Fichier))
         else:
@@ -86,7 +94,7 @@ def upload():
     )
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
-    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags])
+    process_file.apply_async(args=[file_path, filename, folder_id, str(file.id_Fichier), user_tags, current_user.to_dict_secure()])
     redis.incr("total_files")
     redis.rpush(
         "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
@@ -353,6 +361,12 @@ def archive_folders(data):
 @socketio.on('delete_files', namespace='/administration')
 def delete_files(data):
     file_ids = data.get('fileIds')
+    processed_files = redis.lrange("processed_files", 0, -1)
+    processed_files_ids = [json.loads(file.decode("utf-8"))["file_id"] for file in processed_files]
+    for file_id in file_ids:
+        if not file_id in processed_files_ids:
+            socketio.emit('files_not_deleted', {'error': 'Un ou plusieurs fichiers sélectionnés sont en cours de traitement. Veuillez réessayer ultérieurement.'}, namespace='/administration')
+            return
     try:
         file_paths = []
         with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
@@ -371,6 +385,9 @@ def delete_files(data):
         db.session.commit()
         for file_path in file_paths:
             os.remove(file_path)
+        for file in processed_files:
+            if json.loads(file.decode("utf-8"))["file_id"] in file_ids:
+                redis.lrem("processed_files", 0, file)
     except Exception as e:
         db.session.rollback()
         socketio.emit('files_not_deleted', {'error': str(e)}, namespace='/administration')
@@ -390,6 +407,11 @@ def delete_file(file_id):
             f"{file_id}.{database_file.extension_Fichier}",
         )
     )
+    processed_files = redis.lrange("processed_files", 0, -1)
+    for file in processed_files:
+        if json.loads(file.decode("utf-8"))["file_id"] == file_id:
+            redis.lrem("processed_files", 0, file)
+            break
     db.session.commit()
 
 @socketio.on('delete_link', namespace='/administration')

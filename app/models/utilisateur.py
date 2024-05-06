@@ -26,6 +26,9 @@ class UTILISATEUR(db.Model, UserMixin):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
+    def to_dict_secure(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name not in ['email_Utilisateur', 'mdp_Utilisateur', 'telephone_Utilisateur']}
+    
     def is_admin(self):
         return self.id_Role != 4
 
