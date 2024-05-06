@@ -86,8 +86,15 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def get_all_documents(self):
+        documents = []
         with self.open_index.searcher() as searcher:
-            return searcher.documents()
+            for doc in searcher.documents():
+                documents.append(doc)
+        return documents
+    
+    def document_exists(self, id):
+        with self.open_index.searcher() as searcher:
+            return searcher.document(id=id) is not None
 
     def search(self, query, path=None):
         if query.strip() == "":
