@@ -85,6 +85,10 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
+    def get_all_documents(self):
+        with self.open_index.searcher() as searcher:
+            return searcher.documents()
+
     def search(self, query, path=None):
         if query.strip() == "":
             subquery = Every()
@@ -120,7 +124,7 @@ class Whoosh(metaclass=SingletonMeta):
 class NLPProcessor(metaclass=SingletonMeta):
     def __init__(self, batch_size=100000):
         self.batch_size = batch_size
-        self.tokenizer_nlp = load(f"fr_application_model")
+        self.tokenizer_nlp = load("fr_application_model")
         self.lemmatizer_nlp = load("fr_core_news_sm")
         self.tokenizer_nlp.max_length = batch_size
         self.lemmatizer_nlp.max_length = batch_size
