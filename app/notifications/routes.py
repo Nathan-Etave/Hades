@@ -2,6 +2,7 @@
 
 import secrets
 import string
+import json
 from smtplib import SMTPException
 from flask import render_template, request, jsonify
 from flask_bcrypt import generate_password_hash
@@ -19,11 +20,12 @@ from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
 from app.utils import check_notitications
+from app import redis
+from datetime import datetime
 
 
 @bp.route("/", methods=["GET"])
 @login_required
-@admin_required
 def notifications():
     """Route for the notifications page."""
     all_notifications = NOTIFICATION.query.all()
@@ -31,12 +33,21 @@ def notifications():
         all_notifications, key=lambda x: x.datetime_Notification, reverse=True
     )
     roles = ROLE.query.all()
+    processed_files = redis.lrange('processed_files', 0, -1)
+    processed_files = [json.loads(file) for file in processed_files if file is not None]
+    for file in processed_files:
+        file['file']['date_Fichier'] = datetime.strptime(file['file']['date_Fichier'], '%d/%m/%Y %H:%M')
+    processed_files.sort(key=lambda file: file['file']['date_Fichier'], reverse=True)
+    for file in processed_files:
+        file['file']['date_Fichier'] = file['file']['date_Fichier'].strftime('%d/%m/%Y %H:%M')
     return render_template(
         "notifications/index.html",
         notifications=all_notifications,
         roles=roles,
         is_authenticated=True,
-        is_admin=True,
+        is_admin=current_user.is_admin(),
+        display_notif=current_user.id_Role == 1,
+        processed_files = processed_files,
         has_notifications=check_notitications(),
     )
 
@@ -55,7 +66,7 @@ def handle_acceptance(notification, send_email_function, success_message):
     user = UTILISATEUR.query.get(notification.id_Utilisateur)
     user.id_Role = request.json.get("role_id")
     user.est_Actif_Utilisateur = True
-    if notification.type_Notification == "1":
+    if str(notification.type_Notification) == "1":
         password = "".join(
             secrets.choice(string.ascii_letters + string.digits + string.punctuation)
             for i in range(10)
@@ -63,7 +74,7 @@ def handle_acceptance(notification, send_email_function, success_message):
         user.mdp_Utilisateur = generate_password_hash(password)
     db.session.delete(notification)
     try:
-        if notification.type_Notification == "1":
+        if str(notification.type_Notification) == "1":
             send_email_function(user.email_Utilisateur, password)
         else:
             send_email_function(user.email_Utilisateur)
@@ -93,7 +104,7 @@ def handle_rejection(notification, send_email_function, success_message):
     db.session.delete(notification)
     try:
         send_email_function(user.email_Utilisateur)
-        if notification.type_Notification == "1":
+        if str(notification.type_Notification) == "1":
             db.session.delete(user)
         db.session.commit()
     except (SMTPException, ConnectionError, TimeoutError):
@@ -119,11 +130,11 @@ def accept(id_notification):
         JSON: The JSON response.
     """
     notification = NOTIFICATION.query.get(id_notification)
-    if notification.type_Notification == "1":
+    if str(notification.type_Notification) == "1":
         return handle_acceptance(
             notification, send_registration_confirmation_email, "Inscription validée."
         )
-    elif notification.type_Notification == "2":
+    elif str(notification.type_Notification) == "2":
         return handle_acceptance(
             notification, send_reactivation_confirmation_email, "Réactivation validée."
         )
@@ -142,11 +153,11 @@ def reject(id_notification):
         JSON: The JSON response.
     """
     notification = NOTIFICATION.query.get(id_notification)
-    if notification.type_Notification == "1":
+    if str(notification.type_Notification) == "1":
         return handle_rejection(
             notification, send_registration_rejection_email, "Inscription refusée."
         )
-    elif notification.type_Notification == "2":
+    elif str(notification.type_Notification) == "2":
         return handle_rejection(
             notification, send_reactivation_rejection_email, "Réactivation refusée."
         )
