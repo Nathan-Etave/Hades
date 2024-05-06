@@ -1,37 +1,35 @@
+import os
+import re
+import uuid
+import zipfile
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
+from PIL import Image, UnidentifiedImageError
+from chardet import detect
+from docx import Document
+from flask import current_app
+from flask_login import current_user
+from pandas import read_excel, read_csv
+from pdf2image import convert_from_path
+from pptx import Presentation
+from spacy import load
+from spacy.lang.en.stop_words import STOP_WORDS as en_stop
+from spacy.lang.fr.stop_words import STOP_WORDS as fr_stop
+from spacy.util import compile_infix_regex
+from unidecode import unidecode
+from whoosh.analysis import StandardAnalyzer, KeywordAnalyzer
 from whoosh.fields import Schema, TEXT, STORED, KEYWORD, ID
 from whoosh.index import create_in, open_dir
 from whoosh.query import *
-from whoosh.analysis import StandardAnalyzer, KeywordAnalyzer
-import os.path
-from flask import current_app
-from concurrent.futures import ThreadPoolExecutor
-from collections import Counter
-from spacy.lang.fr.stop_words import STOP_WORDS as fr_stop
-from spacy.lang.en.stop_words import STOP_WORDS as en_stop
-from spacy.util import compile_infix_regex
-from spacy import load
-from unidecode import unidecode
-from pandas import read_excel, read_csv
-from docx import Document
-from PIL import Image, UnidentifiedImageError
-import pytesseract
-import fitz
 from xlrd import open_workbook
-from pptx import Presentation
-from pdf2image import convert_from_path
-import os
-from chardet import detect
+import fitz
+import pytesseract
 from app.extensions import db
-from flask_login import current_user
-from app.models.favoris import FAVORIS
-from app.models.notification import NOTIFICATION
-from app.models.fichier import FICHIER
 from app.models.dossier import DOSSIER
-import re
-import zipfile
-import os
-import uuid
+from app.models.favoris import FAVORIS
+from app.models.fichier import FICHIER
+from app.models.notification import NOTIFICATION
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -85,6 +83,17 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
+    def get_all_documents(self):
+        documents = []
+        with self.open_index.searcher() as searcher:
+            for doc in searcher.documents():
+                documents.append(doc)
+        return documents
+    
+    def document_exists(self, id):
+        with self.open_index.searcher() as searcher:
+            return searcher.document(id=id) is not None
+
     def search(self, query, path=None):
         if query.strip() == "":
             subquery = Every()
@@ -120,7 +129,7 @@ class Whoosh(metaclass=SingletonMeta):
 class NLPProcessor(metaclass=SingletonMeta):
     def __init__(self, batch_size=100000):
         self.batch_size = batch_size
-        self.tokenizer_nlp = load(f"fr_application_model")
+        self.tokenizer_nlp = load("fr_application_model")
         self.lemmatizer_nlp = load("fr_core_news_sm")
         self.tokenizer_nlp.max_length = batch_size
         self.lemmatizer_nlp.max_length = batch_size
