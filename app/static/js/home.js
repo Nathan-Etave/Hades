@@ -183,7 +183,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
         div.innerHTML = `
             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fav${id}" id="file" data-file="${id}" data-folder="${id_folder}" data-type="${extension}">
-                <p style="margin-bottom: 0; word-break: break-all;">${name}</p>
+                <div>    
+                    <p style="margin-bottom: 0; word-break: break-all;">${name}</p>
+                </div>
                 <div class="d-flex justify-content-end">
                     <a href="#" id="${id}" class="favori-home" onclick="event.stopPropagation();">
                         <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
