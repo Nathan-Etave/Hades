@@ -4,6 +4,7 @@ from flask import render_template, jsonify, redirect, url_for, request, current_
 from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
+from app.models.lien import LIEN
 from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
@@ -41,6 +42,7 @@ def home():
     results = create_rendered_list(results)
     favorite_files = get_files_favoris(current_user.id_Utilisateur)
     researches = get_user_researches(current_user.id_Utilisateur)
+    links = db.session.query(LIEN).order_by(LIEN.date_Lien).all()
     return render_template(
         "home/index.html",
         is_authenticated=True,
@@ -48,6 +50,7 @@ def home():
         has_notifications=check_notitications(),
         favorite_files=favorite_files,
         researches=researches,
+        links=links,
         folders=results,
         query=query,
         form=form,

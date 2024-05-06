@@ -1,5 +1,8 @@
+let previewModal;
 export function previewAfterRender() {
-    const previewModal = new bootstrap.Modal(document.querySelector('#previewModal'));
+    if (!previewModal) {
+        previewModal = new bootstrap.Modal(document.querySelector('#previewModal'));
+    }
     const files = document.querySelectorAll('#file');
     files.forEach((file) => {
         file.addEventListener('click', async function (event) {

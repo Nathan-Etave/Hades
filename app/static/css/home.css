@@ -35,6 +35,15 @@
     border-radius: 8rem;
 }
 
+#link-button {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 3vw;
+    border-radius: 8rem;
+}
+
 #aside-researches,
 #aside-favorites {
     height: 40vh;
