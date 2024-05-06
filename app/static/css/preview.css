@@ -9,6 +9,10 @@
     min-width: 90vw;
 }
 
+.modal-content-xl .modal-body {
+    height: 0;
+}
+
 .spreadsheet-table table {
     border: 1px solid black;
     border-collapse: collapse;
