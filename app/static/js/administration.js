@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function () {
         DOWNLOAD_CONFIRM: 'downloadConfirm',
         DELETE_USER_CONFIRM: 'deleteUserConfirm',
         DELETE_FILES_CONFIRM: 'deleteFilesConfirm',
-        ARCHIVE_FOLDERS_CONFIRM: 'archiveFoldersConfirm'
+        ARCHIVE_FOLDERS_CONFIRM: 'archiveFoldersConfirm',
+        UPLOAD_OVERWRITE_UNPROCESSABLE: 'uploadOverwriteUnprocessable'
     };
 
     // Functions
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         break;
                 }
             }
-            else if (type === DIALOG_TYPES.UPLOAD_OVERWRITE) {
+            else if (type === DIALOG_TYPES.UPLOAD_OVERWRITE || type === DIALOG_TYPES.UPLOAD_OVERWRITE_UNPROCESSABLE) {
                 fileTotal--;
                 updateProgressBar();
             }
@@ -171,16 +172,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                 });
                 let status = response.status;
+                let data = await response.json()
                 if (status === 200) {
                     fileUploadTotal++;
                     updateProgressBar();
                     updateFolderFileCount(folderId);
-                    let json = await response.json();
-                    createFileElement(json);
+                    createFileElement(data);
                     resolve();
                 }
                 else if (status === 409) {
-                    let data = await response.json();
                     dialogQueue.push({
                         type: DIALOG_TYPES.UPLOAD_OVERWRITE,
                         dialogOptions: {
@@ -199,6 +199,22 @@ document.addEventListener('DOMContentLoaded', function () {
                             data: ev.target.result,
                             tags: tags,
                             force: true
+                        }
+                    });
+                    showNextDialog();
+                    resolve();
+                }
+                else if (status === 422) {
+                    dialogQueue.push({
+                        type: DIALOG_TYPES.UPLOAD_OVERWRITE_UNPROCESSABLE,
+                        dialogOptions: {
+                            title: 'Fichier non traité.',
+                            text: `Le fichier "${data.filename}" existe déjà dans le classeur ${data.existingFolder}. Ce fichier a été créé par ${data.existingFileAuthorFirstName} ${data.existingFileAuthorLastName} le ${data.existingFileDate}. Ce fichier n'a pas encore été traité. Veuillez attendre que le fichier soit traité avant de le remplacer.`,
+                            icon: 'error',
+                            showCloseButton: true,
+                            showConfirmButton: false,
+                            allowEscapeKey: false,
+                            allowOutsideClick: false
                         }
                     });
                     showNextDialog();
@@ -394,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             icon: 'error',
                             title: 'Veuillez attendre la fin du téléversement des fichiers avant d\'archiver un classeur.',
                             showConfirmButton: false,
-                            timer: 1000,
+                            timer: 2000,
                             backdrop: false
                         }
                     });
@@ -409,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Les fichiers sélectionnés ne sont pas tous dans les classeurs sélectionnés.',
                         showConfirmButton: false,
-                        timer: 1000,
+                        timer: 2000,
                         backdrop: false
                     }
                 });
@@ -448,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un fichier.',
                         showConfirmButton: false,
-                        timer: 1000,
+                        timer: 2000,
                         backdrop: false
                     }
                 });
@@ -536,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez sélectionner au moins un fichier.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -623,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de créer un classeur.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -646,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -679,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -697,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -716,7 +732,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un classeur.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -735,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez sélectionner un classeur.',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false
                 }
             });
@@ -763,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs (Nom et URL).',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     backdrop: false,
                 }
             });
@@ -834,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -851,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -867,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -886,7 +902,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -903,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -919,7 +935,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -940,7 +956,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La création du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -960,7 +976,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La modification du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -980,7 +996,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La suppression du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -999,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: 'L\'archivage des classeurs a échoué.',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -1020,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Fichier(s) supprimé(s) avec succès.',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -1036,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'La suppression des fichiers a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
@@ -1051,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Lien supprimé avec succès.',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -1073,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: 'La suppression du lien a échoué.',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -1089,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Lien créé avec succès.',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             },
             data: data
@@ -1143,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'La création du lien a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 backdrop: false
             }
         });
