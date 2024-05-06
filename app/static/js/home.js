@@ -183,7 +183,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
         div.innerHTML = `
             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fav${id}" id="file" data-file="${id}" data-folder="${id_folder}" data-type="${extension}">
-                <p style="margin-bottom: 0; word-break: break-all;">${name}</p>
+                <div>    
+                    <p style="margin-bottom: 0; word-break: break-all;">${name}</p>
+                </div>
                 <div class="d-flex justify-content-end">
                     <a href="#" id="${id}" class="favori-home" onclick="event.stopPropagation();">
                         <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
@@ -242,12 +244,12 @@ document.addEventListener('DOMContentLoaded', function () {
         )
 
     // prevent the accordion to close when clicking on the input
-    const folders = document.querySelectorAll('#folder');
+    const folders = document.querySelectorAll('.folder-item');
     folders.forEach((folder) => {
         folder.addEventListener('click', function (event) {
             event.stopPropagation();
-            if (event.target.dataset.triggerAccordion !== undefined) {
-                var collapse = new bootstrap.Collapse(folder.querySelector('.accordion-collapse'));
+            if (event.target.dataset.triggerAccordion === undefined) {
+                var collapse = new bootstrap.Collapse(folder.parentElement.parentElement.querySelector('.accordion-collapse'));
                 collapse.show();
             }
         });
@@ -286,6 +288,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     file.style.display = "none";
                 }
                 countElement.innerHTML = data.results.length;
+            });
+        }
+    });
+
+    // Handle de dynamique search for the links in the right panal
+    let searchLink = document.getElementById("search-link");
+    let links = document.querySelectorAll(".link-element");
+    searchLink.addEventListener('input', function () {
+        let search = searchLink.value;
+        if (search === "") {
+            links.forEach(link => {
+                link.style.display = "block";
+            });
+        }
+        else {
+            links.forEach(link => {
+                let name = link.querySelector(".link-name").innerHTML;
+                let description = link.querySelector(".link-description").innerHTML;
+                if (name.toLowerCase().includes(search.toLowerCase()) | description.toLowerCase().includes(search.toLowerCase())) {
+                    link.style.display = "block";
+                }
+                else {
+                    link.style.display = "none";
+                }
             });
         }
     });
