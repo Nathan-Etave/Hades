@@ -242,12 +242,12 @@ document.addEventListener('DOMContentLoaded', function () {
         )
 
     // prevent the accordion to close when clicking on the input
-    const folders = document.querySelectorAll('#folder');
+    const folders = document.querySelectorAll('.folder-item');
     folders.forEach((folder) => {
         folder.addEventListener('click', function (event) {
             event.stopPropagation();
-            if (event.target.dataset.triggerAccordion !== undefined) {
-                var collapse = new bootstrap.Collapse(folder.querySelector('.accordion-collapse'));
+            if (event.target.dataset.triggerAccordion === undefined) {
+                var collapse = new bootstrap.Collapse(folder.parentElement.parentElement.querySelector('.accordion-collapse'));
                 collapse.show();
             }
         });
