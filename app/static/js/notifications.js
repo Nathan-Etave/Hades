@@ -1,7 +1,11 @@
+import { previewAfterRender } from "./preview.js";
+
 document.addEventListener('DOMContentLoaded', function () {
     const acceptButtons = document.querySelectorAll('.accept-button');
     const rejectButtons = document.querySelectorAll('.reject-button');
     const selectElements = document.querySelectorAll('select');
+
+    previewAfterRender();
 
     selectElements.forEach(select => {
         select.addEventListener('change', function (event) {

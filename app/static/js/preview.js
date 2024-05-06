@@ -7,10 +7,10 @@ export function previewAfterRender() {
     files.forEach((file) => {
         file.addEventListener('click', async function (event) {
             let target = event.target;
-            if (event.target.nodeName === 'P' || event.target.nodeName === 'I') {
+            if (event.target.nodeName === 'P' || event.target.nodeName === 'I' || event.target.nodeName === 'SPAN') {
                 target = event.target.parentElement.parentElement;
             }
-            if (event.target.className.includes('desktop-element')) {
+            if (event.target.className.includes('desktop-element') | event.target.className.includes('file-notif')) {
                 target = event.target.parentElement;
             }
             const fileId = target.dataset.file;
