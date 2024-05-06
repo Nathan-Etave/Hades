@@ -53,6 +53,7 @@
         integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -60,11 +61,11 @@
     <h1 class="text-center">Historique</h1>
     <div class="mt-4 mb-3" style="margin-left: 15vw; margin-right: 15vw; height: 50vh; overflow-y: auto; border-radius: 1rem; border: solid 2px; cursor: pointer;">
         {% for file in processed_files %}
-            <div class="d-flex" id="file" data-file="{{ file["file"]["id_Fichier"] }}" data-folder="{{ file["folder_id"] }}"  data-type="{{ file["file"]["extension_Fichier"] }}"  data-name="{{ file["filename"] }}" style="margin-top: 0.3rem; margin-bottom: 0.3rem;">
-                <p style="font-size: 1.1rem;">
-                    <span style="font-weight: bold;">[{{ file["file"]["date_Fichier"] }}] </span>
-                    <span>Le fichier "{{ file["file"]["nom_Fichier"] }}" </span>
-                    <span>a été rajouté par {{ file["user"]["nom_Utilisateur"] }} {{ file["user"]["prenom_Utilisateur"] }}.</span>
+            <div class="d-flex hover-underline" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}" style="margin-top: 0.3rem; margin-bottom: 0.3rem;">
+                <p style="font-size: 1.2rem;" class="file-notif">
+                    <span style="font-weight: bold;">[{{ file['file']['date_Fichier'] }}] </span>
+                    <span>Le fichier "{{ file['file']['nom_Fichier'] }}" </span>
+                    <span>a été rajouté par {{ file['user']['nom_Utilisateur'] }} {{ file['user']['prenom_Utilisateur'] }}.</span>
                 </p>
             </div>
         {% endfor %}
