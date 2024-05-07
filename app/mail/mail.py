@@ -10,7 +10,9 @@ def send_email(subject, sender, recipients, html_body):
     msg["From"] = sender
     msg["To"] = recipients
     msg.attach(MIMEText(html_body, "html"))
-    mail_server = smtplib.SMTP("smtp.gmail.com", 587)
+    mail_server = smtplib.SMTP(
+        os.environ.get("MAIL_SERVER"), os.environ.get("MAIL_PORT")
+    )
     mail_server.starttls()
     mail_server.login(os.environ.get("MAIL_USERNAME"), os.environ.get("MAIL_PASSWORD"))
     mail_server.sendmail(sender, recipients, msg.as_string())
@@ -58,15 +60,13 @@ def send_reactivation_rejection_email(email):
 
 
 def send_forgotten_password_email(email, uuid):
-    """
-    Sends a forgotten password email to the specified email address.
+    """Sends a forgotten password email to the specified email address.
 
     Parameters:
     - email (str): The recipient's email address.
     - new_password (str): The new password to be included in the email.
 
-    Returns:
-    None
+    Returns: None
     """
     subject = "Réinitialisation de votre mot de passe"
     sender = f'Hadès <{os.environ.get("MAIL_USERNAME")}>'

@@ -59,19 +59,27 @@
 {% block content %}
 <section>
     <h1 class="text-center">Historique</h1>
-    <div class="mt-4 mb-3" style="margin-left: 15vw; margin-right: 15vw; height: 50vh; overflow-y: auto; border-radius: 1rem; border: solid 2px; cursor: pointer;">
+    <div class="container mt-4 mb-3" style="height: 50vh; overflow-y: auto; border-radius: 1rem; border: solid 2px;" id="historyContainer">
         {% for file in processed_files %}
-            <div class="d-flex hover-underline" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}" style="margin-top: 0.3rem; margin-bottom: 0.3rem;">
-                <p style="font-size: 1.2rem;" class="file-notif">
-                    <span style="font-weight: bold;">[{{ file['file']['date_Fichier'] }}] </span>
-                    <span>Le fichier "{{ file['file']['nom_Fichier'] }}" </span>
-                    <span>a été rajouté par {{ file['user']['nom_Utilisateur'] }} {{ file['user']['prenom_Utilisateur'] }}.</span>
-                </p>
-            </div>
+        <div class="d-flex hover-underline file-text-notification" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}">
+            <p style="font-size: 1.1rem;" class="file-text-notification">
+                <span style="font-weight: bold; color: #007BFF;">[{{ file['file']['date_Fichier'] }}] </span>
+                <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;">{{ file['file']['nom_Fichier'] }}</span>" </span>
+                <span>a été 
+                    {% if file['action'] %}
+                        réécrit 
+                    {% else %}
+                        ajouté 
+                    {% endif %}
+                    dans le classeur "<span style="color: #ecb900;">{{ file['folder']['nom_Dossier'] }}</span>" par 
+                    <span style="color: #dc3545;">{{ file['user']['nom_Utilisateur'] }} {{ file['user']['prenom_Utilisateur'] }}.</span>
+                </span>
+            </p>
+        </div>
         {% endfor %}
     </div>
 </section>
-{% if display_notif %}
+{% if display_notification %}
 <section>
     <h1 class="text-center">Notifications</h1>
     <div class="d-flex align-items-start justify-content-center pt-5" style="height: 75vh; overflow: auto;">
