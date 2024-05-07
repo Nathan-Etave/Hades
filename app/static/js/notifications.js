@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!["1", "2"].includes(notificationType)) {
-            alert(`Impossible de procéder à l'action demandée, la page va être rechargée.`);
+            createAlertMessage('Impossible de procéder à l\'action demandée.', 'error', true);
             return window.location.reload();
         }
 
@@ -42,10 +42,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             let json = await response.json();
-            createFlashMessage(json.message, notificationId, action);
+            createAlertMessage(json.message, action);
             button.parentElement.parentElement.parentElement.parentElement.remove();
         } catch (error) {
-            createFlashMessage(error.message, notificationId, 'error');
+            createAlertMessage(error.message, 'error');
             if (button.parentElement.lastElementChild === button) {
                 button.disabled = false;
                 selectId == '' ? button.parentElement.firstElementChild.disabled = true : button.parentElement.firstElementChild.disabled = false;
@@ -101,20 +101,16 @@ async function sendRequest(url, method, csrfToken, body = null) {
     });
 }
 
-function createFlashMessage(message, notificationId, type) {
-    const flash = document.createElement('div');
-    flash.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible mt-4`;
-    const button = document.createElement('button');
-    button.type = "button";
-    button.className = "btn-close";
-    button.setAttribute('data-bs-dismiss', 'alert');
-    button.setAttribute('data-notification-id', notificationId);
-    button.addEventListener('click', function () {
-        this.parentElement.remove();
-    });
-    flash.appendChild(button);
-    const text = document.createTextNode(message);
-    flash.appendChild(text);
-    document.querySelector('.flash').appendChild(flash);
-    setTimeout(() => flash.remove(), 5000);
+function createAlertMessage(message, type, confirm = false) {
+    Swal.fire({
+        icon: type === 'error' ? 'error' : 'success',
+        title: type === 'error' ? 'Une erreur est survenue.' : 'Action effectuée avec succès.',
+        text: message,
+        position: 'top-end',
+        showConfirmButton: confirm,
+        timer: 2000,
+        backdrop: false
+    })
+
+
 }

@@ -263,6 +263,7 @@ def update_user_status(data):
     elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
         user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
     else:
+        data["status"] = user.est_Actif_Utilisateur
         socketio.emit(
             "user_status_not_updated",
             {

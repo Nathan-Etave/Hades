@@ -7,12 +7,12 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 <!-- personalized js link -->
-<script src="{{ url_for('static', filename='js/profil.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 <!-- css link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profil.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 <!-- csrf token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
@@ -22,7 +22,7 @@
     <div class="d-flex justify-content-center align-items-center flex-column mt-5">
         <!-- Display the user's information -->
         {% if not edit_mode %}
-            <div class="card border-secondary mb-3" style="width: 65vw;" id="profil">
+            <div class="card border-secondary mb-3" style="width: 65vw;" id="profile">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div></div>
                     <h1>Mon compte</h1>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="card-body info">
                     <!-- The form to edit the user's information -->
-                    <form method="POST" action="{{ url_for('profil.edit') }}">
+                    <form method="POST" action="{{ url_for('profile.edit') }}">
                         {{ form.csrf_token }}
                         <div>
                             {{ form.first_name.label(class="form-label") }}
