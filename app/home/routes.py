@@ -70,19 +70,23 @@ def favorize(id_file):
         dict: A JSON response indicating the status of the operation.
             The response will have a 'status' key with the value 'ok'.
     """
-    if request.method == "POST":
-        db.session.execute(
-            FAVORIS.insert().values(
-                id_Fichier=id_file, id_Utilisateur=current_user.id_Utilisateur
+    try:
+        if request.method == "POST":
+            db.session.execute(
+                FAVORIS.insert().values(
+                    id_Fichier=id_file, id_Utilisateur=current_user.id_Utilisateur
+                )
             )
-        )
-    else:
-        db.session.query(FAVORIS).filter(
-            FAVORIS.c.id_Fichier == id_file,
-            FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur,
-        ).delete()
-    db.session.commit()
-    return jsonify({"file": id_file}), 200
+        else:
+            db.session.query(FAVORIS).filter(
+                FAVORIS.c.id_Fichier == id_file,
+                FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur,
+            ).delete()
+        db.session.commit()
+        return jsonify({"file": id_file}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 def get_files_favoris(user_id):
