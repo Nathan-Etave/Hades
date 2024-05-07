@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!["1", "2"].includes(notificationType)) {
-            alert(`Impossible de procéder à l'action demandée, la page va être rechargée.`);
+            createAlertMessage('Impossible de procéder à l\'action demandée.', 'error', true);
             return window.location.reload();
         }
 
@@ -101,13 +101,13 @@ async function sendRequest(url, method, csrfToken, body = null) {
     });
 }
 
-function createAlertMessage(message, type) {
+function createAlertMessage(message, type, confirm = false) {
     Swal.fire({
         icon: type === 'error' ? 'error' : 'success',
         title: type === 'error' ? 'Une erreur est survenue.' : 'Action effectuée avec succès.',
         text: message,
         position: 'top-end',
-        showConfirmButton: false,
+        showConfirmButton: confirm,
         timer: 2000,
         backdrop: false
     })

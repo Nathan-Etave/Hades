@@ -44,7 +44,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.href = "/connexion";
                 }
                 else {
-                    alert("Erreur lors de la déconnexion");
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Erreur lors de la déconnexion.',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        backdrop: false
+                    })
                 }
             })
     });
