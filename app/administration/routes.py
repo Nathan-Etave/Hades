@@ -23,6 +23,7 @@ from app.models.a_recherche import A_RECHERCHE
 from app.models.favoris import FAVORIS
 from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
+from app.mail.mail import send_deactivation_email, send_delete_email
 
 
 @bp.route("/")
@@ -278,6 +279,15 @@ def update_user_status(data):
         {**data, "message": "Le statut de l'utilisateur a été modifié avec succès."},
         namespace="/administration",
     )
+    if not user.est_Actif_Utilisateur:
+        try:
+            send_deactivation_email(user.email_Utilisateur)
+        except Exception as e:
+            socketio.emit(
+                "user_email_error",
+                {**data, "error": "Le statut de l'utilisateur à bien été désactivé, mais l'email de notification n'a pas pu être envoyé."},
+                namespace="/administration",
+            )
 
 
 @socketio.on("delete_user", namespace="/administration")
@@ -329,6 +339,14 @@ def delete_user(data):
         {**data, "message": "L'utilisateur a été supprimé avec succès."},
         namespace="/administration",
     )
+    try:
+        send_delete_email(user.email_Utilisateur)
+    except Exception as e:
+        socketio.emit(
+            "user_email_error",
+            {**data, "error": "L'utilisateur à bien été supprimé, mais l'email de notification n'a pas pu être envoyé."},
+            namespace="/administration",
+        )
 
 
 def delete_user(user_id):
