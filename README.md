@@ -1,8 +1,8 @@
-# <u>Pinpon 45</u>
+# <u>Hadès</u>
 
 ## <u>Sommaire</u>
 
-- [Pinpon 45](#pinpon-45)
+- [Hadès](#hadès)
   - [Sommaire](#sommaire)
   - [Équipe de développement](#équipe-de-développement)
 
