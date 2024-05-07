@@ -367,7 +367,7 @@ def check_notitications():
     Returns:
         bool: True if there is any notification, False otherwise.
     """
-    return NOTIFICATION.query.all() != []
+    return NOTIFICATION.query.all() != [] if current_user.id_Role == 1 else []
 
 def get_total_file_count(folder):
     """

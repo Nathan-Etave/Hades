@@ -930,8 +930,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     socket.on('user_status_not_updated', function (data) {
         let statusToggle = document.querySelector(`#status-toggle-${data.userId}`);
-        statusToggle.parentElement.classList.remove('off');
-        statusToggle.parentElement.classList.replace('btn-danger', 'btn-success');
+        if (data.status == true) {
+            statusToggle.parentElement.classList.remove('off');
+            statusToggle.parentElement.classList.replace('btn-danger', 'btn-success');
+        }
+        else {
+            statusToggle.parentElement.classList.add('off');
+            statusToggle.parentElement.classList.replace('btn-success', 'btn-danger');
+        }
         dialogQueue.push({
             type: DIALOG_TYPES.ALERT,
             dialogOptions: {
