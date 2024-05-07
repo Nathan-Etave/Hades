@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!["1", "2"].includes(notificationType)) {
-            createAlertMessage('Impossible de procéder à l\'action demandée.', 'error', true);
-            return window.location.reload();
+            await createAlertMessage('Impossible de procéder à l\'action demandée.', 'error');
+            window.location.reload();
         }
 
         try {
@@ -101,8 +101,8 @@ async function sendRequest(url, method, csrfToken, body = null) {
     });
 }
 
-function createAlertMessage(message, type, confirm = false) {
-    Swal.fire({
+async function createAlertMessage(message, type, confirm = false) {
+    await Swal.fire({
         icon: type === 'error' ? 'error' : 'success',
         title: type === 'error' ? 'Une erreur est survenue.' : 'Action effectuée avec succès.',
         text: message,

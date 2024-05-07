@@ -2,16 +2,18 @@
 export function baseAfterRender(number) {
     let numberIcon = document.getElementById('number');
 
-    if (number === 0) {
-        numberIcon.style.display = 'none';
-    }
-    else if (number < 10) {
-        numberIcon.style.display = 'flex';
-        numberIcon.innerHTML = number;
-    }
-    else {
-        numberIcon.style.display = 'flex';
-        numberIcon.innerHTML = '9+';
+    if (numberIcon) {
+        if (number === 0) {
+            numberIcon.style.display = 'none';
+        }
+        else if (number < 10) {
+            numberIcon.style.display = 'flex';
+            numberIcon.innerHTML = number;
+        }
+        else {
+            numberIcon.style.display = 'flex';
+            numberIcon.innerHTML = '9+';
+        }
     }
 }
 
