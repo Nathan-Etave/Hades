@@ -3,9 +3,14 @@
 {% block title %}Connexion{% endblock %}
 
 {% block head %}
+<!-- import js link -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- personalized js link -->
 <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+
+<!-- crsf token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
 
@@ -14,6 +19,7 @@
     <div class="row justify-content-center w-100">
         <div class="col-md-6 shadow-lg p-5 bg-secondary rounded">
             <h2 class="text-center">Connexion</h2>
+            <!-- display login formular -->
             <form method="POST" action="{{ url_for('login.login') }}">
                 {{ form.csrf_token }}
                 <div class="form-group">
@@ -30,6 +36,7 @@
                     <input type="submit" value="Connexion" class="btn btn-primary">
                 </div>
             </form>
+            <!-- display errors -->
             {% if form.email.errors %}
                 <div class="alert alert-dismissible alert-danger mt-4">
                     <strong>Erreur lors de la soumission du formulaire.</strong><br>
@@ -38,6 +45,7 @@
                     {% endfor %}
                 </div>
             {% endif %}
+            <!-- display flash messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -63,7 +71,7 @@
     </div>
 </div>
 
-
+<!-- Modal for the forgotten password -->
 <div class="modal" id="mdp_oublie_modal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -73,6 +81,7 @@
                     <span aria-hidden="true"></span>
                 </button>
             </div>
+            <!-- Display the forgotten password formular -->
             <form method="POST" action="{{ url_for('login.login') }}">
                 {{ mdp_form.csrf_token }}
                 <div class="modal-body">

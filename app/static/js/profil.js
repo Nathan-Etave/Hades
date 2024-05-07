@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let btnVerif = document.getElementById("btn_verif");
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
+    // Handle the password verification to access the edit page
     btnVerif.addEventListener('click', function () {
         let verifPassword = document.getElementById("verif_password");
         password = verifPassword.value
@@ -17,16 +18,17 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.json())
             .then(response => {
-                if (response.verif) {
+                if (response.verif) { // success
                     window.location.href = "edit";
                 }
-                else {
+                else { // error
                     let alertMdp = document.getElementById("alert_mdp");
                     alertMdp.classList.remove("d-none")
                 }
             })
     });
 
+    // Handle the logout button
     let btnLogout = document.getElementById("logout");
     btnLogout.addEventListener('click', function () {
         fetch('deconnexion', {

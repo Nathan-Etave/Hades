@@ -18,12 +18,20 @@ import secrets
 import string
 from app.mail.mail import send_forgotten_password_email
 import uuid
-import json 
-import os
+import json
 
 
 @login_manager.user_loader
 def load_user(user):
+    """
+    Load a user from the database based on the given user ID.
+
+    Args:
+        user (int): The ID of the user to load.
+
+    Returns:
+        UTILISATEUR: The user object corresponding to the given ID.
+    """
     return UTILISATEUR.query.get(user)
 
 
@@ -111,6 +119,7 @@ def add_notification():
     db.session.commit()
     return jsonify(notification.to_dict()), 200
 
+
 @bp.route("/reinitialisation/<string:uuid>", methods=["GET"])
 def reinitialisation(uuid):
     """
@@ -126,24 +135,29 @@ def reinitialisation(uuid):
         None
 
     """
-    json_file_path = f'{current_app.root_path}/storage/password/password.json'
-    with open(json_file_path, 'r') as json_file:
+    json_file_path = f"{current_app.root_path}/storage/password/password.json"
+    with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
         if str(uuid) in data:
             user = UTILISATEUR.query.filter_by(id_Utilisateur=data[str(uuid)]).first()
             password = "".join(
-                secrets.choice(string.ascii_letters + string.digits + string.punctuation)
+                secrets.choice(
+                    string.ascii_letters + string.digits + string.punctuation
+                )
                 for _ in range(10)
             )
             user.mdp_Utilisateur = generate_password_hash(password)
             db.session.commit()
-            flash (f"votre mot de passe a bien été réinitialisé, voici le nouveau : {password}", "success")
+            flash(
+                f"votre mot de passe a bien été réinitialisé, voici le nouveau : {password}",
+                "success",
+            )
 
             del data[str(uuid)]
-            with open(json_file_path, 'w') as json_file:
+            with open(json_file_path, "w") as json_file:
                 json.dump(data, json_file)
         else:
-            flash ("La demande de réinitialisation n'est plus valide.", "danger")
+            flash("La demande de réinitialisation n'est plus valide.", "danger")
     return redirect(url_for("login.login"))
 
 
@@ -159,8 +173,8 @@ def forgot_password(email):
     user = UTILISATEUR.query.filter_by(email_Utilisateur=email).first()
     uuid4 = uuid.uuid4()
 
-    json_file_path = f'{current_app.root_path}/storage/password/password.json'
-    with open(json_file_path, 'r') as json_file:
+    json_file_path = f"{current_app.root_path}/storage/password/password.json"
+    with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
 
     for key, value in data.items():
@@ -168,7 +182,7 @@ def forgot_password(email):
             del data[key]
             break
     data[str(uuid4)] = user.id_Utilisateur
-    with open(json_file_path, 'w') as json_file:
+    with open(json_file_path, "w") as json_file:
         json.dump(data, json_file)
 
     try:

@@ -1,6 +1,6 @@
 from app.home import bp
 from flask_login import login_required, current_user
-from flask import render_template, jsonify, redirect, url_for, request, current_app
+from flask import render_template, jsonify, request, current_app
 from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
@@ -147,7 +147,6 @@ def add_research(user_id, search):
     db.session.commit()
     db.session.commit()
 
-#--------------------------------------------------------------------------
 
 def create_folder_dict(folder, files):
     """
@@ -169,8 +168,9 @@ def create_folder_dict(folder, files):
         "files": files_in_folder,
         "color": folder.couleur_Dossier,
         "id": folder.id_Dossier,
-        "subfolder": subfolders
+        "subfolder": subfolders,
     }
+
 
 def create_rendered_list(results):
     """
@@ -183,7 +183,9 @@ def create_rendered_list(results):
         list: A list of dictionaries representing folders and their associated results.
     """
     folders = db.session.query(DOSSIER).order_by(DOSSIER.priorite_Dossier).all()
-    folders_root = [folder for folder in folders if folder.DOSSIER == [] and is_accessible(folder)]
+    folders_root = [
+        folder for folder in folders if folder.DOSSIER == [] and is_accessible(folder)
+    ]
     return [create_folder_dict(folder, results) for folder in folders_root]
 
 
@@ -199,7 +201,12 @@ def recursive_subfolder(folder, files):
     Returns:
         list: A list of dictionaries containing information about each subfolder.
     """
-    return [create_folder_dict(subfolder, files) for subfolder in folder.DOSSIER_ if is_accessible(subfolder)]
+    return [
+        create_folder_dict(subfolder, files)
+        for subfolder in folder.DOSSIER_
+        if is_accessible(subfolder)
+    ]
+
 
 def is_accessible(folder):
     """
@@ -213,10 +220,28 @@ def is_accessible(folder):
     """
     return any(current_user.id_Role == role.id_Role for role in folder.ROLE)
 
-@socketio.on('search_files', namespace='/home')
+
+@socketio.on("search_files", namespace="/home")
 def search_files(data):
+    """
+    Search files based on the provided query and folder ID.
+
+    Args:
+        data (dict): A dictionary containing the search query and folder ID.
+
+    Returns:
+        None
+    """
     search_query = data.get("query")
     with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
         search_results = [result["id"] for result in search_results]
-    socketio.emit("search_results", {'query': search_query, 'results': search_results, 'folderId': data.get("folderId")}, namespace="/home")
+    socketio.emit(
+        "search_results",
+        {
+            "query": search_query,
+            "results": search_results,
+            "folderId": data.get("folderId"),
+        },
+        namespace="/home",
+    )
