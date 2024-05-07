@@ -3,7 +3,7 @@ from wtforms import SubmitField, EmailField, StringField, PasswordField
 from wtforms.validators import DataRequired, Email
 
 
-class Edit_profil_form(FlaskForm):
+class EditProfileForm(FlaskForm):
     """
     Form class for editing user profile information.
 

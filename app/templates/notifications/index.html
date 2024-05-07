@@ -52,6 +52,7 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
         integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
 {% endblock %}
@@ -59,7 +60,7 @@
 {% block content %}
 <section>
     <h1 class="text-center">Historique</h1>
-    <div class="container mt-4 mb-3" style="height: 50vh; overflow-y: auto; border-radius: 1rem; border: solid 2px;" id="historyContainer">
+    <div class="container mt-4 mb-5" style="{% if display_notification %} height: 60vh; {% else %} height: 70vh; {% endif %} overflow-y: auto; border-radius: 1rem; border: solid 2px;" id="historyContainer">
         {% for file in processed_files %}
         <div class="d-flex hover-underline file-text-notification" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}">
             <p style="font-size: 1.1rem;" class="file-text-notification">

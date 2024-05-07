@@ -130,6 +130,8 @@ def accept(id_notification):
     Returns:
         JSON: The JSON response.
     """
+    if current_user.id_Role != 1:
+        return jsonify({"error": "Vous n'avez pas les droits pour effectuer cette action."}), 403
     notification = NOTIFICATION.query.get(id_notification)
     if str(notification.type_Notification) == "1":
         return handle_acceptance(
@@ -153,6 +155,8 @@ def reject(id_notification):
     Returns:
         JSON: The JSON response.
     """
+    if current_user.id_Role != 1:
+        return jsonify({"error": "Vous n'avez pas les droits pour effectuer cette action."}), 403
     notification = NOTIFICATION.query.get(id_notification)
     if str(notification.type_Notification) == "1":
         return handle_rejection(
