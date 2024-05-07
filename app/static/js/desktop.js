@@ -18,9 +18,11 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('files_details', function (data) {
         let modalFooter = document.querySelector('.nav-tabs');
         desktop.innerHTML = '';
+        localStorage.setItem('desktop', JSON.stringify(data["files_id"]));
+        baseAfterRender(data["files"].length);
 
         let deskFileNumber = 1;
-        data.forEach(function (file) {
+        data["files"].forEach(function (file) {
             let div = document.createElement('div');
             div.className = 'col-2';
             div.id = "div-file-" + file.id_Fichier;

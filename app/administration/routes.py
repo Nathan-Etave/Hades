@@ -822,5 +822,6 @@ def verify_index():
                     "",
                     current_user.to_dict_secure(),
                     database_document.to_dict(),
+                    database_document.DOSSIER_.to_dict()
                 ]
             )
