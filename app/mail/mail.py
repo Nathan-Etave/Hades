@@ -73,3 +73,35 @@ def send_forgotten_password_email(email, uuid):
     recipients = email
     html_body = f"<p>Bonjour, une demande de réinitialisation de mot de passe a été faite sur votre compte. \n Pour la valider, cliquez sur le lien suivant :</p> <a href='http://127.0.0.1:5000/connexion/reinitialisation/{uuid}'>Réinitialisation du mot de passe</a>"
     send_email(subject, sender, recipients, html_body)
+
+def send_deactivation_email(email):
+    """
+    Sends a deactivation email to the specified email address.
+
+    Args:
+        email (str): The email address to send the deactivation email to.
+
+    Returns:
+        None
+    """
+    subject = "Désactivation de votre compte"
+    sender = f'Hadès <{os.environ.get("MAIL_USERNAME")}>'
+    recipients = email
+    html_body = "<p>Bonjour, votre compte a été désactivé. Pour plus d'informations, veuillez contacter le support technique.</p> <p>Vous pouvez demander la réactivation de votre compte depuis la page de connexion sur le lien suivant :</p> <a href='http://127.0.0.1:5000/connexion/'>Réactivation du compte</a>"
+    send_email(subject, sender, recipients, html_body)
+
+def send_delete_email(email):
+    """
+    Sends a delete email to the specified email address.
+
+    Args:
+        email (str): The email address to send the delete email to.
+
+    Returns:
+        None
+    """
+    subject = "Suppression de votre compte"
+    sender = f'Hadès <{os.environ.get("MAIL_USERNAME")}>'
+    recipients = email
+    html_body = "<p>Bonjour, votre compte a été supprimé. Pour plus d'informations, veuillez contacter le support technique.</p>"
+    send_email(subject, sender, recipients, html_body)

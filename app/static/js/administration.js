@@ -1226,6 +1226,21 @@ document.addEventListener('DOMContentLoaded', function () {
         showNextDialog();
     });
 
+    socket.on('user_email_error', function(data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'warning',
+                title: data.error,
+                showConfirmButton: false,
+                timer: 2000,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+    })
+
     // Initialization
     checkboxes.forEach((checkbox) => {
         if (checkbox.classList.contains('status-toggle')) {
