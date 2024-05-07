@@ -20,22 +20,32 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json().then(data => ({ status: response.status, body: data })))
             .then(response => {
                 if (response.status === 200) { // success
-                    alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.");
+                    createAlertMessage("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.", "success");
                     window.location.href = "/connexion";
                 }
                 if (response.status === 404) { // error
                     if (response.body.error === "user not found") {
-                        alert("Aucun utilisateur n'est associé à cet email.");
+                        createAlertMessage("Aucun utilisateur n'est associé à cet email.", "warning");
                     }
                     else if (response.body.error === "user already have a notification") {
-                        alert("Vous avez déjà une demande de réactivation en cours.");
+                        createAlertMessage("Vous avez déjà une demande de réactivation en cours.", "warning");
                     }
                     else {
-                        alert("Une erreur est survenue.");
+                        createAlertMessage("Une erreur est survenue.", "error");
                     }
                     window.location.href = "/connexion";
                 }
             })
     });
 
+    function createAlertMessage(message, type) {
+        Swal.fire({
+            position: 'top-end',
+            icon: type,
+            title: message,
+            showConfirmButton: true,
+            timer: 2000,
+            backdrop: false
+        });
+    }
 });

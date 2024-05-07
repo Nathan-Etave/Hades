@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             favElement.className = "fa-regular fa-star fa-lg me-2";
                         }
                         else {
-                            alert("Erreur lors de la suppression du favori");
+                            createErrorAlertMessage("Erreur lors de la suppression du favori.", data.body);
                         }
                     });
             });
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             }
                             else {
-                                alert("Erreur lors de la suppression du favori");
+                                createErrorAlertMessage("Erreur lors de la suppression du favori.", data.body);
                             }
                         });
                 }
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 displayFav(elem.getAttribute("data-file"), elem.getAttribute("data-name"), elem.getAttribute("data-folder"), elem.getAttribute("data-type"));
                             }
                             else {
-                                alert("Erreur lors de l'ajout du favori");
+                                createErrorAlertMessage("Erreur lors de l'ajout du favori.", data.body);
                             }
                         });
                 }
@@ -315,5 +315,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+    function createErrorAlertMessage(message, data) {
+        Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: message,
+            text: data.error,
+            showConfirmButton: false,
+            timer: 2000,
+            backdrop: false
+        });
+    }
     
 });
