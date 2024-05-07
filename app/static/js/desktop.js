@@ -1,7 +1,9 @@
+//function import 
 import { previewAfterRender } from './preview.js';
 import { baseAfterRender } from './base.js';
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Initilisation 
     let deskList = JSON.parse(localStorage.getItem('desktop'));
     if (deskList === null) {
         deskList = [];
@@ -9,18 +11,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
+    // emit event to get files details
     const socket = io.connect('/file_handler');
     socket.emit('get_files_details', { 'files': deskList });
 
+    // Handle the display of the desktop
     let currentFile = 0;
     let desktop = document.getElementById('desk-section');
-
     socket.on('files_details', function (data) {
         let modalFooter = document.querySelector('.nav-tabs');
         desktop.innerHTML = '';
+        localStorage.setItem('desktop', JSON.stringify(data["files_id"]));
+        baseAfterRender(data["files"].length);
 
         let deskFileNumber = 1;
-        data.forEach(function (file) {
+        data["files"].forEach(function (file) {
+
+            // Create the card
             let div = document.createElement('div');
             div.className = 'col-2';
             div.id = "div-file-" + file.id_Fichier;
@@ -48,20 +55,21 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <p class="card-title h5" style="font-size: 1.5em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${file.nom_Fichier}<p>
                                  </div>
                                  <div class="desktop-element mt-auto d-flex justify-content-center">
-                                    <a href="#" id="${ file.id_Fichier }" class="favori" is-fav="${ file.is_favorite }" onclick="event.stopPropagation();">
+                                    <a href="#" id="${file.id_Fichier}" class="favori" is-fav="${file.is_favorite}" onclick="event.stopPropagation();">
                                         <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"
-                                            id="fav-${ file.id_Fichier }"></i>
+                                            id="fav-${file.id_Fichier}"></i>
                                     </a>
-                                    <a href="#" id="${ file.id_Fichier }" class="desktop-btn" onclick="event.stopPropagation();">
-                                        <i class="fa-regular fa-square-minus fa-lg me-2" id="desk-${ file.id_Fichier }"></i>
+                                    <a href="#" id="${file.id_Fichier}" class="desktop-btn" onclick="event.stopPropagation();">
+                                        <i class="fa-regular fa-square-minus fa-lg me-2" id="desk-${file.id_Fichier}"></i>
                                     </a>
-                                    <a href="/classeur/${ file.id_Dossier }/fichier/${ file.id_Fichier }?as_attachment=true"
+                                    <a href="/classeur/${file.id_Dossier}/fichier/${file.id_Fichier}?as_attachment=true"
                                         style="display: inherit;">
                                         <i class="fa fa-download mt-1" aria-hidden="true" style="cursor: pointer;"
-                                            data-file="${ file.id_Fichier }" data-folder="${ file.id_Dossier }"></i>
+                                            data-file="${file.id_Fichier}" data-folder="${file.id_Dossier}"></i>
                                     </a>
                                  </div>`;
 
+            // Add event on the card to change the current file and activate the corresponding nav
             fileDiv.addEventListener('click', function () {
                 let fileNumber = parseInt(fileDiv.className.split('-')[4]);
                 let nav = document.querySelector('.nav-' + fileNumber);
@@ -73,10 +81,10 @@ document.addEventListener('DOMContentLoaded', function () {
             div.appendChild(card);
             desktop.appendChild(div);
 
-
+            // Create the nav
             let fileNav = document.createElement('li');
             let fileNavText = document.createElement('p');
-            fileNavText.className = 'nav-link nav-'+deskFileNumber;
+            fileNavText.className = 'nav-link nav-' + deskFileNumber;
             fileNavText.textContent = file.nom_Fichier;
             fileNavText.style.whiteSpace = 'nowrap';
             fileNavText.style.overflow = 'hidden';
@@ -89,7 +97,8 @@ document.addEventListener('DOMContentLoaded', function () {
             fileNav.style.width = '15vw';
             modalFooter.appendChild(fileNav);
 
-            fileNav.addEventListener('click', function() {
+            // Add event on the nav to change the current file and activate the corresponding card
+            fileNav.addEventListener('click', function () {
                 let fileNumber = fileNav.getAttribute('file-number');
                 let card = document.querySelector('.file-' + fileNumber);
                 let newNav = document.querySelector('.nav-' + fileNumber);
@@ -104,62 +113,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
         });
 
+        // Hndle the favori button
         let favs = document.querySelectorAll('.favori');
-            favs.forEach(function (fav) {
-                let id = fav.id;
-                let isFav = fav.getAttribute('is-fav');
-                let etoile = document.getElementById("fav-" + id);
-                if (isFav === "true") {
-                    fav.className = "favori-true";
+        favs.forEach(function (fav) {
+            let id = fav.id;
+            let isFav = fav.getAttribute('is-fav');
+            let etoile = document.getElementById("fav-" + id);
+            if (isFav === "true") {
+                fav.className = "favori-true";
+            }
+            else {
+                fav.className = "favori-false";
+                etoile.className = "fa-regular fa-star fa-lg me-2";
+            }
+            fav.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (fav.className === "favori-true") {
+                    fetch("/favori/" + id, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                        .then(data => {
+                            if (data.status === 200) {
+                                fav.className = "favori-false";
+                                etoile.className = "fa-regular fa-star fa-lg me-2";
+                            }
+                            else {
+                                alert("Erreur lors de la suppression du favori");
+                            }
+                        });
                 }
                 else {
-                    fav.className = "favori-false";
-                    etoile.className = "fa-regular fa-star fa-lg me-2";
+                    fetch("/favori/" + id, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                        .then(data => {
+                            if (data.status === 200) {
+                                fav.className = "favori-true";
+                                etoile.className = "fa-solid fa-star fa-lg me-2";
+                            }
+                            else {
+                                alert("Erreur lors de l'ajout du favori");
+                            }
+                        });
                 }
-                fav.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    if (fav.className === "favori-true") {
-                        fetch("/favori/" + id, {
-                            method: "DELETE",
-                            headers: {
-                                "Content-Type": "application/json",
-                                'X-CSRFToken': csrfToken
-                            }
-                        })
-                            .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                            .then(data => {
-                                if (data.status === 200) {
-                                    fav.className = "favori-false";
-                                    etoile.className = "fa-regular fa-star fa-lg me-2";
-                                }
-                                else {
-                                    alert("Erreur lors de la suppression du favori");
-                                }
-                            });
-                    }
-                    else {
-                        fetch("/favori/" + id, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                'X-CSRFToken': csrfToken
-                            }
-                        })
-                            .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                            .then(data => {
-                                if (data.status === 200) {
-                                    fav.className = "favori-true";
-                                    etoile.className = "fa-solid fa-star fa-lg me-2";
-                                }
-                                else {
-                                    alert("Erreur lors de l'ajout du favori");
-                                }
-                            });
-                    }
-                });
             });
+        });
 
-
+        // Handle the button to remove a file from the desktop
         let deskBtns = document.querySelectorAll('.desktop-btn');
         deskBtns.forEach(function (btn) {
             btn.addEventListener('click', function () {
@@ -167,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let deskList = JSON.parse(localStorage.getItem('desktop'));
                 let index = deskList.indexOf(id);
                 if (index !== -1) {
-                deskList.splice(index, 1);
+                    deskList.splice(index, 1);
                 }
                 localStorage.setItem('desktop', JSON.stringify(deskList));
                 window.location.reload();
@@ -180,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
+    // Handle the navigation with the keyboard
     window.addEventListener('keydown', function (event) {
         let nbFiles = document.querySelectorAll('#file').length;
         if (currentFile !== 0) {
@@ -201,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // desactivate the current file nav when closing the preview
     let btnClose = document.querySelector('.btn-close');
     btnClose.addEventListener('click', function () {
         let nav = document.querySelector('.nav-' + currentFile);
@@ -208,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
         currentFile = 0;
     });
 
+    // Handle the clear button
     let btnClear = document.getElementById("clear");
     btnClear.addEventListener('click', function () {
         localStorage.setItem('desktop', JSON.stringify([]));

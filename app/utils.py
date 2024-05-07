@@ -52,6 +52,22 @@ class SingletonMeta(type):
 
 
 class Whoosh(metaclass=SingletonMeta):
+    """
+    A class that provides methods for interacting with the Whoosh search engine.
+
+    Attributes:
+        open_index (IndexReader): The open index reader for performing search operations.
+
+    Methods:
+        add_document: Add a document to the search index.
+        delete_document: Delete a document from the search index.
+        delete_documents: Delete multiple documents from the search index.
+        get_all_documents: Get all documents from the search index.
+        document_exists: Check if a document with the given ID exists in the search index.
+        search: Perform a search query on the search index.
+
+    """
+
     def __init__(self):
         analyzer = StandardAnalyzer(stoplist=None)
         schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(analyzer=KeywordAnalyzer(), stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True))
@@ -62,6 +78,17 @@ class Whoosh(metaclass=SingletonMeta):
             self.open_index = open_dir(f'{current_app.root_path}/storage/index')
 
     def add_document(self, title, content, path, tags, id):
+        """
+        Add a document to the search index.
+
+        Args:
+            title (str): The title of the document.
+            content (str): The content of the document.
+            path (str): The path of the document.
+            tags (str): The tags associated with the document.
+            id (str): The ID of the document.
+
+        """
         writer = self.open_index.writer()
         try:
             writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
@@ -69,6 +96,13 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def delete_document(self, id):
+        """
+        Delete a document from the search index.
+
+        Args:
+            id (str): The ID of the document to delete.
+
+        """
         writer = self.open_index.writer()
         try:
             writer.delete_by_term("id", id)
@@ -76,6 +110,13 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def delete_documents(self, ids):
+        """
+        Delete multiple documents from the search index.
+
+        Args:
+            ids (list): A list of IDs of the documents to delete.
+
+        """
         writer = self.open_index.writer()
         try:
             for id in ids:
@@ -84,6 +125,13 @@ class Whoosh(metaclass=SingletonMeta):
             writer.commit()
 
     def get_all_documents(self):
+        """
+        Get all documents from the search index.
+
+        Returns:
+            list: A list of documents in the search index.
+
+        """
         documents = []
         with self.open_index.searcher() as searcher:
             for doc in searcher.documents():
@@ -91,10 +139,31 @@ class Whoosh(metaclass=SingletonMeta):
         return documents
     
     def document_exists(self, id):
+        """
+        Check if a document with the given ID exists in the search index.
+
+        Args:
+            id (str): The ID of the document to check.
+
+        Returns:
+            bool: True if the document exists, False otherwise.
+
+        """
         with self.open_index.searcher() as searcher:
             return searcher.document(id=id) is not None
 
     def search(self, query, path=None):
+        """
+        Perform a search query on the search index.
+
+        Args:
+            query (str): The search query.
+            path (str, optional): The path to filter the search results. Defaults to None.
+
+        Returns:
+            list: A list of search results.
+
+        """
         if query.strip() == "":
             subquery = Every()
         else : 
@@ -301,11 +370,29 @@ def check_notitications():
     return NOTIFICATION.query.all() != []
 
 def get_total_file_count(folder):
+    """
+    Recursively calculates the total number of files in a given folder and its subfolders.
+
+    Args:
+        folder (Folder): The root folder to start counting from.
+
+    Returns:
+        int: The total number of files in the folder and its subfolders.
+    """
     total = len(folder.FICHIER)
     for subfolder in folder.DOSSIER_:
         total += get_total_file_count(subfolder)
     return total
 
 def get_total_file_count_by_id(folder_id):
+    """
+    Returns the total file count for a given folder ID.
+    
+    Parameters:
+    folder_id (int): The ID of the folder.
+    
+    Returns:
+    int: The total file count.
+    """
     folder = DOSSIER.query.filter_by(id_Dossier=folder_id).first()
     return get_total_file_count(folder)
