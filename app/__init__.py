@@ -87,6 +87,7 @@ def create_app(config_class = Config, is_worker=False):
         pubsub = redis.pubsub()
         pubsub.subscribe(**{'worker_status': handle_worker_status_message})
         pubsub.subscribe(**{'process_status': handle_process_status_message})
+        pubsub.subscribe(**{'file_processed': lambda message: socketio.emit('file_processed', json.loads(message['data'].decode('utf-8')), namespace='/notifications')})
         pubsub.run_in_thread(sleep_time=0.5)
 
     @app.context_processor

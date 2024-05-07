@@ -20,9 +20,10 @@ from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
 from app.utils import check_notitications
-from app import redis
+from app import redis, socketio
 from datetime import datetime
 
+@socketio.on('connect', namespace='/notifications')
 
 @bp.route("/", methods=["GET"])
 @login_required
@@ -35,18 +36,18 @@ def notifications():
     roles = ROLE.query.all()
     processed_files = redis.lrange('processed_files', 0, -1)
     processed_files = [json.loads(file) for file in processed_files if file is not None]
-    for file in processed_files:
-        file['file']['date_Fichier'] = datetime.strptime(file['file']['date_Fichier'], '%d/%m/%Y %H:%M')
     processed_files.sort(key=lambda file: file['file']['date_Fichier'], reverse=True)
     for file in processed_files:
-        file['file']['date_Fichier'] = file['file']['date_Fichier'].strftime('%d/%m/%Y %H:%M')
+        date_str = file['file']['date_Fichier'].split(':')[0] + ':' + file['file']['date_Fichier'].split(':')[1]
+        file['file']['date_Fichier'] = datetime.strptime(date_str, '%d/%m/%Y %H:%M').strftime('%d/%m/%Y %H:%M')
+        file['folder']['nom_Dossier'] = file['folder']['nom_Dossier']
     return render_template(
         "notifications/index.html",
         notifications=all_notifications,
         roles=roles,
         is_authenticated=True,
         is_admin=current_user.is_admin(),
-        display_notif=current_user.id_Role == 1,
+        display_notification=current_user.id_Role == 1,
         processed_files = processed_files,
         has_notifications=check_notitications(),
     )
