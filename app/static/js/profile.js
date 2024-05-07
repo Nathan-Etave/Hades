@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Handle the logout button
-    let btnLogout = document.getElementById("logout");
+    let btnLogout = document.getElementById("logout") || { addEventListener: () => {} };
     btnLogout.addEventListener('click', function () {
         fetch('deconnexion', {
             method: "POST",

@@ -1,10 +1,10 @@
-"""Routes for the profil blueprint."""
+"""Routes for the profile blueprint."""
 
 from flask import render_template, request, jsonify, url_for, redirect, abort
 from flask_login import login_required, current_user, logout_user
-from app.profil import bp
+from app.profile import bp
 from app.extensions import db
-from app.forms.edit_profil_form import Edit_profil_form
+from app.forms.edit_profil_form import EditProfileForm
 from flask_bcrypt import check_password_hash, generate_password_hash
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications
@@ -13,14 +13,14 @@ from app.models.role import ROLE
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
-def profil():
+def profile():
     """Route to display the profile page.
 
     Returns:
         render_template: The profile page.
     """
     return render_template(
-        "profil/index.html",
+        "profile/index.html",
         is_authenticated=True,
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
@@ -43,9 +43,9 @@ def edit():
         Otherwise, renders the profile edit page with the form and user data.
     """
     if not request.referrer or "profil" not in request.referrer:
-        return redirect(url_for("profil.profil"))
+        return redirect(url_for("profile.profile"))
 
-    form = Edit_profil_form()
+    form = EditProfileForm()
     if form.validate_on_submit():
         edit_user(
             current_user.id_Utilisateur,
@@ -55,14 +55,14 @@ def edit():
             form.telephone.data,
             form.password.data,
         )
-        return redirect(url_for("profil.profil"))
+        return redirect(url_for("profile.profile"))
     else:
         form.last_name.data = current_user.nom_Utilisateur
         form.first_name.data = current_user.prenom_Utilisateur
         form.email.data = current_user.email_Utilisateur
         form.telephone.data = current_user.telephone_Utilisateur
     return render_template(
-        "profil/index.html",
+        "profile/index.html",
         is_authenticated=True,
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
