@@ -28,6 +28,7 @@ def file(folder_id, file_id):
 @socketio.on('get_files_details', namespace='/file_handler')
 def get_files_details(data):
     files_id = data['files']
+    files_id = [file_id for file_id in files_id if db.session.query(FICHIER).filter(FICHIER.id_Fichier == file_id).first() is not None]
     favoris = db.session.query(FAVORIS.c.id_Fichier).filter(FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur).all()
     favoris_ids = [favori.id_Fichier for favori in favoris]
     files = []
@@ -37,7 +38,7 @@ def get_files_details(data):
         dict_file['id_Dossier'] = file.DOSSIER_.id_Dossier
         dict_file['is_favorite'] = file.id_Fichier in favoris_ids
         files.append(dict_file)
-    socketio.emit('files_details', files, namespace='/file_handler')
+    socketio.emit('files_details', {"files": files, "files_id": files_id}, namespace='/file_handler')
 
 
 @bp.route('/download/archive', methods=['POST'])
