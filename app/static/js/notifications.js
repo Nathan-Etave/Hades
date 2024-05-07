@@ -1,6 +1,6 @@
 import { previewAfterRender } from "./preview.js";
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {    
     const acceptButtons = document.querySelectorAll('.accept-button');
     const rejectButtons = document.querySelectorAll('.reject-button');
     const selectElements = document.querySelectorAll('select');
@@ -64,6 +64,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     rejectButtons.forEach(button => {
         button.addEventListener('click', event => handleButtonClick(event, 'reject'));
+    });
+
+    const socket = io.connect('/notifications');
+    const historyContainer = document.querySelector('#historyContainer');
+    socket.on('file_processed', (data) => {
+        let div = document.createElement('div');
+        div.className = 'd-flex hover-underline file-text-notification';
+        div.id = 'file';
+        div.dataset.file = data.file.id_Fichier;
+        div.dataset.folder = data.folder_id;
+        div.dataset.type = data.file.extension_Fichier;
+        div.dataset.name = data.filename;
+        div.innerHTML = `
+        <p style="font-size: 1.1rem;" class="file-text-notification">
+            <span style="font-weight: bold; color: #007BFF;">[${data.file.date_Fichier}] </span>
+            <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;">${data.file.nom_Fichier}</span>" </span>
+            <span>a été ${data.action === true ? 'réécrit' : 'ajouté'} dans le classeur "<span style="color: #ecb900;">${data.folder.nom_Dossier}</span>" par 
+            <span style="color: #dc3545;">${data.user.nom_Utilisateur} ${data.user.prenom_Utilisateur}.</span>
+            </span>
+        </p>
+        `;
+        historyContainer.insertBefore(div, historyContainer.firstChild);
+        previewAfterRender();
     });
 });
 

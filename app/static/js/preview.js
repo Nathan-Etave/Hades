@@ -7,11 +7,17 @@ export function previewAfterRender() {
     files.forEach((file) => {
         file.addEventListener('click', async function (event) {
             let target = event.target;
-            if (event.target.nodeName === 'P' || event.target.nodeName === 'I' || event.target.nodeName === 'SPAN') {
+            if (event.target.className.includes('file-text-notification') || event.target.parentElement.className.includes('file-text-notification')) {
+                return;
+            }
+            if (event.target.nodeName === 'P' || event.target.nodeName === 'I' || event.target.nodeName === 'SPAN') {
                 target = event.target.parentElement.parentElement;
             }
-            if (event.target.className.includes('desktop-element') | event.target.className.includes('file-notif')) {
+            if (event.target.className.includes('desktop-element')) {
                 target = event.target.parentElement;
+            }
+            if (event.target.className.includes('file-notification')) {
+                target = event.target.parentElement.parentElement.parentElement;
             }
             const fileId = target.dataset.file;
             const folderId = target.dataset.folder;

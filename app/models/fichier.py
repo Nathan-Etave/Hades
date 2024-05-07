@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from sqlalchemy import Integer, String, ForeignKeyConstraint, Index, DateTime
 from sqlalchemy.orm import relationship, mapped_column, Mapped
@@ -16,14 +17,14 @@ class FICHIER(db.Model):
     id_Dossier = mapped_column(Integer)
     nom_Fichier = mapped_column(String(255))
     extension_Fichier = mapped_column(String(255))
-    date_Fichier = mapped_column(DateTime, default=db.func.current_timestamp())
+    date_Fichier = mapped_column(DateTime, default=datetime.now())
     id_Utilisateur = mapped_column(Integer)
     
     def to_dict(self):
        result = {}
        for c in self.__table__.columns:
            if c.name == 'date_Fichier':
-               result[c.name] = self.date_Fichier.strftime('%d/%m/%Y %H:%M')
+               result[c.name] = self.date_Fichier.strftime('%d/%m/%Y %H:%M:%S:%f')
            else:
                result[c.name] = getattr(self, c.name)
        return result
