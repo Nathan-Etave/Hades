@@ -37,7 +37,6 @@ def create_app(config_class = Config, is_worker=False):
     from app.home import bp as home_bp
     from app.administration import bp as administration_bp
     from app.profile import bp as profile_bp
-    from app.search import bp as search_bp
     from app.file_handler import bp as file_handler_bp
     from app.desktop import bp as desktop_bp
 
@@ -102,7 +101,6 @@ def create_app(config_class = Config, is_worker=False):
     app.register_blueprint(home_bp, url_prefix='/')
     app.register_blueprint(administration_bp, url_prefix='/administration')
     app.register_blueprint(profile_bp, url_prefix='/profil')
-    app.register_blueprint(search_bp, url_prefix='/recherche')
     app.register_blueprint(file_handler_bp)
     app.register_blueprint(desktop_bp, url_prefix='/bureau')
     return app
