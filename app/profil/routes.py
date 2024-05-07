@@ -25,7 +25,9 @@ def profil():
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
         user=current_user,
-        user_role= db.session.query(ROLE.nom_Role).filter(ROLE.id_Role == current_user.id_Role).first()[0],
+        user_role=db.session.query(ROLE.nom_Role)
+        .filter(ROLE.id_Role == current_user.id_Role)
+        .first()[0],
         edit_mode=False,
     )
 
@@ -40,7 +42,7 @@ def edit():
         If the form is valid, redirects to the user's profile page.
         Otherwise, renders the profile edit page with the form and user data.
     """
-    if not request.referrer or 'profil' not in request.referrer:
+    if not request.referrer or "profil" not in request.referrer:
         return redirect(url_for("profil.profil"))
 
     form = Edit_profil_form()

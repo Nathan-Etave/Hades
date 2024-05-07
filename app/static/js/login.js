@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let reactivationButton = document.getElementById("btn_reactivation");
 
+    // handle the reactivation button
     reactivationButton.addEventListener('click', function () {
         let email_user = document.getElementById("email").value;
         let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -18,11 +19,11 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.json().then(data => ({ status: response.status, body: data })))
             .then(response => {
-                if (response.status === 200) {
+                if (response.status === 200) { // success
                     alert("La demande de réactivation a bien été envoyée ! \n vous recevrez un mail lorsqu'elle sera traitée.");
                     window.location.href = "/connexion";
                 }
-                if (response.status === 404) {
+                if (response.status === 404) { // error
                     if (response.body.error === "user not found") {
                         alert("Aucun utilisateur n'est associé à cet email.");
                     }
