@@ -1,3 +1,4 @@
+// Function to display the number of files in the desktop icon
 export function baseAfterRender(number) {
     let numberIcon = document.getElementById('number');
 
@@ -14,6 +15,7 @@ export function baseAfterRender(number) {
     }
 }
 
+// Handle the création of the desktop list in the localStorage
 document.addEventListener('DOMContentLoaded', function () {
     let deskList = JSON.parse(localStorage.getItem('desktop'));
     if (deskList === null) {
