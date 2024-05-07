@@ -1,12 +1,21 @@
 from app.desktop import bp
-from flask import render_template, redirect, url_for, request
+from flask import render_template
 from flask_login import current_user, login_required
-from app import socketio
-from app.extensions import db
-from app.models.fichier import FICHIER
 from app.utils import check_notitications
 
-@bp.route('/')
+
+@bp.route("/")
 @login_required
 def desktop():
-    return render_template('desktop/index.html', is_authenticated=True, is_admin=current_user.is_admin(), has_notifications=check_notitications())
+    """
+    Renders the desktop page.
+
+    Returns:
+        The rendered desktop page as a response.
+    """
+    return render_template(
+        "desktop/index.html",
+        is_authenticated=True,
+        is_admin=current_user.is_admin(),
+        has_notifications=check_notitications(),
+    )
