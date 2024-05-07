@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 from base64 import b64decode
@@ -118,6 +119,7 @@ def upload():
         id_Dossier=folder_id,
         nom_Fichier=filename,
         extension_Fichier=filename.split(".")[-1],
+        date_Fichier=datetime.now(),
         id_Utilisateur=current_user.id_Utilisateur,
     )
     db.session.add(file)
@@ -136,7 +138,8 @@ def upload():
             user_tags,
             current_user.to_dict_secure(),
             file.to_dict(),
-            file.DOSSIER_.to_dict()
+            file.DOSSIER_.to_dict(),
+            force,
         ]
     )
     redis.incr("total_files")
@@ -822,5 +825,7 @@ def verify_index():
                     "",
                     current_user.to_dict_secure(),
                     database_document.to_dict(),
+                    database_document.DOSSIER_.to_dict(),
+                    False,
                 ]
             )
