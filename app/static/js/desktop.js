@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
             fileNav.className = 'file-nav nav-item';
             fileNav.setAttribute('file-number', deskFileNumber);
             fileNav.style.cursor = 'pointer';
-            fileNav.style.width = '15vw';
+            fileNav.style.width = 'auto';
+            fileNav.style.maxWidth = '15vw';
             modalFooter.appendChild(fileNav);
 
             // Add event on the nav to change the current file and activate the corresponding card
