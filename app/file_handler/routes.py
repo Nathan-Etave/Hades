@@ -7,12 +7,13 @@ from app import socketio
 from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.utils import FileDownloader
-from app.decorators import admin_required
+from app.decorators import admin_required, active_required
 from threading import Timer
 
 
 @bp.route("/classeur/<int:folder_id>/fichier/<int:file_id>", methods=["GET"])
 @login_required
+@active_required
 def file(folder_id, file_id):
     file = FICHIER.query.get(file_id)
     as_attachment = request.args.get("as_attachment", default=False, type=bool)
@@ -73,6 +74,7 @@ def get_files_details(data):
 
 @bp.route("/download/archive", methods=["POST"])
 @login_required
+@active_required
 @admin_required
 def download_archive():
     zip_path = FileDownloader().create_zip(request.json["fileIds"])

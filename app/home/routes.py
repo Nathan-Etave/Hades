@@ -8,15 +8,16 @@ from app.models.lien import LIEN
 from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
-from app.utils import check_notitications
 from app.models.dossier import DOSSIER
-from app.utils import Whoosh
+from app.utils import Whoosh, check_notitications
+from app.decorators import active_required
 from app import socketio
 from fasteners import InterProcessLock
 
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
+@active_required
 def home():
     """
     Renders the home page.
@@ -60,6 +61,7 @@ def home():
 
 @bp.route("/favori/<int:id_file>", methods=["POST", "DELETE"])
 @login_required
+@active_required
 def favorize(id_file):
     """
     Favorize or unfavorize a file for the current user.

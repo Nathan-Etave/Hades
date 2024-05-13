@@ -9,10 +9,12 @@ from flask_bcrypt import check_password_hash, generate_password_hash
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications
 from app.models.role import ROLE
+from app.decorators import active_required
 
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
+@active_required
 def profile():
     """Route to display the profile page.
 
@@ -35,6 +37,7 @@ def profile():
 
 @bp.route("/edit", methods=["GET", "POST"])
 @login_required
+@active_required
 def edit():
     """
     Edit the user profile.
@@ -76,6 +79,7 @@ def edit():
 
 @bp.route("/verification", methods=["POST"])
 @login_required
+@active_required
 def verification():
     """
     Verify the password provided by the user.
@@ -91,6 +95,7 @@ def verification():
 
 @bp.route("/deconnexion", methods=["POST"])
 @login_required
+@active_required
 def logout():
     logout_user()
     return jsonify({"status": "success"})
