@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let searchLink = document.getElementById("search-link");
     let links = document.querySelectorAll(".link-element");
     searchLink.addEventListener('input', function () {
-        let search = searchLink.value;
+        let search = searchLink.value.toLowerCase();
         if (search === "") {
             links.forEach(link => {
                 link.style.display = "block";
@@ -304,9 +304,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         else {
             links.forEach(link => {
-                let name = link.querySelector(".link-name").innerHTML;
-                let description = link.querySelector(".link-description").innerHTML;
-                if (name.toLowerCase().includes(search.toLowerCase()) | description.toLowerCase().includes(search.toLowerCase())) {
+                let name = link.querySelector(".link-name").innerHTML.toLowerCase();
+                let description = link.querySelector(".link-description").innerHTML.toLowerCase();
+                if (name.includes(search) | description.includes(search)) {
                     link.style.display = "block";
                 }
                 else {
