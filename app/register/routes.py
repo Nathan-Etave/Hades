@@ -57,4 +57,4 @@ def register() -> any:
                     "warning",
                 )
         return redirect(url_for("register.register"))
-    return render_template("register/index.html", form=form, is_authenticated=False)
+    return render_template("register/index.html", form=form, is_authenticated=False, title="Inscription")

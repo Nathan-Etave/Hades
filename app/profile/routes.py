@@ -29,6 +29,7 @@ def profile():
         .filter(ROLE.id_Role == current_user.id_Role)
         .first()[0],
         edit_mode=False,
+        title="Profil",
     )
 
 
@@ -69,6 +70,7 @@ def edit():
         user=current_user,
         form=form,
         edit_mode=True,
+        title="Profil",
     )
 
 

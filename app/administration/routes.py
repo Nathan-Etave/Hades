@@ -56,6 +56,7 @@ def administration():
         is_admin=True,
         is_authenticated=True,
         has_notifications=check_notitications(),
+        title="Administration",
     )
 
 
