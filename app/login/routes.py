@@ -63,16 +63,16 @@ def login():
                 else:
                     flash("Votre compte n'est pas encore activé.", "danger")
                 form.email.data = form.email.data
-                return render_template("login/index.html", form=form, mdp_form=mdp_form)
+                return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
             if check_password_hash(user.mdp_Utilisateur, form.password.data):
                 login_user(user)
                 return redirect(url_for("home.home"))
             flash("Mot de passe incorrect.", "danger")
             form.email.data = form.email.data
-            return render_template("login/index.html", form=form, mdp_form=mdp_form)
+            return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
         flash("Adresse email inconnu.", "danger")
         form.email.data = form.email.data
-        return render_template("login/index.html", form=form, mdp_form=mdp_form)
+        return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
     if mdp_form.validate_on_submit():
         user = UTILISATEUR.query.filter_by(
             email_Utilisateur=mdp_form.email.data
@@ -88,7 +88,7 @@ def login():
                 flash(response[0], response[1])
         else:
             flash("Adresse email inconnu.", "danger")
-    return render_template("login/index.html", form=form, mdp_form=mdp_form)
+    return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
 
 
 @bp.route("/notification", methods=["POST"])

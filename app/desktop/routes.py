@@ -18,4 +18,5 @@ def desktop():
         is_authenticated=True,
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
+        title="Bureau",
     )

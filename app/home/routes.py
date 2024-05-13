@@ -54,6 +54,7 @@ def home():
         folders=results,
         query=query,
         form=form,
+        title="Accueil" if not query else query,
     )
 
 

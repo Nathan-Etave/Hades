@@ -50,6 +50,7 @@ def notifications():
         display_notification=current_user.id_Role == 1,
         processed_files = processed_files,
         has_notifications=check_notitications(),
+        title="Notifications",
     )
 
 

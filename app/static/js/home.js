@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Handle previous seartch terms in the side panel
+        // Handle previous search terms in the side panel
         let search_tiles = document.querySelectorAll(".search_term");
         let search_btn = document.getElementById("search_btn");
         search_tiles.forEach(function (tile) {
