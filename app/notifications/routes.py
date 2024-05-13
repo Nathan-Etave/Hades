@@ -15,7 +15,7 @@ from app.mail.mail import (
     send_reactivation_confirmation_email,
     send_reactivation_rejection_email,
 )
-from app.decorators import admin_required
+from app.decorators import admin_required, active_required
 from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
@@ -27,6 +27,7 @@ from datetime import datetime
 
 @bp.route("/", methods=["GET"])
 @login_required
+@active_required
 def notifications():
     """Route for the notifications page."""
     all_notifications = NOTIFICATION.query.all()
@@ -121,6 +122,7 @@ def handle_rejection(notification, send_email_function, success_message):
 
 @bp.route("/<int:id_notification>/accept", methods=["GET", "POST"])
 @login_required
+@active_required
 @admin_required
 def accept(id_notification):
     """Route to accept a notification.
@@ -146,6 +148,7 @@ def accept(id_notification):
 
 @bp.route("/<int:id_notification>/reject", methods=["GET", "POST"])
 @login_required
+@active_required
 @admin_required
 def reject(id_notification):
     """Route to reject a notification.
