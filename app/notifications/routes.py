@@ -67,7 +67,7 @@ def handle_acceptance(notification, send_email_function, success_message):
     """
     user = UTILISATEUR.query.get(notification.id_Utilisateur)
     user.id_Role = request.json.get("role_id")
-    user.est_Actif_Utilisateur = True
+    user.est_Actif_Utilisateur = 1
     if str(notification.type_Notification) == "1":
         password = "".join(
             secrets.choice(string.ascii_letters + string.digits + string.punctuation)

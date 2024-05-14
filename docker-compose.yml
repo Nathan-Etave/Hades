@@ -1,0 +1,73 @@
+x-app-environment: &app_environment
+  SECRET_KEY: ""
+  CELERY_BROKER_URL: "redis://redis:6379/0"
+  RESULT_BACKEND: "redis://redis:6379/0"
+  REDIS_URL: "redis://redis:6379/0"
+  MAIL_SERVER: ""
+  MAIL_PORT: ""
+  MAIL_USERNAME: ""
+  MAIL_PASSWORD: ""
+  DATABASE_URI: "postgresql://hades:hades@postgres/hades"
+
+x-postgres-environment: &postgres_environment
+    POSTGRES_USER: ""
+    POSTGRES_PASSWORD: ""
+    POSTGRES_DB: "hades"
+
+services:
+  web:
+    build: .
+    command: gunicorn --preload -b "0.0.0.0:8888" -w 4 'app:create_app()' --reload
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+      - app_data:/app/storage
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      <<: *app_environment
+  worker1:
+    build: .
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker1
+    volumes:
+      - .:/app
+      - app_data:/app/storage
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      <<: *app_environment
+  worker2:
+    build: .
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker2
+    volumes:
+      - .:/app
+      - app_data:/app/storage
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+    environment:
+      <<: *app_environment
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      <<: *postgres_environment
+
+volumes:
+  app_data: {}
+  postgres_data: {}
