@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchLink = document.querySelector('#searchLink');
 
     // Users variables
+    const userId = document.querySelector('meta[name="current-user"]').content;
     const initialUsers = Array.from(document.querySelectorAll('.user'));
     const roleSelects = document.querySelectorAll('.role-select');
     const statusToggles = document.querySelectorAll('.status-toggle');
@@ -225,6 +226,21 @@ document.addEventListener('DOMContentLoaded', function () {
                             showConfirmButton: false,
                             allowEscapeKey: false,
                             allowOutsideClick: false
+                        }
+                    });
+                    showNextDialog();
+                    resolve();
+                }
+                else if (status === 404) {
+                    dialogQueue.push({
+                        type: DIALOG_TYPES.ALERT,
+                        dialogOptions: {
+                            title: 'Erreur.',
+                            text: data.error,
+                            icon: 'error',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            backdrop: false
                         }
                     });
                     showNextDialog();
@@ -829,6 +845,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Socket events
+    socket.on('connect', function () {
+        socket.emit('join', { room: `user_${userId}` });
+    });
+
     socket.on('worker_status', function (data) {
         const workers = [
             document.querySelector('#workerStatusTable1 tbody'),

@@ -8,25 +8,25 @@ from flask import render_template, request, jsonify
 from flask_bcrypt import generate_password_hash
 from flask_login import login_required, current_user
 from app.notifications import bp
-from app.extensions import db
-from app.mail.mail import (
+from app.mail import (
     send_registration_confirmation_email,
     send_registration_rejection_email,
     send_reactivation_confirmation_email,
     send_reactivation_rejection_email,
 )
-from app.decorators import admin_required
+from app.decorators import admin_required, active_required
 from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
 from app.utils import check_notitications
-from app import redis, socketio
+from app.extensions import redis, socketio, db
 from datetime import datetime
 
 @socketio.on('connect', namespace='/notifications')
 
 @bp.route("/", methods=["GET"])
 @login_required
+@active_required
 def notifications():
     """Route for the notifications page."""
     all_notifications = NOTIFICATION.query.all()
@@ -50,6 +50,7 @@ def notifications():
         display_notification=current_user.id_Role == 1,
         processed_files = processed_files,
         has_notifications=check_notitications(),
+        title="Notifications",
     )
 
 
@@ -120,6 +121,7 @@ def handle_rejection(notification, send_email_function, success_message):
 
 @bp.route("/<int:id_notification>/accept", methods=["GET", "POST"])
 @login_required
+@active_required
 @admin_required
 def accept(id_notification):
     """Route to accept a notification.
@@ -145,6 +147,7 @@ def accept(id_notification):
 
 @bp.route("/<int:id_notification>/reject", methods=["GET", "POST"])
 @login_required
+@active_required
 @admin_required
 def reject(id_notification):
     """Route to reject a notification.

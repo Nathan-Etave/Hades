@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
-from app import celery, create_app, redis, socketio
+from app.extensions import celery, redis
+from app import create_app
 from celery import current_task
 from app.utils import FileReader, NLPProcessor, Whoosh
 from fasteners import InterProcessLock

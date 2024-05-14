@@ -11,8 +11,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-    // emit event to get files details
+    // Socket initialization
     const socket = io.connect('/file_handler');
+    const userId = document.querySelector('meta[name="current-user"]').content;
+    socket.on('connect', function () {
+        socket.emit('join', { room: `user_${userId}` });
+    });
+
+    // emit event to get files details
     socket.emit('get_files_details', { 'files': deskList });
 
     // Handle the display of the desktop

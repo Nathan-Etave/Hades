@@ -1,7 +1,7 @@
-from sqlalchemy import Integer, String, DateTime, Index, ForeignKeyConstraint
+from sqlalchemy import Integer, DateTime, Index, ForeignKeyConstraint, UUID
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from typing import Optional
-from app import db
+from app.extensions import db
 
 
 class NOTIFICATION(db.Model):
@@ -16,7 +16,7 @@ class NOTIFICATION(db.Model):
     id_Notification = mapped_column(Integer, primary_key=True)
     datetime_Notification = mapped_column(DateTime)
     type_Notification = mapped_column(Integer)
-    id_Utilisateur = mapped_column(Integer)
+    id_Utilisateur = mapped_column(UUID(as_uuid=True))
     id_Fichier = mapped_column(Integer)
 
     def to_dict(self):

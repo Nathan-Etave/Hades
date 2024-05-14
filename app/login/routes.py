@@ -10,13 +10,12 @@ from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
 from app.forms.login_form import LoginForm
 from app.forms.forgotten_password_form import ForgottenPasswordForm
-from app import login_manager
-from app.extensions import db
+from app.extensions import login_manager, db
 from datetime import datetime
 from flask import jsonify, request
 import secrets
 import string
-from app.mail.mail import send_forgotten_password_email
+from app.mail import send_forgotten_password_email
 import uuid
 import json
 
@@ -27,7 +26,7 @@ def load_user(user):
     Load a user from the database based on the given user ID.
 
     Args:
-        user (int): The ID of the user to load.
+        user (uuid.UUID): The ID of the user to load.
 
     Returns:
         UTILISATEUR: The user object corresponding to the given ID.
@@ -63,16 +62,16 @@ def login():
                 else:
                     flash("Votre compte n'est pas encore activé.", "danger")
                 form.email.data = form.email.data
-                return render_template("login/index.html", form=form, mdp_form=mdp_form)
+                return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
             if check_password_hash(user.mdp_Utilisateur, form.password.data):
                 login_user(user)
                 return redirect(url_for("home.home"))
             flash("Mot de passe incorrect.", "danger")
             form.email.data = form.email.data
-            return render_template("login/index.html", form=form, mdp_form=mdp_form)
+            return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
         flash("Adresse email inconnu.", "danger")
         form.email.data = form.email.data
-        return render_template("login/index.html", form=form, mdp_form=mdp_form)
+        return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
     if mdp_form.validate_on_submit():
         user = UTILISATEUR.query.filter_by(
             email_Utilisateur=mdp_form.email.data
@@ -88,7 +87,7 @@ def login():
                 flash(response[0], response[1])
         else:
             flash("Adresse email inconnu.", "danger")
-    return render_template("login/index.html", form=form, mdp_form=mdp_form)
+    return render_template("login/index.html", form=form, mdp_form=mdp_form, title="Connexion")
 
 
 @bp.route("/notification", methods=["POST"])
@@ -120,13 +119,13 @@ def add_notification():
     return jsonify(notification.to_dict()), 200
 
 
-@bp.route("/reinitialisation/<string:uuid>", methods=["GET"])
-def reinitialisation(uuid):
+@bp.route("/reinitialisation/<string:user_uuid>", methods=["GET"])
+def reinitialisation(user_uuid):
     """
     Reinitializes the password for a user identified by the given UUID.
 
     Args:
-        uuid (str): The UUID of the user.
+        user_uuid (str): The UUID of the user.
 
     Returns:
         redirect: A redirect response to the login page.
@@ -138,8 +137,8 @@ def reinitialisation(uuid):
     json_file_path = f"{current_app.root_path}/storage/password/password.json"
     with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
-        if str(uuid) in data:
-            user = UTILISATEUR.query.filter_by(id_Utilisateur=data[str(uuid)]).first()
+        if str(user_uuid) in data:
+            user = UTILISATEUR.query.filter_by(id_Utilisateur=uuid.UUID(data[str(user_uuid)])).first()
             password = "".join(
                 secrets.choice(
                     string.ascii_letters + string.digits + string.punctuation
@@ -153,7 +152,7 @@ def reinitialisation(uuid):
                 "success",
             )
 
-            del data[str(uuid)]
+            del data[str(user_uuid)]
             with open(json_file_path, "w") as json_file:
                 json.dump(data, json_file)
         else:
@@ -178,10 +177,10 @@ def forgot_password(email):
         data = json.load(json_file)
 
     for key, value in data.items():
-        if value == user.id_Utilisateur:
+        if value == str(user.id_Utilisateur):
             del data[key]
             break
-    data[str(uuid4)] = user.id_Utilisateur
+    data[str(uuid4)] = str(user.id_Utilisateur)
     with open(json_file_path, "w") as json_file:
         json.dump(data, json_file)
 

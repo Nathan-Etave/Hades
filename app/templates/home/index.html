@@ -26,8 +26,9 @@
 <script type="module" src="{{ url_for('static', filename='js/home.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/preview.js') }}"></script>
 
-<!-- csrf-token -->
+<!-- meta -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="current-user" content="{{ user_id }}">
 
 {% endblock %}
 
@@ -160,7 +161,7 @@
 <div class="container-fluid pt-2" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="accordion" id="foldersAccordion">
+            <div class="accordion mb-5" id="foldersAccordion">
                 {% for folder in folders %}
                     {{ render_folder(folder) }}
                 {% endfor %}

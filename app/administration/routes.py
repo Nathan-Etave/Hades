@@ -1,17 +1,17 @@
 from datetime import datetime
 import os
 import json
+import uuid
 from base64 import b64decode
-from app import redis, socketio
+from app.extensions import redis, socketio, db
 from app.administration import bp
 from app.tasks import process_file
 from unidecode import unidecode
-from flask import render_template, request, current_app, Response, jsonify
-from flask_login import current_user
+from flask import render_template, request, current_app, jsonify
+from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
-from flask_login import login_required
-from app.decorators import admin_required
-from app.extensions import db
+from flask_socketio import join_room
+from app.decorators import admin_required, active_required
 from app.models.dossier import DOSSIER
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.fichier import FICHIER
@@ -23,11 +23,12 @@ from app.models.a_recherche import A_RECHERCHE
 from app.models.favoris import FAVORIS
 from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
-from app.mail.mail import send_deactivation_email, send_delete_email
+from app.mail import send_deactivation_email, send_delete_email
 
 
 @bp.route("/")
 @login_required
+@active_required
 @admin_required
 def administration():
     all_folders = DOSSIER.query.all()
@@ -56,11 +57,13 @@ def administration():
         is_admin=True,
         is_authenticated=True,
         has_notifications=check_notitications(),
+        title="Administration",
     )
 
 
 @bp.route("/upload", methods=["POST"])
 @login_required
+@active_required
 @admin_required
 def upload():
     if redis.get("total_files") == redis.get("total_files_processed"):
@@ -68,6 +71,9 @@ def upload():
         redis.set("total_files_processed", 0)
     json_data = request.get_json()
     folder_id = json_data.get("folderId")
+    folder = DOSSIER.query.get(folder_id)
+    if folder is None:
+        return jsonify({"error": "Le classeur sélectionné n'existe pas."}), 404
     file_data = json_data.get("data")
     filename = unidecode(secure_filename(json_data.get("filename"))).lower()
     existing_file = FICHIER.query.filter_by(nom_Fichier=filename).first()
@@ -77,7 +83,7 @@ def upload():
         processed_files = [
             json.loads(file.decode("utf-8"))["filename"] for file in processed_files
         ]
-        if not existing_file.nom_Fichier in processed_files:
+        if existing_file.nom_Fichier not in processed_files:
             return (
                 jsonify(
                     {
@@ -128,6 +134,10 @@ def upload():
     file_path = os.path.join(
         storage_directory, folder_id, f"{file.id_Fichier}.{file.extension_Fichier}"
     )
+    current_user_dict = current_user.to_dict_secure()
+    current_user_dict.update({"id_Utilisateur": str(current_user.id_Utilisateur)})
+    file_dict = file.to_dict()
+    file_dict.update({'id_Utilisateur': str(file.id_Utilisateur)})
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
     process_file.apply_async(
@@ -137,8 +147,8 @@ def upload():
             folder_id,
             str(file.id_Fichier),
             user_tags,
-            current_user.to_dict_secure(),
-            file.to_dict(),
+            current_user_dict,
+            file_dict,
             file.DOSSIER_.to_dict(),
             force,
         ]
@@ -160,6 +170,9 @@ def upload():
     )
     return jsonify(file_dict), 200
 
+@socketio.on("join", namespace="/administration")
+def on_join(data):
+    join_room(data["room"])
 
 @socketio.on("connect", namespace="/administration")
 def connect():
@@ -190,16 +203,25 @@ def search_files(data):
     search_query = data.get("query")
     with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
-    socketio.emit("search_results", search_results, namespace="/administration")
+    socketio.emit("search_results", search_results, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
 
 
 @socketio.on("update_user_role", namespace="/administration")
 def update_user_role(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "user_role_not_updated",
+            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas modifier les rôles des utilisateurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Utilisateur == data.get("userId"):
         socketio.emit(
             "user_role_not_updated",
             {**data, "error": "Vous ne pouvez pas modifier votre propre rôle."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
@@ -210,11 +232,12 @@ def update_user_role(data):
                 "error": "Vous n'avez pas l'autorisation de modifier les rôles des utilisateurs.",
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     user_id = data.get("userId")
     role_id = data.get("roleId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     if current_user.id_Role == 1 and role_id in ["1", "2", "3", "4"]:
         user.id_Role = role_id
     elif current_user.id_Role == 2 and role_id in ["3", "4"]:
@@ -228,6 +251,7 @@ def update_user_role(data):
                 "error": "Vous n'avez pas l'autorisation d'affecter ce rôle à cet utilisateur.",
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     db.session.commit()
@@ -235,16 +259,26 @@ def update_user_role(data):
         "user_role_updated",
         {**data, "message": "Le rôle de l'utilisateur a été modifié avec succès."},
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
 @socketio.on("update_user_status", namespace="/administration")
 def update_user_status(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "user_status_not_updated",
+            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas modifier les statuts des utilisateurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Utilisateur == data.get("userId"):
         socketio.emit(
             "user_status_not_updated",
             {**data, "error": "Vous ne pouvez pas modifier votre propre statut."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
@@ -255,10 +289,11 @@ def update_user_status(data):
                 "error": "Vous n'avez pas l'autorisation de modifier les statuts des utilisateurs.",
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
         user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
     elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
@@ -272,6 +307,7 @@ def update_user_status(data):
                 "error": "Vous n'avez pas l'autorisation de modifier le statut de cet utilisateur.",
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     db.session.commit()
@@ -279,6 +315,7 @@ def update_user_status(data):
         "user_status_updated",
         {**data, "message": "Le statut de l'utilisateur a été modifié avec succès."},
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
     if not user.est_Actif_Utilisateur:
         try:
@@ -288,16 +325,26 @@ def update_user_status(data):
                 "user_email_error",
                 {**data, "error": "Le statut de l'utilisateur à bien été désactivé, mais l'email de notification n'a pas pu être envoyé."},
                 namespace="/administration",
+                room=f"user_{current_user.id_Utilisateur}",
             )
 
 
 @socketio.on("delete_user", namespace="/administration")
 def delete_user(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "user_not_deleted",
+            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas supprimer d'utilisateurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Utilisateur == data.get("userId"):
         socketio.emit(
             "user_not_deleted",
             {**data, "error": "Vous ne pouvez pas supprimer votre propre compte."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
@@ -308,15 +355,16 @@ def delete_user(data):
                 "error": "Vous n'avez pas l'autorisation de supprimer des utilisateurs.",
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     try:
         if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
-            delete_user(user_id)
+            delete_user_database(user_id)
         elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
-            delete_user(user_id)
+            delete_user_database(user_id)
         else:
             socketio.emit(
                 "user_not_deleted",
@@ -325,6 +373,7 @@ def delete_user(data):
                     "error": "Vous n'avez pas l'autorisation de supprimer cet utilisateur.",
                 },
                 namespace="/administration",
+                room=f"user_{current_user.id_Utilisateur}",
             )
             return
     except Exception as e:
@@ -333,12 +382,14 @@ def delete_user(data):
             "user_not_deleted",
             {**data, "error": str(e)},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     socketio.emit(
         "user_deleted",
         {**data, "message": "L'utilisateur a été supprimé avec succès."},
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
     try:
         send_delete_email(user.email_Utilisateur)
@@ -347,10 +398,12 @@ def delete_user(data):
             "user_email_error",
             {**data, "error": "L'utilisateur à bien été supprimé, mais l'email de notification n'a pas pu être envoyé."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
 
 
-def delete_user(user_id):
+def delete_user_database(user_id):
+    user_id = uuid.UUID(user_id)
     files = FICHIER.query.filter_by(id_Utilisateur=user_id).all()
     for file in files:
         file.id_Utilisateur = current_user.id_Utilisateur
@@ -372,11 +425,20 @@ def delete_user(user_id):
 
 @socketio.on("create_folder", namespace="/administration")
 def create_folder(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "folder_not_created",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas créer de classeurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
         socketio.emit(
             "folder_not_created",
             {"error": "Vous n'avez pas l'autorisation de créer des classeurs."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     folder_name = data.get("folderName")
@@ -402,7 +464,7 @@ def create_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration"
+            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     try:
@@ -419,7 +481,7 @@ def create_folder(data):
         db.session.delete(folder)
         db.session.commit()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration"
+            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     try:
@@ -447,7 +509,7 @@ def create_folder(data):
         db.session.delete(folder)
         db.session.commit()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration"
+            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     socketio.emit(
@@ -459,16 +521,26 @@ def create_folder(data):
             "parentFolderId": parent_folder_id,
         },
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
 @socketio.on("modify_folder", namespace="/administration")
 def modify_folder(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "folder_not_modified",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas modifier de classeurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
         socketio.emit(
             "folder_not_modified",
             {"error": "Vous n'avez pas l'autorisation de modifier des classeurs."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     folder_id = data.get("folderId")
@@ -506,6 +578,7 @@ def modify_folder(data):
                 "folder_not_modified",
                 {"error": "Un classeur ne peut pas être son propre parent."},
                 namespace="/administration",
+                room=f"user_{current_user.id_Utilisateur}",
             )
             return
         if parent_folder_id != 0:
@@ -530,7 +603,7 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     try:
@@ -539,7 +612,7 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     try:
@@ -552,7 +625,7 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration"
+            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     db.session.commit()
@@ -560,16 +633,26 @@ def modify_folder(data):
         "folder_modified",
         {"folderId": folder_id, "folderName": folder_name, "folderColor": folder_color},
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
 @socketio.on("delete_folder", namespace="/administration")
 def delete_folder(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "folder_not_deleted",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de classeurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
         socketio.emit(
             "folder_not_deleted",
             {"error": "Vous n'avez pas l'autorisation de supprimer des classeurs."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     folder = DOSSIER.query.get(data.get("folderId"))
@@ -578,6 +661,7 @@ def delete_folder(data):
             "folder_not_deleted",
             {"error": "Le classeur d'archive ne peut pas être supprimé."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     if len(folder.DOSSIER_) > 0:
@@ -585,6 +669,7 @@ def delete_folder(data):
             "folder_not_deleted",
             {"error": "Le classeur contient des sous-classeurs."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     if len(folder.FICHIER) > 0:
@@ -592,6 +677,7 @@ def delete_folder(data):
             "folder_not_deleted",
             {"error": "Le classeur contient des fichiers."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -609,7 +695,7 @@ def delete_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_deleted", {"error": str(e)}, namespace="/administration"
+            "folder_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     try:
@@ -620,7 +706,7 @@ def delete_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_deleted", {"error": str(e)}, namespace="/administration"
+            "folder_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     deleted_priority = folder.priorite_Dossier
@@ -635,17 +721,26 @@ def delete_folder(data):
         folder_to_update.priorite_Dossier -= 1
     db.session.commit()
     socketio.emit(
-        "folder_deleted", {"folderId": folder.id_Dossier}, namespace="/administration"
+        "folder_deleted", {"folderId": folder.id_Dossier}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
     )
 
 
 @socketio.on("archive_folders", namespace="/administration")
 def archive_folders(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "folders_not_archived",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas archiver de classeurs."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Role != 1 and current_user.id_Role != 2:
         socketio.emit(
             "folders_not_archived",
             {"error": "Vous n'avez pas l'autorisation d'archiver des classeurs."},
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     folder_ids = data.get("folderIds")
@@ -680,16 +775,24 @@ def archive_folders(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folders_not_archived", {"error": str(e)}, namespace="/administration"
+            "folders_not_archived", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     socketio.emit(
-        "folders_archived", {"folderIds": folder_ids}, namespace="/administration"
+        "folders_archived", {"folderIds": folder_ids}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
     )
 
 
 @socketio.on("delete_files", namespace="/administration")
 def delete_files(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "files_not_deleted",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de fichiers."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     file_ids = data.get("fileIds")
     processed_files = redis.lrange("processed_files", 0, -1)
     processed_files_ids = [
@@ -703,6 +806,7 @@ def delete_files(data):
                     "error": "Un ou plusieurs fichiers sélectionnés sont en cours de traitement. Veuillez réessayer ultérieurement."
                 },
                 namespace="/administration",
+                room=f"user_{current_user.id_Utilisateur}",
             )
             return
     try:
@@ -729,10 +833,10 @@ def delete_files(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "files_not_deleted", {"error": str(e)}, namespace="/administration"
+            "files_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
-    socketio.emit("files_deleted", {"fileIds": file_ids}, namespace="/administration")
+    socketio.emit("files_deleted", {"fileIds": file_ids}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
 
 
 def delete_file(file_id):
@@ -758,6 +862,14 @@ def delete_file(file_id):
 
 @socketio.on("delete_link", namespace="/administration")
 def delete_link(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "link_not_deleted",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de liens."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     try:
         link = LIEN.query.get(data.get("linkId"))
         db.session.delete(link)
@@ -765,16 +877,24 @@ def delete_link(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "link_not_deleted", {"error": str(e)}, namespace="/administration"
+            "link_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     socketio.emit(
-        "link_deleted", {"linkId": data.get("linkId")}, namespace="/administration"
+        "link_deleted", {"linkId": data.get("linkId")}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
     )
 
 
 @socketio.on("create_link", namespace="/administration")
 def create_link(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "link_not_created",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas créer de liens."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     link_name = data.get("linkName")
     link_url = data.get("linkUrl")
     link_description = data.get("linkDescription")
@@ -791,7 +911,7 @@ def create_link(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "link_not_created", {"error": str(e)}, namespace="/administration"
+            "link_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
     socketio.emit(
@@ -805,11 +925,20 @@ def create_link(data):
             "linkAuthor": f"{current_user.prenom_Utilisateur} {current_user.nom_Utilisateur}",
         },
         namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
 @socketio.on("verify_index", namespace="/administration")
 def verify_index():
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "index_not_verified",
+            {"error": "Votre compte est désactivé, vous ne pouvez pas vérifier l'indexation des fichiers."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
     if current_user.id_Role != 1:
         socketio.emit(
             "index_not_verified",
@@ -817,6 +946,7 @@ def verify_index():
                 "error": "Vous n'avez pas l'autorisation de vérifier l'indexation des fichiers."
             },
             namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):

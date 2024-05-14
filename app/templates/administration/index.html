@@ -19,6 +19,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/js/bootstrap5-toggle.ecmas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="current-user" content="{{ current_user.id_Utilisateur }}">
 {% endblock %}
 
 {% macro render_folder(folder) %}
