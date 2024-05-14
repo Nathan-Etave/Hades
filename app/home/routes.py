@@ -1,22 +1,23 @@
 from app.home import bp
 from flask_login import login_required, current_user
 from flask import render_template, jsonify, request, current_app
-from app.extensions import db
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
 from app.models.lien import LIEN
 from app.models.a_recherche import A_RECHERCHE
 from app.forms.search_form import SearchForm
 from datetime import datetime
-from app.utils import check_notitications
 from app.models.dossier import DOSSIER
-from app.utils import Whoosh
-from app import socketio
+from app.utils import Whoosh, check_notitications
+from app.decorators import active_required
+from app.extensions import socketio, db
 from fasteners import InterProcessLock
+from flask_socketio import join_room
 
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
+@active_required
 def home():
     """
     Renders the home page.
@@ -54,11 +55,14 @@ def home():
         folders=results,
         query=query,
         form=form,
+        title="Accueil" if not query else query,
+        user_id=current_user.id_Utilisateur,
     )
 
 
 @bp.route("/favori/<int:id_file>", methods=["POST", "DELETE"])
 @login_required
+@active_required
 def favorize(id_file):
     """
     Favorize or unfavorize a file for the current user.
@@ -224,6 +228,18 @@ def is_accessible(folder):
     """
     return any(current_user.id_Role == role.id_Role for role in folder.ROLE)
 
+@socketio.on("join", namespace="/home")
+def on_join(data):
+    """
+    Join a room.
+
+    Args:
+        data (dict): A dictionary containing the room information.
+
+    Returns:
+        None
+    """
+    join_room(data["room"])
 
 @socketio.on("search_files", namespace="/home")
 def search_files(data):
@@ -248,4 +264,5 @@ def search_files(data):
             "folderId": data.get("folderId"),
         },
         namespace="/home",
+        room=f"user_{current_user.id_Utilisateur}",
     )

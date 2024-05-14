@@ -3,16 +3,17 @@ from app.file_handler import bp
 from flask import send_from_directory, abort, current_app, request, send_file
 from app.models.fichier import FICHIER
 from flask_login import current_user, login_required
-from app import socketio
-from app.extensions import db
+from app.extensions import socketio, db
 from app.models.favoris import FAVORIS
 from app.utils import FileDownloader
-from app.decorators import admin_required
+from app.decorators import admin_required, active_required
 from threading import Timer
+from flask_socketio import join_room
 
 
 @bp.route("/classeur/<int:folder_id>/fichier/<int:file_id>", methods=["GET"])
 @login_required
+@active_required
 def file(folder_id, file_id):
     file = FICHIER.query.get(file_id)
     as_attachment = request.args.get("as_attachment", default=False, type=bool)
@@ -29,6 +30,18 @@ def file(folder_id, file_id):
         download_name=file.nom_Fichier,
     )
 
+@socketio.on("join", namespace="/file_handler")
+def on_join(data):
+    """
+    Join a room.
+
+    Args:
+        data (dict): A dictionary containing the room information.
+
+    Returns:
+        None
+    """
+    join_room(data["room"])
 
 @socketio.on("get_files_details", namespace="/file_handler")
 def get_files_details(data):
@@ -63,16 +76,19 @@ def get_files_details(data):
         dict_file = file.to_dict()
         dict_file["id_Dossier"] = file.DOSSIER_.id_Dossier
         dict_file["is_favorite"] = file.id_Fichier in favoris_ids
+        dict_file["id_Utilisateur"] = str(file.id_Utilisateur)
         files.append(dict_file)
     socketio.emit(
         "files_details",
         {"files": files, "files_id": files_id},
         namespace="/file_handler",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
 @bp.route("/download/archive", methods=["POST"])
 @login_required
+@active_required
 @admin_required
 def download_archive():
     zip_path = FileDownloader().create_zip(request.json["fileIds"])

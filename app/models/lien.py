@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, String, Text, Index
+from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, String, Text, Index, UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.extensions import db
 
@@ -15,6 +15,6 @@ class LIEN(db.Model):
     lien_Lien = mapped_column(String(255))
     description_Lien = mapped_column(Text)
     date_Lien = mapped_column(DateTime, default=db.func.current_timestamp())
-    id_Utilisateur = mapped_column(Integer)
+    id_Utilisateur = mapped_column(UUID(as_uuid=True))
 
     UTILISATEUR: Mapped[Optional['UTILISATEUR']] = relationship('UTILISATEUR', back_populates='LIEN')

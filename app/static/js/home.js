@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Handle previous seartch terms in the side panel
+        // Handle previous search terms in the side panel
         let search_tiles = document.querySelectorAll(".search_term");
         let search_btn = document.getElementById("search_btn");
         search_tiles.forEach(function (tile) {
@@ -255,7 +255,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // socket initialization
     const socket = io.connect('/home');
+    const userId = document.querySelector('meta[name="current-user"]').content;
+    socket.on('connect', function () {
+        socket.emit('join', { room: `user_${userId}` });
+    });
 
     // Handle dynamique search inside a folder
     let folderSearch = document.querySelectorAll("#fileSearch");

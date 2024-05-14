@@ -1,4 +1,4 @@
-from sqlalchemy import DateTime, ForeignKeyConstraint, Index, Integer, String
+from sqlalchemy import DateTime, ForeignKeyConstraint, Index, String, UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.extensions import db
 
@@ -10,7 +10,7 @@ class A_RECHERCHE(db.Model):
         Index('fk_A_Recherche_Recherche', 'champ_Recherche')
     )
 
-    id_Utilisateur = mapped_column(Integer, primary_key=True, nullable=False)
+    id_Utilisateur = mapped_column(UUID(as_uuid=True), primary_key=True, nullable=False)
     champ_Recherche = mapped_column(String(255), primary_key=True, nullable=False)
     datetime_Recherche = mapped_column(DateTime, primary_key=True, nullable=False)
 

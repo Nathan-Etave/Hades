@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import Integer, String, ForeignKeyConstraint, Index, DateTime
+from sqlalchemy import Integer, String, ForeignKeyConstraint, Index, DateTime, UUID
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.extensions import db
 
@@ -18,7 +18,7 @@ class FICHIER(db.Model):
     nom_Fichier = mapped_column(String(255))
     extension_Fichier = mapped_column(String(255))
     date_Fichier = mapped_column(DateTime, default=datetime.now())
-    id_Utilisateur = mapped_column(Integer)
+    id_Utilisateur = mapped_column(UUID(as_uuid=True))
     
     def to_dict(self):
        result = {}
