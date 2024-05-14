@@ -3,13 +3,13 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'VARIABLE PAR DEFAUT'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'app.db')
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL') or 'redis://localhost:6379/0'
-    RESULT_BACKEND = os.environ.get('RESULT_BACKEND') or 'redis://localhost:6379/0'
-    REDIS_URL = os.environ.get('REDIS_URL') or 'redis://localhost:6379/0'
-    MAIL_SERVER = os.environ.get('MAIL_SERVER')
-    MAIL_PORT = os.environ.get('MAIL_PORT')
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+    RESULT_BACKEND = os.getenv('RESULT_BACKEND')
+    REDIS_URL = os.getenv('REDIS_URL')
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = os.getenv('MAIL_PORT')
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')

@@ -37,7 +37,7 @@ def register() -> any:
                 nom_Utilisateur=form.last_name.data,
                 prenom_Utilisateur=form.first_name.data,
                 email_Utilisateur=form.email.data,
-                est_Actif_Utilisateur=False,
+                est_Actif_Utilisateur=0,
             )
             db.session.add(user)
             db.session.commit()
