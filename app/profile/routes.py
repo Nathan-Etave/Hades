@@ -1,5 +1,6 @@
 """Routes for the profile blueprint."""
 
+import uuid
 from flask import render_template, request, jsonify, url_for, redirect, abort
 from flask_login import login_required, current_user, logout_user
 from app.profile import bp
@@ -105,13 +106,13 @@ def edit_user(id, last_name, first_name, email, telephone, password):
     """Edit the user in the database.
 
     Args:
-        id (int): The user's id.
+        id (str): The user's id.
         last_name (str): The user's last name.
         first_name (str): The user's first name.
         email (str): The user's email.
         password (str): The user's password.
     """
-    user = UTILISATEUR.query.get(id)
+    user = UTILISATEUR.query.get(uuid.UUID(id))
     user.nom_Utilisateur = last_name
     user.prenom_Utilisateur = first_name
     user.email_Utilisateur = email

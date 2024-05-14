@@ -27,7 +27,7 @@ def load_user(user):
     Load a user from the database based on the given user ID.
 
     Args:
-        user (int): The ID of the user to load.
+        user (uuid.UUID): The ID of the user to load.
 
     Returns:
         UTILISATEUR: The user object corresponding to the given ID.
@@ -121,12 +121,12 @@ def add_notification():
 
 
 @bp.route("/reinitialisation/<string:uuid>", methods=["GET"])
-def reinitialisation(uuid):
+def reinitialisation(user_uuid):
     """
     Reinitializes the password for a user identified by the given UUID.
 
     Args:
-        uuid (str): The UUID of the user.
+        user_uuid (str): The UUID of the user.
 
     Returns:
         redirect: A redirect response to the login page.
@@ -138,8 +138,8 @@ def reinitialisation(uuid):
     json_file_path = f"{current_app.root_path}/storage/password/password.json"
     with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
-        if str(uuid) in data:
-            user = UTILISATEUR.query.filter_by(id_Utilisateur=data[str(uuid)]).first()
+        if str(user_uuid) in data:
+            user = UTILISATEUR.query.filter_by(id_Utilisateur=uuid.UUID(data[str(user_uuid)])).first()
             password = "".join(
                 secrets.choice(
                     string.ascii_letters + string.digits + string.punctuation
@@ -153,7 +153,7 @@ def reinitialisation(uuid):
                 "success",
             )
 
-            del data[str(uuid)]
+            del data[str(user_uuid)]
             with open(json_file_path, "w") as json_file:
                 json.dump(data, json_file)
         else:
@@ -178,10 +178,10 @@ def forgot_password(email):
         data = json.load(json_file)
 
     for key, value in data.items():
-        if value == user.id_Utilisateur:
+        if value == str(user.id_Utilisateur):
             del data[key]
             break
-    data[str(uuid4)] = user.id_Utilisateur
+    data[str(uuid4)] = str(user.id_Utilisateur)
     with open(json_file_path, "w") as json_file:
         json.dump(data, json_file)
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import json
+import uuid
 from base64 import b64decode
 from app import redis, socketio
 from app.administration import bp
@@ -233,7 +234,7 @@ def update_user_role(data):
         return
     user_id = data.get("userId")
     role_id = data.get("roleId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     if current_user.id_Role == 1 and role_id in ["1", "2", "3", "4"]:
         user.id_Role = role_id
     elif current_user.id_Role == 2 and role_id in ["3", "4"]:
@@ -289,7 +290,7 @@ def update_user_status(data):
         )
         return
     user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
         user.est_Actif_Utilisateur = not user.est_Actif_Utilisateur
     elif current_user.id_Role == 2 and user.id_Role in [3, 4]:
@@ -355,7 +356,7 @@ def delete_user(data):
         )
         return
     user_id = data.get("userId")
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     try:
         if current_user.id_Role == 1 and user.id_Role in [1, 2, 3, 4]:
             delete_user_database(user_id)
@@ -413,7 +414,7 @@ def delete_user_database(user_id):
     )
     for favorite in favorites:
         db.session.delete(favorite)
-    user = UTILISATEUR.query.get(user_id)
+    user = UTILISATEUR.query.get(uuid.UUID(user_id))
     db.session.delete(user)
     db.session.commit()
 
