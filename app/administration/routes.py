@@ -135,6 +135,10 @@ def upload():
     file_path = os.path.join(
         storage_directory, folder_id, f"{file.id_Fichier}.{file.extension_Fichier}"
     )
+    current_user_dict = current_user.to_dict_secure()
+    current_user_dict.update({"id_Utilisateur": str(current_user.id_Utilisateur)})
+    file_dict = file.to_dict()
+    file_dict.update({'id_Utilisateur': str(file.id_Utilisateur)})
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
     process_file.apply_async(
@@ -144,8 +148,8 @@ def upload():
             folder_id,
             str(file.id_Fichier),
             user_tags,
-            current_user.to_dict_secure(),
-            file.to_dict(),
+            current_user_dict,
+            file_dict,
             file.DOSSIER_.to_dict(),
             force,
         ]
@@ -400,6 +404,7 @@ def delete_user(data):
 
 
 def delete_user_database(user_id):
+    user_id = uuid.UUID(user_id)
     files = FICHIER.query.filter_by(id_Utilisateur=user_id).all()
     for file in files:
         file.id_Utilisateur = current_user.id_Utilisateur
@@ -414,7 +419,7 @@ def delete_user_database(user_id):
     )
     for favorite in favorites:
         db.session.delete(favorite)
-    user = UTILISATEUR.query.get(uuid.UUID(user_id))
+    user = UTILISATEUR.query.get(user_id)
     db.session.delete(user)
     db.session.commit()
 
