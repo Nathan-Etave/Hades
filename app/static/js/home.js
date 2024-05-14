@@ -255,7 +255,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // socket initialization
     const socket = io.connect('/home');
+    const userId = document.querySelector('meta[name="current-user"]').content;
+    socket.on('connect', function () {
+        socket.emit('join', { room: `user_${userId}` });
+    });
 
     // Handle dynamique search inside a folder
     let folderSearch = document.querySelectorAll("#fileSearch");

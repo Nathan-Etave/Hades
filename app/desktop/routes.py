@@ -21,4 +21,5 @@ def desktop():
         is_admin=current_user.is_admin(),
         has_notifications=check_notitications(),
         title="Bureau",
+        user_id=current_user.id_Utilisateur,
     )

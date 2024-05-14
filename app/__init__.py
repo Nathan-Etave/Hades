@@ -1,13 +1,7 @@
 import os
 import json
 from flask import Flask, current_app
-from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager
-from flask_socketio import SocketIO
-from flask_redis import FlaskRedis
 from config import Config
-from celery import Celery
-from app.extensions import db
 from app.models.a_acces import A_ACCES
 from app.models.a_recherche import A_RECHERCHE
 from app.models.a_tag import A_TAG
@@ -22,13 +16,7 @@ from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
 from app.models.lien import LIEN
-
-
-crsf = CSRFProtect()
-login_manager = LoginManager()
-socketio = SocketIO()
-celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND, include=['app.tasks'])
-redis = FlaskRedis()
+from app.extensions import redis, socketio, crsf, login_manager, celery, db
 
 def create_app(config_class = Config, is_worker=False):
     from app.register import bp as register_bp

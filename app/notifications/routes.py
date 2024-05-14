@@ -8,8 +8,7 @@ from flask import render_template, request, jsonify
 from flask_bcrypt import generate_password_hash
 from flask_login import login_required, current_user
 from app.notifications import bp
-from app.extensions import db
-from app.mail.mail import (
+from app.mail import (
     send_registration_confirmation_email,
     send_registration_rejection_email,
     send_reactivation_confirmation_email,
@@ -20,7 +19,7 @@ from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
 from app.utils import check_notitications
-from app import redis, socketio
+from app.extensions import redis, socketio, db
 from datetime import datetime
 
 @socketio.on('connect', namespace='/notifications')

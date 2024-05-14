@@ -3,7 +3,7 @@ import os
 import json
 import uuid
 from base64 import b64decode
-from app import redis, socketio
+from app.extensions import redis, socketio, db
 from app.administration import bp
 from app.tasks import process_file
 from unidecode import unidecode
@@ -12,7 +12,6 @@ from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from flask_socketio import join_room
 from app.decorators import admin_required, active_required
-from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.sous_dossier import SOUS_DOSSIER
 from app.models.fichier import FICHIER
@@ -24,7 +23,7 @@ from app.models.a_recherche import A_RECHERCHE
 from app.models.favoris import FAVORIS
 from app.utils import Whoosh, check_notitications
 from fasteners import InterProcessLock
-from app.mail.mail import send_deactivation_email, send_delete_email
+from app.mail import send_deactivation_email, send_delete_email
 
 
 @bp.route("/")
