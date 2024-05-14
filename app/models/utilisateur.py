@@ -1,5 +1,6 @@
+import uuid
 from typing import List, Optional
-from sqlalchemy import Index, Integer, String, ForeignKeyConstraint
+from sqlalchemy import Index, Integer, String, ForeignKeyConstraint, UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.extensions import db
 from flask_login import UserMixin
@@ -11,7 +12,7 @@ class UTILISATEUR(db.Model, UserMixin):
         Index('fk_Utilisateur_Role', 'id_Role')
     )
 
-    id_Utilisateur = mapped_column(Integer, primary_key=True)
+    id_Utilisateur = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     nom_Utilisateur = mapped_column(String(255))
     prenom_Utilisateur = mapped_column(String(255))
     email_Utilisateur = mapped_column(String(255))
