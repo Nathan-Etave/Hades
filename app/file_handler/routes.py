@@ -3,12 +3,12 @@ from app.file_handler import bp
 from flask import send_from_directory, abort, current_app, request, send_file
 from app.models.fichier import FICHIER
 from flask_login import current_user, login_required
-from app import socketio
-from app.extensions import db
+from app.extensions import socketio, db
 from app.models.favoris import FAVORIS
 from app.utils import FileDownloader
 from app.decorators import admin_required, active_required
 from threading import Timer
+from flask_socketio import join_room
 
 
 @bp.route("/classeur/<int:folder_id>/fichier/<int:file_id>", methods=["GET"])
@@ -30,6 +30,18 @@ def file(folder_id, file_id):
         download_name=file.nom_Fichier,
     )
 
+@socketio.on("join", namespace="/file_handler")
+def on_join(data):
+    """
+    Join a room.
+
+    Args:
+        data (dict): A dictionary containing the room information.
+
+    Returns:
+        None
+    """
+    join_room(data["room"])
 
 @socketio.on("get_files_details", namespace="/file_handler")
 def get_files_details(data):
@@ -70,6 +82,7 @@ def get_files_details(data):
         "files_details",
         {"files": files, "files_id": files_id},
         namespace="/file_handler",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 

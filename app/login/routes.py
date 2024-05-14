@@ -10,13 +10,12 @@ from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
 from app.forms.login_form import LoginForm
 from app.forms.forgotten_password_form import ForgottenPasswordForm
-from app import login_manager
-from app.extensions import db
+from app.extensions import login_manager, db
 from datetime import datetime
 from flask import jsonify, request
 import secrets
 import string
-from app.mail.mail import send_forgotten_password_email
+from app.mail import send_forgotten_password_email
 import uuid
 import json
 

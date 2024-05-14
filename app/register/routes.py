@@ -5,7 +5,7 @@ from smtplib import SMTPException
 from flask import render_template, redirect, url_for, flash
 from app.register import bp
 from app.extensions import db
-from app.mail.mail import send_registration_request_email
+from app.mail import send_registration_request_email
 from app.forms.registration_form import RegistrationForm
 from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
