@@ -64,6 +64,7 @@ def get_files_details(data):
         dict_file = file.to_dict()
         dict_file["id_Dossier"] = file.DOSSIER_.id_Dossier
         dict_file["is_favorite"] = file.id_Fichier in favoris_ids
+        dict_file["id_Utilisateur"] = str(file.id_Utilisateur)
         files.append(dict_file)
     socketio.emit(
         "files_details",

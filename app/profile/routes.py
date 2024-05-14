@@ -112,7 +112,7 @@ def edit_user(id, last_name, first_name, email, telephone, password):
         email (str): The user's email.
         password (str): The user's password.
     """
-    user = UTILISATEUR.query.get(uuid.UUID(id))
+    user = UTILISATEUR.query.get(id)
     user.nom_Utilisateur = last_name
     user.prenom_Utilisateur = first_name
     user.email_Utilisateur = email

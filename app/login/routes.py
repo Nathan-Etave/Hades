@@ -120,7 +120,7 @@ def add_notification():
     return jsonify(notification.to_dict()), 200
 
 
-@bp.route("/reinitialisation/<string:uuid>", methods=["GET"])
+@bp.route("/reinitialisation/<string:user_uuid>", methods=["GET"])
 def reinitialisation(user_uuid):
     """
     Reinitializes the password for a user identified by the given UUID.
