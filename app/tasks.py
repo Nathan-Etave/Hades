@@ -20,7 +20,7 @@ def process_file(file_path, filename, folder_id, file_id, user_tags, current_use
         redis.set(f'worker:{worker_name}', json.dumps({'worker': worker_name, 'status': 'processing', 'file': filename, 'next_file': next_file}))
         file_text = FileReader().read(file_path, filename.split(".")[-1])
         file_tags = f'{' '.join(NLPProcessor().tokenize(file_text))} {user_tags}'
-        with InterProcessLock(f'{app.root_path}/whoosh.lock'):
+        with InterProcessLock(f'{app.root_path}/storage/index/whoosh.lock'):
             Whoosh().add_document(filename, file_text, folder_id, file_tags, file_id)
         redis.rpush('processed_files', json.dumps({'filename': filename, 'folder_id': folder_id, 'file_id': file_id, 'user': current_user, 'file': file, 'folder': folder, 'action': action}))
         date_str = file['date_Fichier'].split(':')[0] + ':' + file['date_Fichier'].split(':')[1]

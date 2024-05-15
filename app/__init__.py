@@ -37,7 +37,10 @@ def create_app(config_class = Config, is_worker=False):
         fill_db()
         if not os.path.exists(f'{current_app.root_path}/storage'):
             os.makedirs(f'{current_app.root_path}/storage')
-
+        if not os.path.exists(f'{current_app.root_path}/storage/files'):
+            os.makedirs(f'{current_app.root_path}/storage/files')
+        if not os.path.exists(f'{current_app.root_path}/storage/database'):
+            os.makedirs(f'{current_app.root_path}/storage/database')
         if not os.path.exists(f'{current_app.root_path}/storage/password'):
             os.makedirs(f'{current_app.root_path}/storage/password')
         json_file_path = f'{current_app.root_path}/storage/password/password.json'
