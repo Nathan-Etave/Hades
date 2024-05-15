@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Reinitialisation{% endblock %}
+
+{% block head %}
+<!-- import js link -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
+
+<!-- crsf token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center" style="height: 75vh;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6 shadow-lg p-5 bg-secondary rounded">
+            <h2 class="text-center">Réinitialisation du mot de passe</h2>
+            <form method="POST" action="{{ url_for('password_reset.reinitialisation', hash_user_uuid=hash_user_uuid) }}">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control") }}
+                </div>
+                <p class="text-muted">Un email de confirmation vous sera envoyé.</p>
+                <div class="form-group text-center">
+                    <input type="submit" value="Valider" class="btn btn-primary">
+                </div>
+            </form>
+            {% for error in form.confirm_password.errors %}
+                <div class="alert alert-dismissible alert-info mt-4">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible mt-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
