@@ -18,6 +18,7 @@ import string
 from app.mail import send_forgotten_password_email
 import uuid
 import json
+from itsdangerous import URLSafeTimedSerializer
 
 
 @login_manager.user_loader
@@ -118,47 +119,19 @@ def add_notification():
     db.session.commit()
     return jsonify(notification.to_dict()), 200
 
-
-@bp.route("/reinitialisation/<string:user_uuid>", methods=["GET"])
-def reinitialisation(user_uuid):
+def hash_uuid(uuid):
     """
-    Reinitializes the password for a user identified by the given UUID.
+    Hashes a UUID using a URL-safe timed serializer.
 
     Args:
-        user_uuid (str): The UUID of the user.
+        uuid (str): The UUID to be hashed.
 
     Returns:
-        redirect: A redirect response to the login page.
-
-    Raises:
-        None
+        str: The hashed UUID.
 
     """
-    json_file_path = f"{current_app.root_path}/storage/password/password.json"
-    with open(json_file_path, "r") as json_file:
-        data = json.load(json_file)
-        if str(user_uuid) in data:
-            user = UTILISATEUR.query.filter_by(id_Utilisateur=uuid.UUID(data[str(user_uuid)])).first()
-            password = "".join(
-                secrets.choice(
-                    string.ascii_letters + string.digits + string.punctuation
-                )
-                for _ in range(10)
-            )
-            user.mdp_Utilisateur = generate_password_hash(password)
-            db.session.commit()
-            flash(
-                f"votre mot de passe a bien été réinitialisé, voici le nouveau : {password}",
-                "success",
-            )
-
-            del data[str(user_uuid)]
-            with open(json_file_path, "w") as json_file:
-                json.dump(data, json_file)
-        else:
-            flash("La demande de réinitialisation n'est plus valide.", "danger")
-    return redirect(url_for("login.login"))
-
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(str(uuid))
 
 def forgot_password(email):
     """
@@ -177,15 +150,15 @@ def forgot_password(email):
         data = json.load(json_file)
 
     for key, value in data.items():
-        if value == str(user.id_Utilisateur):
+        if value["user_id"] == str(user.id_Utilisateur):
             del data[key]
             break
-    data[str(uuid4)] = str(user.id_Utilisateur)
+    data[str(uuid4)] = {"user_id": str(user.id_Utilisateur), "date": str(datetime.now())}
     with open(json_file_path, "w") as json_file:
         json.dump(data, json_file)
 
     try:
-        send_forgotten_password_email(user.email_Utilisateur, uuid4)
+        send_forgotten_password_email(user.email_Utilisateur, hash_uuid(uuid4))
     except OSError:
         return ["Erreur lors de l'envoie du mail de réinitialisation.", "danger"]
     return ["Un email vous a été envoyé pour réinitialiser mot de passe.", "success"]
