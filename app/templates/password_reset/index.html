@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}Reinitialisation{% endblock %}
+{% block title %}Reinitialisation2{% endblock %}
 
 {% block head %}
 <!-- import js link -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
+
+<!-- import css link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!-- personalized js -->
+<script type="module" src="{{ url_for('static', filename='js/password_reset.js') }}"></script>
 
 <!-- crsf token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -21,11 +27,17 @@
                 {{ form.csrf_token }}
                 <div class="form-group">
                     {{ form.password.label(class="form-label") }}
-                    {{ form.password(class="form-control") }}
+                    <div class="d-flex align-items-center justify-content-center">
+                        {{ form.password(class="form-control", id="password") }}
+                        <span toggle="#password" class="fa fa-fw fa-eye-slash field-icon toggle-password" style="font-size: 1.5rem; padding-left: 1vw; cursor: pointer;"></span>
+                    </div>
                 </div>
                 <div class="form-group">
                     {{ form.confirm_password.label(class="form-label") }}
-                    {{ form.confirm_password(class="form-control") }}
+                    <div class="d-flex align-items-center justify-content-center">
+                        {{ form.confirm_password(class="form-control", id="confirm-password") }}
+                        <span toggle="#confirm-password" class="fa fa-fw fa-eye-slash field-icon toggle-password" style="font-size: 1.5rem; padding-left: 1vw; cursor: pointer;"></span>
+                    </div>
                 </div>
                 <p class="text-muted">Un email de confirmation vous sera envoyé.</p>
                 <div class="form-group text-center">
