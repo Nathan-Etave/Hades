@@ -253,7 +253,7 @@ def search_files(data):
         None
     """
     search_query = data.get("query")
-    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
         search_results = [result["id"] for result in search_results]
     socketio.emit(
