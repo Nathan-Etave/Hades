@@ -1,0 +1,77 @@
+x-hades-environment: &hades_environment
+  SECRET_KEY: ${SECRET_KEY}
+  CELERY_BROKER_URL: "redis://redis:6379/0"
+  RESULT_BACKEND: "redis://redis:6379/0"
+  REDIS_URL: "redis://redis:6379/0"
+  MAIL_SERVER: ${MAIL_SERVER}
+  MAIL_PORT: ${MAIL_PORT}
+  MAIL_USERNAME: ${MAIL_USERNAME}
+  MAIL_PASSWORD: ${MAIL_PASSWORD}
+  DATABASE_URI: "sqlite:////app/storage/database/hades.db"
+
+services:
+  web1:
+    build: .
+    image: hades:latest
+    command: gunicorn -b "0.0.0.0:8001" -k gevent --workers 1 --threads 2 'app:create_app()' --reload
+    volumes:
+      - .:/app
+      - ./app/storage:/app/storage
+    depends_on:
+      - redis
+    restart: always
+    environment:
+      <<: *hades_environment
+  web2:
+    build: .
+    image: hades:latest
+    command: gunicorn -b "0.0.0.0:8002" -k gevent --workers 1 --threads 2 'app:create_app()' --reload
+    volumes:
+      - .:/app
+      - ./app/storage:/app/storage
+    depends_on:
+      - redis
+    restart: always
+    environment:
+      <<: *hades_environment
+  worker1:
+    build: .
+    image: hades:latest
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker1
+    volumes:
+      - .:/app
+      - ./app/storage:/app/storage
+    depends_on:
+      - redis
+    restart: always
+    environment:
+      <<: *hades_environment
+  worker2:
+    build: .
+    image: hades:latest
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker2
+    volumes:
+      - .:/app
+      - ./app/storage:/app/storage
+    depends_on:
+      - redis
+    restart: always
+    environment:
+      <<: *hades_environment
+  redis:
+    image: redis:latest
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./app/storage/redis:/data
+    restart: always
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web1
+      - web2
+    restart: always
