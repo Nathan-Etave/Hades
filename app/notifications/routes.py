@@ -68,18 +68,9 @@ def handle_acceptance(notification, send_email_function, success_message):
     user = UTILISATEUR.query.get(notification.id_Utilisateur)
     user.id_Role = request.json.get("role_id")
     user.est_Actif_Utilisateur = True
-    if str(notification.type_Notification) == "1":
-        password = "".join(
-            secrets.choice(string.ascii_letters + string.digits + string.punctuation)
-            for i in range(10)
-        )
-        user.mdp_Utilisateur = generate_password_hash(password)
     db.session.delete(notification)
     try:
-        if str(notification.type_Notification) == "1":
-            send_email_function(user.email_Utilisateur, password)
-        else:
-            send_email_function(user.email_Utilisateur)
+        send_email_function(user.email_Utilisateur)
         db.session.commit()
     except (SMTPException, ConnectionError, TimeoutError):
         db.session.rollback()
