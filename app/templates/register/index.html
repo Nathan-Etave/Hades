@@ -21,6 +21,10 @@
                     {{ form.email.label(class="form-label") }}
                     {{ form.email(id="email", class="form-control") }}
                 </div>
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                </div>
                 <p class="text-muted">Un email de confirmation vous sera envoyé.</p>
                 <div class="form-group text-center">
                     <input type="submit" value="Demander l'inscription" class="btn btn-primary">
@@ -33,6 +37,13 @@
                 <a href="#email" class="alert-link">{{ error }}</a><br>
                 {% endfor %}
             </div>
+            {% endif %}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <div class="alert alert-dismissible alert-info mt-4">
+                        {{ error }}
+                    </div>
+                {% endfor %}
             {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
