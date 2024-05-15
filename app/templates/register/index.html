@@ -38,6 +38,13 @@
                 {% endfor %}
             </div>
             {% endif %}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <div class="alert alert-dismissible alert-info mt-4">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
