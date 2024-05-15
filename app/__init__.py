@@ -28,6 +28,22 @@ def create_app(config_class = Config, is_worker=False):
     from app.file_handler import bp as file_handler_bp
     from app.desktop import bp as desktop_bp
 
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.exists(f'{root_path}/storage'):
+        os.makedirs(f'{root_path}/storage')
+    if not os.path.exists(f'{root_path}/storage/files'):
+        os.makedirs(f'{root_path}/storage/files')
+    if not os.path.exists(f'{root_path}/storage/database'):
+        os.makedirs(f'{root_path}/storage/database')
+    if not os.path.exists(f'{root_path}/storage/redis'):
+        os.makedirs(f'{root_path}/storage/redis')
+    if not os.path.exists(f'{root_path}/storage/password'):
+        os.makedirs(f'{root_path}/storage/password')
+    json_file_path = f'{root_path}/storage/password/password.json'
+    if not os.path.exists(json_file_path):
+        with open(json_file_path, 'w') as json_file:
+            json.dump({}, json_file)
+
     app = Flask(__name__)
     app.config.from_object(config_class)
     crsf.init_app(app)
@@ -35,18 +51,6 @@ def create_app(config_class = Config, is_worker=False):
     with app.app_context():
         db.create_all()
         fill_db()
-        if not os.path.exists(f'{current_app.root_path}/storage'):
-            os.makedirs(f'{current_app.root_path}/storage')
-        if not os.path.exists(f'{current_app.root_path}/storage/files'):
-            os.makedirs(f'{current_app.root_path}/storage/files')
-        if not os.path.exists(f'{current_app.root_path}/storage/database'):
-            os.makedirs(f'{current_app.root_path}/storage/database')
-        if not os.path.exists(f'{current_app.root_path}/storage/password'):
-            os.makedirs(f'{current_app.root_path}/storage/password')
-        json_file_path = f'{current_app.root_path}/storage/password/password.json'
-        if not os.path.exists(json_file_path):
-            with open(json_file_path, 'w') as json_file:
-                json.dump({}, json_file)
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'

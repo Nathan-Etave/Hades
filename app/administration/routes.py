@@ -799,7 +799,7 @@ def delete_files(data):
         json.loads(file.decode("utf-8"))["file_id"] for file in processed_files
     ]
     for file_id in file_ids:
-        if not file_id in processed_files_ids:
+        if file_id not in processed_files_ids:
             socketio.emit(
                 "files_not_deleted",
                 {
