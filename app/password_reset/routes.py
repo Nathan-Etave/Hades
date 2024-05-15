@@ -9,13 +9,9 @@ from app.forms.password_reset_form import PasswordResetForm
 from datetime import datetime, timedelta
 from flask_bcrypt import generate_password_hash
 from app.mail import send_reset_password_confirmation
-from app.decorators import active_required
-from flask_login import login_required
 
 
 @bp.route("/<string:hash_user_uuid>", methods=["GET", "POST"])
-@login_required
-@active_required
 def reinitialisation(hash_user_uuid):
     """
     Reinitializes the password for a user identified by the given UUID.
