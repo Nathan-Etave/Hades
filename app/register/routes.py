@@ -10,6 +10,7 @@ from app.forms.registration_form import RegistrationForm
 from app.models.utilisateur import UTILISATEUR
 from app.models.notification import NOTIFICATION
 from flask_login import current_user
+from flask_bcrypt import generate_password_hash
 
 @bp.route("/", methods=["GET", "POST"])
 def register() -> any:
@@ -38,6 +39,7 @@ def register() -> any:
                 prenom_Utilisateur=form.first_name.data,
                 email_Utilisateur=form.email.data,
                 est_Actif_Utilisateur=0,
+                mdp_Utilisateur=generate_password_hash(form.password.data),
             )
             db.session.add(user)
             db.session.commit()

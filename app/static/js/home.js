@@ -321,6 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Function to create an error alert message
     function createErrorAlertMessage(message, data) {
         Swal.fire({
             position: 'top-end',

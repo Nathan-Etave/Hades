@@ -30,6 +30,7 @@ from app.models.dossier import DOSSIER
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
 from app.models.notification import NOTIFICATION
+from wtforms import ValidationError
 
 class SingletonMeta(type):
     """Singleton metaclass.
@@ -396,3 +397,14 @@ def get_total_file_count_by_id(folder_id):
     """
     folder = DOSSIER.query.filter_by(id_Dossier=folder_id).first()
     return get_total_file_count(folder)
+
+class PasswordComplexity(object):
+    def __init__(self, message=None):
+        if not message:
+            message = u'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule et un chiffre, et doit avoir une longueur minimale de 6 caractères.'
+        self.message = message
+
+    def __call__(self, form, field):
+        password = field.data
+        if not (any(x.isupper() for x in password) and any(x.islower() for x in password) and any(x.isdigit() for x in password)) or len(password) < 6:
+            raise ValidationError(self.message)

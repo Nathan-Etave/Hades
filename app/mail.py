@@ -26,11 +26,11 @@ def send_registration_request_email(email):
     send_email(subject, sender, recipients, html_body)
 
 
-def send_registration_confirmation_email(email, password):
+def send_registration_confirmation_email(email):
     subject = "Inscription validée"
     sender = f'Hadès <{Config.MAIL_USERNAME}>'
     recipients = email
-    html_body = f"<p>Bonjour, votre demande d'inscription a été validée. Vous pouvez désormais vous connecter à la plateforme.</p><p>Votre mot de passe est: {password}</p>"
+    html_body = f"<p>Bonjour, votre demande d'inscription a été validée. Vous pouvez désormais vous connecter à la plateforme.</p>"
     send_email(subject, sender, recipients, html_body)
 
 
@@ -70,7 +70,7 @@ def send_forgotten_password_email(email, uuid):
     subject = "Réinitialisation de votre mot de passe"
     sender = f'Hadès <{Config.MAIL_USERNAME}>'
     recipients = email
-    html_body = f"<p>Bonjour, une demande de réinitialisation de mot de passe a été faite sur votre compte. \n Pour la valider, cliquez sur le lien suivant :</p> <a href='http://127.0.0.1:5000/connexion/reinitialisation/{uuid}'>Réinitialisation du mot de passe</a>"
+    html_body = f"<p>Bonjour, une demande de réinitialisation de mot de passe a été faite sur votre compte. \n Pour la valider, cliquez sur le lien suivant :</p> <a href='http://127.0.0.1:5000/reinitialisation/{uuid}'>Réinitialisation du mot de passe</a><p>Ce lien est valide pour une durée de 10 minutes.</p>"
     send_email(subject, sender, recipients, html_body)
 
 def send_deactivation_email(email):
@@ -103,4 +103,20 @@ def send_delete_email(email):
     sender = f'Hadès <{Config.MAIL_USERNAME}>'
     recipients = email
     html_body = "<p>Bonjour, votre compte a été supprimé. Pour plus d'informations, veuillez contacter le support technique.</p>"
+    send_email(subject, sender, recipients, html_body)
+
+def send_reset_password_confirmation(email):
+    """
+    Sends a reset password confirmation email to the specified email address.
+
+    Args:
+        email (str): The email address to send the reset password confirmation email to.
+
+    Returns:
+        None
+    """
+    subject = "Réinitialisation de votre mot de passe"
+    sender = f'Hadès <{Config.MAIL_USERNAME}>'
+    recipients = email
+    html_body = "<p>Bonjour, votre mot de passe a bien été réinitialisé.</p>"
     send_email(subject, sender, recipients, html_body)
