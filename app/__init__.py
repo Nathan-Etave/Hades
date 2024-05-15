@@ -29,6 +29,22 @@ def create_app(config_class = Config, is_worker=False):
     from app.desktop import bp as desktop_bp
     from app.password_reset import bp as password_reset_bp
 
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.exists(f'{root_path}/storage'):
+        os.makedirs(f'{root_path}/storage')
+    if not os.path.exists(f'{root_path}/storage/files'):
+        os.makedirs(f'{root_path}/storage/files')
+    if not os.path.exists(f'{root_path}/storage/database'):
+        os.makedirs(f'{root_path}/storage/database')
+    if not os.path.exists(f'{root_path}/storage/redis'):
+        os.makedirs(f'{root_path}/storage/redis')
+    if not os.path.exists(f'{root_path}/storage/password'):
+        os.makedirs(f'{root_path}/storage/password')
+    json_file_path = f'{root_path}/storage/password/password.json'
+    if not os.path.exists(json_file_path):
+        with open(json_file_path, 'w') as json_file:
+            json.dump({}, json_file)
+
     app = Flask(__name__)
     app.config.from_object(config_class)
     crsf.init_app(app)
@@ -36,15 +52,6 @@ def create_app(config_class = Config, is_worker=False):
     with app.app_context():
         db.create_all()
         fill_db()
-        if not os.path.exists(f'{current_app.root_path}/storage'):
-            os.makedirs(f'{current_app.root_path}/storage')
-
-        if not os.path.exists(f'{current_app.root_path}/storage/password'):
-            os.makedirs(f'{current_app.root_path}/storage/password')
-        json_file_path = f'{current_app.root_path}/storage/password/password.json'
-        if not os.path.exists(json_file_path):
-            with open(json_file_path, 'w') as json_file:
-                json.dump({}, json_file)
 
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
@@ -112,7 +119,7 @@ def fill_db():
         db.session.add(DOSSIER(nom_Dossier="Mémoire", priorite_Dossier=6, couleur_Dossier="#cc99ff"))
         db.session.add(DOSSIER(nom_Dossier="Thèse", priorite_Dossier=7, couleur_Dossier="#ccccff"))
         db.session.add(DOSSIER(nom_Dossier="À trier", priorite_Dossier=8, couleur_Dossier="#ccffff"))
-        db.session.add(DOSSIER(nom_Dossier="Archive", priorite_Dossier=9223372036854775807, couleur_Dossier="#d3d7d8"))
+        db.session.add(DOSSIER(nom_Dossier="Archive", priorite_Dossier=2147483647, couleur_Dossier="#d3d7d8"))
         db.session.commit()
 
     if not db.session.query(A_ACCES).all():
@@ -124,6 +131,6 @@ def fill_db():
         db.session.commit()
 
     if not UTILISATEUR.query.all():
-        db.session.add(UTILISATEUR(nom_Utilisateur="Administrateur", prenom_Utilisateur="", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", telephone_Utilisateur="", est_Actif_Utilisateur=True, id_Role=1))
+        db.session.add(UTILISATEUR(nom_Utilisateur="Administrateur", prenom_Utilisateur="", email_Utilisateur="admin@admin.fr", mdp_Utilisateur="$2b$12$sOih7qRKimxwqJXITajOfO.Twyg.lModCMYSrgxLpxGompCQjjM56", telephone_Utilisateur="", est_Actif_Utilisateur=1, id_Role=1))
         # password: O]SxR=rBv%
         db.session.commit()

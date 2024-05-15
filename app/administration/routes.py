@@ -119,7 +119,7 @@ def upload():
     user_tags = unidecode(
         " ".join(json_data.get("tags").replace(" ", ";").split(";"))
     ).lower()
-    storage_directory = os.path.join(current_app.root_path, "storage")
+    storage_directory = os.path.join(current_app.root_path, "storage", "files")
     if not os.path.exists(f"{storage_directory}/{folder_id}"):
         os.makedirs(f"{storage_directory}/{folder_id}")
     file = FICHIER(
@@ -201,7 +201,7 @@ def connect():
 @socketio.on("search_files", namespace="/administration")
 def search_files(data):
     search_query = data.get("query")
-    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
     socketio.emit("search_results", search_results, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
 
@@ -799,7 +799,7 @@ def delete_files(data):
         json.loads(file.decode("utf-8"))["file_id"] for file in processed_files
     ]
     for file_id in file_ids:
-        if not file_id in processed_files_ids:
+        if file_id not in processed_files_ids:
             socketio.emit(
                 "files_not_deleted",
                 {
@@ -811,7 +811,7 @@ def delete_files(data):
             return
     try:
         file_paths = []
-        with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+        with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
             Whoosh().delete_documents(file_ids)
         for file_id in file_ids:
             database_file = FICHIER.query.get(file_id)
@@ -820,6 +820,7 @@ def delete_files(data):
                 os.path.join(
                     current_app.root_path,
                     "storage",
+                    "files",
                     str(database_file.id_Dossier),
                     f"{file_id}.{database_file.extension_Fichier}",
                 )
@@ -840,7 +841,7 @@ def delete_files(data):
 
 
 def delete_file(file_id):
-    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
         Whoosh().delete_document(file_id)
     database_file = FICHIER.query.get(file_id)
     db.session.delete(database_file)
@@ -848,6 +849,7 @@ def delete_file(file_id):
         os.path.join(
             current_app.root_path,
             "storage",
+            "files",
             str(database_file.id_Dossier),
             f"{file_id}.{database_file.extension_Fichier}",
         )
@@ -949,7 +951,7 @@ def verify_index():
             room=f"user_{current_user.id_Utilisateur}",
         )
         return
-    with InterProcessLock(f"{current_app.root_path}/whoosh.lock"):
+    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
         woosh_documents = Whoosh().get_all_documents()
     database_documents = FICHIER.query.all()
     for woosh_document in woosh_documents:
@@ -959,22 +961,36 @@ def verify_index():
         ]:
             Whoosh().delete_document(woosh_document["id"])
     for database_document in database_documents:
-        if not Whoosh().document_exists(str(database_document.id_Fichier)):
-            process_file.apply_async(
-                args=[
-                    os.path.join(
-                        current_app.root_path,
-                        "storage",
-                        str(database_document.id_Dossier),
-                        f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
-                    ),
-                    database_document.nom_Fichier,
-                    str(database_document.id_Dossier),
-                    str(database_document.id_Fichier),
-                    "",
-                    current_user.to_dict_secure(),
-                    database_document.to_dict(),
-                    database_document.DOSSIER_.to_dict(),
-                    False,
-                ]
-            )
+        file_path = os.path.join(
+            current_app.root_path,
+            "storage",
+            "files",
+            str(database_document.id_Dossier),
+            f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+        )
+        if os.path.exists(file_path):
+            with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
+                if not Whoosh().document_exists(str(database_document.id_Fichier)):
+                    process_file.apply_async(
+                        args=[
+                            os.path.join(
+                                current_app.root_path,
+                                "storage",
+                                "files",
+                                str(database_document.id_Dossier),
+                                f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+                            ),
+                            database_document.nom_Fichier,
+                            str(database_document.id_Dossier),
+                            str(database_document.id_Fichier),
+                            "",
+                            current_user.to_dict_secure(),
+                            database_document.to_dict(),
+                            database_document.DOSSIER_.to_dict(),
+                            False,
+                        ]
+                    )
+        else:
+            with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
+                Whoosh().delete_document(str(database_document.id_Fichier))
+
