@@ -62,7 +62,6 @@ def home():
 
 @bp.route("/favori/<int:id_file>", methods=["POST", "DELETE"])
 @login_required
-@active_required
 def favorize(id_file):
     """
     Favorize or unfavorize a file for the current user.
@@ -75,13 +74,19 @@ def favorize(id_file):
             The response will have a 'status' key with the value 'ok'.
     """
     try:
+        if db.session.query(FICHIER).filter_by(id_Fichier=id_file).first() is None:
+                return jsonify({"error": "Ce fichier n'existe pas."}), 500
         if request.method == "POST":
+            if not current_user.est_Actif_Utilisateur:
+                return jsonify({"error": "Vous ne pouvez pas ajouter un favori, votre compte est desactivé."}), 500
             db.session.execute(
                 FAVORIS.insert().values(
                     id_Fichier=id_file, id_Utilisateur=current_user.id_Utilisateur
                 )
             )
         else:
+            if not current_user.est_Actif_Utilisateur:
+                return jsonify({"error": "Vous ne pouvez pas supprimer un favori, votre compte est desactivé."}), 500
             db.session.query(FAVORIS).filter(
                 FAVORIS.c.id_Fichier == id_file,
                 FAVORIS.c.id_Utilisateur == current_user.id_Utilisateur,

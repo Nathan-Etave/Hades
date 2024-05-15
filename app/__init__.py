@@ -27,6 +27,7 @@ def create_app(config_class = Config, is_worker=False):
     from app.profile import bp as profile_bp
     from app.file_handler import bp as file_handler_bp
     from app.desktop import bp as desktop_bp
+    from app.password_reset import bp as password_reset_bp
 
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -91,6 +92,7 @@ def create_app(config_class = Config, is_worker=False):
     app.register_blueprint(profile_bp, url_prefix='/profil')
     app.register_blueprint(file_handler_bp)
     app.register_blueprint(desktop_bp, url_prefix='/bureau')
+    app.register_blueprint(password_reset_bp, url_prefix='/reinitialisation')
     return app
 
 def fill_db():
