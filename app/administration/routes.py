@@ -154,7 +154,7 @@ def upload():
     )
     redis.incr("total_files")
     redis.rpush(
-        "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
+        "files_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
     )
     file_dict = file.to_dict()
     file_dict.update(
@@ -949,4 +949,14 @@ def verify_index_socket():
             room=f"user_{current_user.id_Utilisateur}",
         )
         return
-    verify_index.apply_async(current_user.to_dict_secure())
+    if redis.llen("files_queue") > 0:
+        socketio.emit(
+            "index_not_verified",
+            {
+                "error": "Un ou plusieurs fichiers sont en cours de traitement. Veuillez réessayer ultérieurement."
+            },
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
+    verify_index.apply_async(args=[current_user.to_dict_secure()])

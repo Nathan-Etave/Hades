@@ -6,16 +6,16 @@ from app import create_app
 from celery import current_task
 from app.utils import FileReader, NLPProcessor, Whoosh
 from fasteners import InterProcessLock
-from app.models import FICHIER
+from app.models.fichier import FICHIER
 
 @celery.task(name='app.tasks.process_file')
 def process_file(file_path, filename, folder_id, file_id, user_tags, current_user, file, folder, action):
     app = create_app(is_worker=True)
     with app.app_context():
         worker_name = current_task.request.hostname
-        redis.lpop('file_queue')
-        if redis.llen('file_queue') > 0:
-            next_file = redis.lindex('file_queue', 0).decode('utf-8')
+        redis.lpop('files_queue')
+        if redis.llen('files_queue') > 0:
+            next_file = redis.lindex('files_queue', 0).decode('utf-8')
         else:
             next_file = None
         redis.publish('worker_status', json.dumps({'worker': worker_name, 'status': 'processing', 'file': filename, 'next_file': next_file}))
@@ -38,14 +38,14 @@ def verify_index(current_user_dict):
     app = create_app(is_worker=True)
     with app.app_context():
         with InterProcessLock(f"{app.root_path}/storage/index/whoosh.lock"):
-            woosh_documents = Whoosh().get_all_documents()
+            whoosh_documents = Whoosh().get_all_documents()
         database_documents = FICHIER.query.all()
-        for woosh_document in woosh_documents:
-            if str(woosh_document["id"]) not in [
+        for whoosh_document in whoosh_documents:
+            if str(whoosh_document["id"]) not in [
                 str(database_document.id_Fichier)
                 for database_document in database_documents
             ]:
-                Whoosh().delete_document(woosh_document["id"])
+                Whoosh().delete_document(whoosh_document["id"])
         for database_document in database_documents:
             file_path = os.path.join(
                 app.root_path,
