@@ -99,7 +99,6 @@ def add_notification():
     Returns:
         JSON: The created notification in JSON format.
     """
-    current_date = datetime.now()
     type = request.json.get("type")
     email_user = request.json.get("email_user")
     id_user = (
@@ -111,7 +110,6 @@ def add_notification():
     if notification:
         return jsonify({"error": "user already have a notification"}), 404
     notification = NOTIFICATION(
-        datetime_Notification=current_date,
         type_Notification=type,
         id_Utilisateur=id_user,
     )

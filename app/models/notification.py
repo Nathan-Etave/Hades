@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import Integer, DateTime, Index, ForeignKeyConstraint, UUID
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from typing import Optional
@@ -14,13 +15,18 @@ class NOTIFICATION(db.Model):
     )
 
     id_Notification = mapped_column(Integer, primary_key=True)
-    datetime_Notification = mapped_column(DateTime)
+    datetime_Notification = mapped_column(DateTime, default=datetime.now())
     type_Notification = mapped_column(Integer)
     id_Utilisateur = mapped_column(UUID(as_uuid=True))
     id_Fichier = mapped_column(Integer)
 
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        result = {}
+        for c in self.__table__.columns:
+            if c.name == 'id_Utilisateur':
+                result[c.name] = str(getattr(self, c.name))
+            else:
+                result[c.name] = getattr(self, c.name)
 
     FICHIER_: Mapped[Optional['FICHIER']] = relationship('FICHIER', back_populates='NOTIFICATION')
     UTILISATEUR_: Mapped[Optional['UTILISATEUR']] = relationship('UTILISATEUR', back_populates='NOTIFICATION')

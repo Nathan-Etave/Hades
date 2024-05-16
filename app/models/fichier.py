@@ -21,13 +21,15 @@ class FICHIER(db.Model):
     id_Utilisateur = mapped_column(UUID(as_uuid=True))
     
     def to_dict(self):
-       result = {}
-       for c in self.__table__.columns:
-           if c.name == 'date_Fichier':
-               result[c.name] = self.date_Fichier.strftime('%d/%m/%Y %H:%M:%S:%f')
-           else:
+        result = {}
+        for c in self.__table__.columns:
+            if c.name == 'date_Fichier':
+                result[c.name] = self.date_Fichier.strftime('%d/%m/%Y %H:%M:%S:%f')
+            elif c.name == 'id_Utilisateur':
+                result[c.name] = str(getattr(self, c.name))
+            else:
                result[c.name] = getattr(self, c.name)
-       return result
+        return result
 
     DOSSIER_: Mapped[Optional['DOSSIER']] = relationship('DOSSIER', back_populates='FICHIER')
     UTILISATEUR_: Mapped[List['UTILISATEUR']] = relationship('UTILISATEUR', secondary='FAVORIS', back_populates='FICHIER_')

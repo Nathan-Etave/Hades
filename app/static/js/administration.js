@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let fileInput = document.querySelectorAll('.file-input');
     let fileTotal = 0;
     let fileUploadTotal = 0;
+    let maxFilesUploads = 999;
+    let currentFilesUploads = 0;
     const initialFiles = {};
     let filesCheckboxes = Array.from(document.querySelectorAll('.file-checkbox'));
 
@@ -1284,11 +1286,28 @@ document.addEventListener('DOMContentLoaded', function () {
             let folderId = event.target.dataset.folder;
             let files = event.target.files;
             fileTotal += files.length;
-            for (let file of files) {
-                await uploadFile(file, folderId, tags);
-
-            }
             event.target.value = '';
+            if (files.length + currentFilesUploads > maxFilesUploads) {
+                fileTotal -= files.length;
+                dialogQueue.push({
+                    type: DIALOG_TYPES.ALERT,
+                    dialogOptions: {
+                        position: 'top-end',
+                        icon: 'error',
+                        title: `Vous ne pouvez pas téléverser plus de ${maxFilesUploads} fichiers à la fois.`,
+                        showConfirmButton: false,
+                        timer: 2000,
+                        backdrop: false
+                    }
+                });
+                showNextDialog();
+                return;
+            }
+            for (let file of files) {
+                currentFilesUploads++;
+                await uploadFile(file, folderId, tags);
+                currentFilesUploads--;
+            }
         });
     });
 
