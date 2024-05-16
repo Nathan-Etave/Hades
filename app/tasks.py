@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime
 from app.extensions import celery, redis
@@ -5,6 +6,7 @@ from app import create_app
 from celery import current_task
 from app.utils import FileReader, NLPProcessor, Whoosh
 from fasteners import InterProcessLock
+from app.models import FICHIER
 
 @celery.task(name='app.tasks.process_file')
 def process_file(file_path, filename, folder_id, file_id, user_tags, current_user, file, folder, action):
@@ -30,3 +32,50 @@ def process_file(file_path, filename, folder_id, file_id, user_tags, current_use
         redis.incr('total_files_processed')
         redis.publish('process_status', json.dumps({'total_files': redis.get('total_files').decode('utf-8'), 'total_files_processed': redis.get('total_files_processed').decode('utf-8')}))
         redis.delete(f'worker:{worker_name}')
+
+@celery.task(name='app.tasks.verify_index')
+def verify_index(current_user_dict):
+    app = create_app(is_worker=True)
+    with app.app_context():
+        with InterProcessLock(f"{app.root_path}/storage/index/whoosh.lock"):
+            woosh_documents = Whoosh().get_all_documents()
+        database_documents = FICHIER.query.all()
+        for woosh_document in woosh_documents:
+            if str(woosh_document["id"]) not in [
+                str(database_document.id_Fichier)
+                for database_document in database_documents
+            ]:
+                Whoosh().delete_document(woosh_document["id"])
+        for database_document in database_documents:
+            file_path = os.path.join(
+                app.root_path,
+                "storage",
+                "files",
+                str(database_document.id_Dossier),
+                f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+            )
+            if os.path.exists(file_path):
+                with InterProcessLock(f"{app.root_path}/storage/index/whoosh.lock"):
+                    if not Whoosh().document_exists(str(database_document.id_Fichier)):
+                        process_file.apply_async(
+                            args=[
+                                os.path.join(
+                                    app.root_path,
+                                    "storage",
+                                    "files",
+                                    str(database_document.id_Dossier),
+                                    f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+                                ),
+                                database_document.nom_Fichier,
+                                str(database_document.id_Dossier),
+                                str(database_document.id_Fichier),
+                                "",
+                                current_user_dict,
+                                database_document.to_dict(),
+                                database_document.DOSSIER_.to_dict(),
+                                False,
+                            ]
+                        )
+            else:
+                with InterProcessLock(f"{app.root_path}/storage/index/whoosh.lock"):
+                    Whoosh().delete_document(str(database_document.id_Fichier))
