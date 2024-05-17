@@ -5,7 +5,6 @@ import string
 import json
 from smtplib import SMTPException
 from flask import render_template, request, jsonify
-from flask_bcrypt import generate_password_hash
 from flask_login import login_required, current_user
 from app.notifications import bp
 from app.mail import (
@@ -18,8 +17,9 @@ from app.decorators import admin_required, active_required
 from app.models.notification import NOTIFICATION
 from app.models.utilisateur import UTILISATEUR
 from app.models.role import ROLE
+from app.models.fichier import FICHIER
 from app.utils import check_notitications
-from app.extensions import redis, socketio, db
+from app.extensions import socketio, db
 from datetime import datetime
 
 @socketio.on('connect', namespace='/notifications')
@@ -34,13 +34,13 @@ def notifications():
         all_notifications, key=lambda x: x.datetime_Notification, reverse=True
     )
     roles = ROLE.query.all()
-    processed_files = redis.lrange('processed_files', 0, -1)
-    processed_files = [json.loads(file) for file in processed_files if file is not None]
-    processed_files.sort(key=lambda file: file['file']['date_Fichier'], reverse=True)
+    processed_files = FICHIER.query.filter(FICHIER.est_Indexe_Fichier == 1).all()
+    processed_files = [{'file' : file.to_dict(), 'folder' : file.DOSSIER_.to_dict(), 'user' : file.AUTEUR.to_dict_secure()} for file in processed_files]
     for file in processed_files:
         date_str = file['file']['date_Fichier'].split(':')[0] + ':' + file['file']['date_Fichier'].split(':')[1]
         file['file']['date_Fichier'] = datetime.strptime(date_str, '%d/%m/%Y %H:%M').strftime('%d/%m/%Y %H:%M')
         file['folder']['nom_Dossier'] = file['folder']['nom_Dossier']
+    processed_files.sort(key=lambda file: file['file']['date_Fichier'], reverse=True)
     return render_template(
         "notifications/index.html",
         notifications=all_notifications,
