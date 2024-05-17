@@ -66,9 +66,6 @@ def administration():
 @active_required
 @admin_required
 def upload():
-    if redis.get("total_files") == redis.get("total_files_processed"):
-        redis.set("total_files", 0)
-        redis.set("total_files_processed", 0)
     json_data = request.get_json()
     folder_id = json_data.get("folderId")
     folder = DOSSIER.query.get(folder_id)
@@ -79,11 +76,7 @@ def upload():
     existing_file = FICHIER.query.filter_by(nom_Fichier=filename).first()
     force = json_data.get("force")
     if existing_file is not None:
-        processed_files = redis.lrange("processed_files", 0, -1)
-        processed_files = [
-            json.loads(file.decode("utf-8"))["filename"] for file in processed_files
-        ]
-        if existing_file.nom_Fichier not in processed_files:
+        if not existing_file.est_Indexe_Fichier:
             return (
                 jsonify(
                     {
@@ -152,7 +145,6 @@ def upload():
             force,
         ]
     )
-    redis.incr("total_files")
     redis.rpush(
         "files_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
     )
@@ -187,15 +179,14 @@ def connect():
 
     socketio.emit(
         "total_files",
-        redis.get("total_files").decode("utf-8"),
+        FICHIER.query.count(),
         namespace="/administration",
     )
     socketio.emit(
         "total_files_processed",
-        redis.get("total_files_processed").decode("utf-8"),
+        FICHIER.query.filter(FICHIER.est_Indexe_Fichier == 1).count(),
         namespace="/administration",
     )
-
 
 @socketio.on("search_files", namespace="/administration")
 def search_files(data):
@@ -793,12 +784,8 @@ def delete_files(data):
         )
         return
     file_ids = data.get("fileIds")
-    processed_files = redis.lrange("processed_files", 0, -1)
-    processed_files_ids = [
-        json.loads(file.decode("utf-8"))["file_id"] for file in processed_files
-    ]
     for file_id in file_ids:
-        if file_id not in processed_files_ids:
+        if not FICHIER.query.get(file_id).est_Indexe_Fichier:
             socketio.emit(
                 "files_not_deleted",
                 {
@@ -827,9 +814,6 @@ def delete_files(data):
         db.session.commit()
         for file_path in file_paths:
             os.remove(file_path)
-        for file in processed_files:
-            if json.loads(file.decode("utf-8"))["file_id"] in file_ids:
-                redis.lrem("processed_files", 0, file)
     except Exception as e:
         db.session.rollback()
         socketio.emit(
@@ -853,11 +837,6 @@ def delete_file(file_id):
             f"{file_id}.{database_file.extension_Fichier}",
         )
     )
-    processed_files = redis.lrange("processed_files", 0, -1)
-    for file in processed_files:
-        if json.loads(file.decode("utf-8"))["file_id"] == file_id:
-            redis.lrem("processed_files", 0, file)
-            break
     db.session.commit()
 
 
@@ -949,6 +928,11 @@ def verify_index_socket():
             room=f"user_{current_user.id_Utilisateur}",
         )
         return
+    workers = redis.keys("worker:*") if len(redis.keys("worker:*")) > 0 else []
+    for file in redis.lrange("files_queue", 0, -1):
+        file = json.loads(file.decode("utf-8"))
+        if FICHIER.query.get(file["file_id"]).est_Indexe_Fichier or len(workers) == 0:
+            redis.lrem("files_queue", 0, json.dumps(file))
     if redis.llen("files_queue") > 0:
         socketio.emit(
             "index_not_verified",

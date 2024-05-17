@@ -62,7 +62,7 @@
     <h1 class="text-center">Historique</h1>
     <div class="container mt-4 mb-5" style="{% if display_notification %} height: 60vh; {% else %} height: 70vh; {% endif %} overflow-y: auto; border-radius: 1rem; border: solid 2px;" id="historyContainer">
         {% for file in processed_files %}
-        <div class="d-flex hover-underline file-text-notification notification-preview" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}">
+        <div class="d-flex hover-underline file-text-notification notification-preview" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder']['id_Dossier'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['file']['nom_Fichier'] }}">
             <p style="font-size: 1.1rem;" class="file-text-notification">
                 <span style="font-weight: bold; color: #007BFF;">[{{ file['file']['date_Fichier'] }}] </span>
                 <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;" id="file-name">{{ file['file']['nom_Fichier'] }}</span>" </span>

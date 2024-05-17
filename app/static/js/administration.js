@@ -1278,13 +1278,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCancelButton: true,
             });
             if (tags === undefined) {
-                event.target.value = '';
+                input.type = '';
+                input.type = 'file';
                 return;
             }
             let folderId = event.target.dataset.folder;
             let files = event.target.files;
             fileTotal += files.length;
-            event.target.value = '';
+            input.type = '';
+            input.type = 'file';
             for (let file of files) {
                 await uploadFile(file, folderId, tags);
             }

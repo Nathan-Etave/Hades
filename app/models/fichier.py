@@ -19,6 +19,7 @@ class FICHIER(db.Model):
     extension_Fichier = mapped_column(String(255))
     date_Fichier = mapped_column(DateTime, default=datetime.now())
     id_Utilisateur = mapped_column(UUID(as_uuid=True))
+    est_Indexe_Fichier = mapped_column(Integer, default=0)
     
     def to_dict(self):
         result = {}
