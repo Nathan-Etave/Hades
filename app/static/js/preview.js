@@ -23,7 +23,12 @@ export function previewAfterRender() {
             const folderId = target.dataset.folder;
             const fileType = target.dataset.type;
             let previewModalLabel = document.querySelector('#previewModalLabel');
-            previewModalLabel.innerHTML = target.querySelector('p').textContent;
+            if (target.className.includes('notification-preview')) {
+                previewModalLabel.innerHTML = target.querySelector('#file-name').textContent;
+            }
+            else {
+                previewModalLabel.innerHTML = target.querySelector('p').textContent;
+            }
             const modalBody = document.querySelector('#previewModal').querySelector('.modal-body');
             modalBody.innerHTML = '';
 
