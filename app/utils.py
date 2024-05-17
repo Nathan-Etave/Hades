@@ -359,7 +359,7 @@ class FileDownloader(metaclass=SingletonMeta):
                 database_folder = db.session.query(DOSSIER).filter(DOSSIER.id_Dossier == folder_id).first()
                 for file in files_by_folder[folder_id]:
                     file_path = os.path.join(current_app.root_path, 'storage', 'files', str(folder_id), f'{file.id_Fichier}.{file.extension_Fichier}')
-                    zip_file.write(file_path, arcname=os.path.join(database_folder.nom_Dossier.replace('/', '-'), f'{file.nom_Fichier}.{file.extension_Fichier}'))
+                    zip_file.write(file_path, arcname=os.path.join(database_folder.nom_Dossier.replace('/', '-'), f'{file.nom_Fichier}'))
         return zip_path
 
 def check_notitications():

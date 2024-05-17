@@ -86,7 +86,7 @@
                 {{ render_folder(sub_folder) }}
                 {% endfor %}
             </div>
-            <div class="accordion mt-2 pt-2" id="filesAccordion{{ folder.id_Dossier }}"
+            <div class="accordion mt-2 pt-2  filesContainer" id="filesAccordion{{ folder.id_Dossier }}"
                 style="height: 50vh; overflow: auto;">
                 {% for file in folder.FICHIER %}
                 <div class="card mt-1 mb-1 me-2 file" id="file-{{ file.id_Fichier }}">
@@ -181,7 +181,7 @@
 <div class="container-fluid" style="margin: unset;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <h3 class="text-center">Gestion des documents</h3>
+            <h3 class="text-center">Gestion des fichiers</h3>
             <div class="text-end">
                 <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseWorkers" aria-expanded="false" title="Afficher les workers"
