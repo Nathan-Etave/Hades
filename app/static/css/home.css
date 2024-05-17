@@ -44,7 +44,7 @@
 }
 
 #aside-researches,
-#aside-favorites {
+#asideFavorites {
     height: 40vh;
     overflow-y: auto;
 }
