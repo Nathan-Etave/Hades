@@ -3,10 +3,17 @@ export function previewAfterRender() {
     if (!previewModal) {
         previewModal = new bootstrap.Modal(document.querySelector('#previewModal'));
     }
-    const files = document.querySelectorAll('#file');
-    files.forEach((file) => {
-        file.addEventListener('click', async function (event) {
+    const folders = Array.from(document.querySelectorAll('#folder'));
+    const additionalFolders = ['#asideFavorites', '#deskSection', '#historyContainer']
+    .map(selector => document.querySelector(selector))
+    .filter(element => element !== null);
+    folders.push(...additionalFolders);
+    folders.forEach(folder => {
+        folder.addEventListener('click', async (event) => {
             let target = event.target;
+            if (!target.closest('#file')) {
+                return;
+            }
             if (event.target.className.includes('file-text-notification') || event.target.parentElement.className.includes('file-text-notification')) {
                 return;
             }

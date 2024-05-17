@@ -16,14 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const userId = document.querySelector('meta[name="current-user"]').content;
     socket.on('connect', function () {
         socket.emit('join', { room: `user_${userId}` });
+        // emit event to get files details
+        socket.emit('get_files_details', { 'files': deskList });
     });
-
-    // emit event to get files details
-    socket.emit('get_files_details', { 'files': deskList });
 
     // Handle the display of the desktop
     let currentFile = 0;
-    let desktop = document.getElementById('desk-section');
+    let desktop = document.getElementById('deskSection');
     socket.on('files_details', function (data) {
         let modalFooter = document.querySelector('.nav-tabs');
         desktop.innerHTML = '';

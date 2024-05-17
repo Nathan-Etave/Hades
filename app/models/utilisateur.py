@@ -23,13 +23,17 @@ class UTILISATEUR(db.Model, UserMixin):
 
     def get_id(self):
         return self.id_Utilisateur
-    
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-    
+
     def to_dict_secure(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns if c.name not in ['email_Utilisateur', 'mdp_Utilisateur', 'telephone_Utilisateur']}
-    
+        result = {}
+        for c in self.__table__.columns:
+            if c.name not in ['email_Utilisateur', 'mdp_Utilisateur', 'telephone_Utilisateur']:
+                if c.name == 'id_Utilisateur':
+                    result[c.name] = str(getattr(self, c.name))
+                else:
+                    result[c.name] = getattr(self, c.name)
+        return result
+
     def is_admin(self):
         return self.id_Role != 4
 

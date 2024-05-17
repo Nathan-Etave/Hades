@@ -5,7 +5,7 @@ import uuid
 from base64 import b64decode
 from app.extensions import redis, socketio, db
 from app.administration import bp
-from app.tasks import process_file
+from app.tasks import process_file, verify_index
 from unidecode import unidecode
 from flask import render_template, request, current_app, jsonify
 from flask_login import current_user, login_required
@@ -135,7 +135,6 @@ def upload():
         storage_directory, folder_id, f"{file.id_Fichier}.{file.extension_Fichier}"
     )
     current_user_dict = current_user.to_dict_secure()
-    current_user_dict.update({"id_Utilisateur": str(current_user.id_Utilisateur)})
     file_dict = file.to_dict()
     file_dict.update({'id_Utilisateur': str(file.id_Utilisateur)})
     with open(file_path, "wb") as new_file:
@@ -155,7 +154,7 @@ def upload():
     )
     redis.incr("total_files")
     redis.rpush(
-        "file_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
+        "files_queue", json.dumps({"file_id": file.id_Fichier, "filename": filename})
     )
     file_dict = file.to_dict()
     file_dict.update(
@@ -930,9 +929,8 @@ def create_link(data):
         room=f"user_{current_user.id_Utilisateur}",
     )
 
-
 @socketio.on("verify_index", namespace="/administration")
-def verify_index():
+def verify_index_socket():
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "index_not_verified",
@@ -951,46 +949,14 @@ def verify_index():
             room=f"user_{current_user.id_Utilisateur}",
         )
         return
-    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
-        woosh_documents = Whoosh().get_all_documents()
-    database_documents = FICHIER.query.all()
-    for woosh_document in woosh_documents:
-        if str(woosh_document["id"]) not in [
-            str(database_document.id_Fichier)
-            for database_document in database_documents
-        ]:
-            Whoosh().delete_document(woosh_document["id"])
-    for database_document in database_documents:
-        file_path = os.path.join(
-            current_app.root_path,
-            "storage",
-            "files",
-            str(database_document.id_Dossier),
-            f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
+    if redis.llen("files_queue") > 0:
+        socketio.emit(
+            "index_not_verified",
+            {
+                "error": "Un ou plusieurs fichiers sont en cours de traitement. Veuillez réessayer ultérieurement."
+            },
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
-        if os.path.exists(file_path):
-            with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
-                if not Whoosh().document_exists(str(database_document.id_Fichier)):
-                    process_file.apply_async(
-                        args=[
-                            os.path.join(
-                                current_app.root_path,
-                                "storage",
-                                "files",
-                                str(database_document.id_Dossier),
-                                f"{database_document.id_Fichier}.{database_document.extension_Fichier}",
-                            ),
-                            database_document.nom_Fichier,
-                            str(database_document.id_Dossier),
-                            str(database_document.id_Fichier),
-                            "",
-                            current_user.to_dict_secure(),
-                            database_document.to_dict(),
-                            database_document.DOSSIER_.to_dict(),
-                            False,
-                        ]
-                    )
-        else:
-            with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
-                Whoosh().delete_document(str(database_document.id_Fichier))
-
+        return
+    verify_index.apply_async(args=[current_user.to_dict_secure()])
