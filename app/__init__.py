@@ -16,7 +16,7 @@ from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
 from app.models.lien import LIEN
-from app.extensions import redis, socketio, crsf, login_manager, celery, db
+from app.extensions import redis, socketio, crsf, login_manager, celery, db, compress
 
 def create_app(config_class = Config, is_worker=False):
     from app.register import bp as register_bp
@@ -61,6 +61,8 @@ def create_app(config_class = Config, is_worker=False):
     celery.conf.update(app.config)
 
     redis.init_app(app)
+
+    compress.init_app(app)
 
     if not is_worker:
         def handle_worker_status_message(message):
