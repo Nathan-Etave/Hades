@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         `;
     
-        let favPanel = document.getElementById("aside-favorites");
+        let favPanel = document.getElementById("asideFavorites");
         favPanel.appendChild(div);
         panelAfterRender();
         desktopAfterRender();

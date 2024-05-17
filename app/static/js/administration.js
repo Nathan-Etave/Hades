@@ -1284,11 +1284,10 @@ document.addEventListener('DOMContentLoaded', function () {
             let folderId = event.target.dataset.folder;
             let files = event.target.files;
             fileTotal += files.length;
+            event.target.value = '';
             for (let file of files) {
                 await uploadFile(file, folderId, tags);
-
             }
-            event.target.value = '';
         });
     });
 
