@@ -3,6 +3,36 @@ import { previewAfterRender } from './preview.js';
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    //handle the lazy loading of the icons
+    let lazyIconObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                let icon = entry.target;
+                let newIcon = document.createElement('i');
+                newIcon.className = icon.getAttribute('data-icon');
+                if (newIcon.classList.contains('fa-star')) {
+                    newIcon.style.color = '#FFD43B';
+                    newIcon.id = "fav-" + icon.id;
+                    applyFavoriEvent(icon, newIcon); 
+                }
+                else if (newIcon.className.includes('fa-square')) {
+                    newIcon.id = "desk-" + icon.id;
+                }
+                icon.appendChild(newIcon);
+                if (newIcon.className.includes('fa-square')) {
+                    desktopAfterRender(icon.id);
+                }
+                lazyIconObserver.unobserve(icon);
+            }
+        });
+    });
+
+    var lazyIcons = [].slice.call(document.querySelectorAll('.icon-placeholder'));
+
+    lazyIcons.forEach(function(lazyIcon) {
+        lazyIconObserver.observe(lazyIcon);
+    });
+
     let btn_and = document.getElementById("btn_and");
     let btn_or = document.getElementById("btn_or");
     let search_bar = document.getElementById("search-bar");
@@ -58,9 +88,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to apply the JS to the desktop buton after the render
-    function desktopAfterRender() {
+    function desktopAfterRender(fileId, home = false) {
+
         // Get the desktop list from the local storage
-        let desktops = document.querySelectorAll('.desktop');
         let deskList = JSON.parse(localStorage.getItem('desktop'));
         if (deskList === null) {
             deskList = [];
@@ -68,114 +98,119 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Handle the desktop add/remove button from the side panel and the search results
-        desktops.forEach(
-            desktop => {
-                let fileId = desktop.id;
-                let deskBtn = document.getElementById("desk-" + fileId);
-                let deskHomeBtn = document.getElementById("desk-home-" + fileId); 
-                if (deskList.includes(fileId)) {
-                    desktop.className = "desktop-true";
-                    deskBtn.className = "fa-regular fa-square-minus fa-lg";
-                    if (deskHomeBtn !== null) {
-                        deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
-                    }
-                }
-                else {
-                    desktop.className = "desktop-false";
-                }
-                desktop.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    let newDeskList = JSON.parse(localStorage.getItem('desktop'));
-                    let deskHomeBtn = document.getElementById("desk-home-" + fileId);
-                    if (desktop.className === "desktop-true") {
-                        newDeskList = newDeskList.filter(file => file !== fileId);
-                        localStorage.setItem('desktop', JSON.stringify(newDeskList));
-                        desktop.className = "desktop-false";
-                        deskBtn.className = "fa-regular fa-square-plus fa-lg";
-                        if (deskHomeBtn !== null) {
-                            deskHomeBtn.className = "fa-regular fa-square-plus fa-lg";
-                        }
-                    }
-                    else {
-                        newDeskList.push(fileId);
-                        localStorage.setItem('desktop', JSON.stringify(newDeskList));
-                        desktop.className = "desktop-true";
-                        deskBtn.className = "fa-regular fa-square-minus fa-lg";
-                        if (deskHomeBtn !== null) {
-                            deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
-                        }
-                    }
-                    baseAfterRender(newDeskList.length);
-                });
+        let desktop;
+        if (home) {
+            desktop = document.querySelector(".desktop-home-"+fileId);
+        }
+        else {
+            desktop = document.querySelector(".desktop-"+fileId);
+        }
+        let deskBtn = document.getElementById("desk-" + fileId);
+        let deskHomeBtn = document.getElementById("desk-home-" + fileId); 
+        if (deskList.includes(fileId)) {
+            desktop.className = "desktop-true";
+            if (deskBtn !== null) {
+                deskBtn.className = "fa-regular fa-square-minus fa-lg";
             }
-        );
-    }
+            if (deskHomeBtn !== null) {
+                deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+            }
+        }
+        else {
+            desktop.className = "desktop-false";
+        }
+        desktop.addEventListener('click', function (event) {
+            event.preventDefault();
+            let newDeskList = JSON.parse(localStorage.getItem('desktop'));
+            let deskHomeBtn = document.getElementById("desk-home-" + fileId);
+            if (desktop.className === "desktop-true") {
+                newDeskList = newDeskList.filter(file => file !== fileId);
+                localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                desktop.className = "desktop-false";
+                if (deskBtn !== null) {
+                    deskBtn.className = "fa-regular fa-square-plus fa-lg";
+                }
+                if (deskHomeBtn !== null) {
+                    deskHomeBtn.className = "fa-regular fa-square-plus fa-lg";
+                }
+            }
+            else {
+                newDeskList.push(fileId);
+                localStorage.setItem('desktop', JSON.stringify(newDeskList));
+                desktop.className = "desktop-true";
+                if (deskBtn !== null) {
+                    deskBtn.className = "fa-regular fa-square-minus fa-lg";
+                }
+                if (deskHomeBtn !== null) {
+                    deskHomeBtn.className = "fa-regular fa-square-minus fa-lg";
+                }
+            }
+            baseAfterRender(newDeskList.length);
+        });
+    };
 
     //apply the JS the first time
     panelAfterRender();
-    desktopAfterRender();
 
-    // Handle favori in the search results
-    let favs = document.querySelectorAll('.favori');
-        favs.forEach(function (fav) {
-            let id = fav.id;
-            let isFav = fav.getAttribute('is-fav');
-            let etoile = document.getElementById("fav-" + id);
-            if (isFav === "True") {
-                fav.className = "favori-true";
+    // Function to apply the JS to the favoris
+    function applyFavoriEvent(fav, etoile){
+        let id = fav.id;
+        let isFav = fav.getAttribute('is-fav');
+        if (isFav === "True") {
+            fav.className = "favori-true";
+        }
+        else {
+            fav.className = "favori-false";
+            etoile.className = "fa-regular fa-star fa-lg me-2";
+        }
+        fav.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (fav.className === "favori-true") {
+                fetch("favori/" + id, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                    .then(data => {
+                        if (data.status === 200) {
+                            fav.className = "favori-false";
+                            etoile.className = "fa-regular fa-star fa-lg me-2";
+                            let favTile = document.querySelector(".fav" + id);
+                            if (favTile !== null) {
+                                favTile.remove();
+                            }
+                        }
+                        else {
+                            createErrorAlertMessage("Erreur lors de la suppression du favori.", data.body);
+                        }
+                    });
             }
             else {
-                fav.className = "favori-false";
-                etoile.className = "fa-regular fa-star fa-lg me-2";
+                fetch("favori/" + id, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                    .then(data => {
+                        if (data.status === 200) {
+                            fav.className = "favori-true";
+                            etoile.className = "fa-solid fa-star fa-lg me-2";
+                            let elem = fav.parentElement.parentElement.querySelector("#file");
+                            displayFav(elem.getAttribute("data-file"), elem.getAttribute("data-name"), elem.getAttribute("data-folder"), elem.getAttribute("data-type"));
+                        }
+                        else {
+                            createErrorAlertMessage("Erreur lors de l'ajout du favori.", data.body);
+                        }
+                    });
             }
-            fav.addEventListener('click', function (event) {
-                event.preventDefault();
-                if (fav.className === "favori-true") {
-                    fetch("favori/" + id, {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                            'X-CSRFToken': csrfToken
-                        }
-                    })
-                        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                        .then(data => {
-                            if (data.status === 200) {
-                                fav.className = "favori-false";
-                                etoile.className = "fa-regular fa-star fa-lg me-2";
-                                let favTile = document.querySelector(".fav" + id);
-                                if (favTile !== null) {
-                                    favTile.remove();
-                                }
-                            }
-                            else {
-                                createErrorAlertMessage("Erreur lors de la suppression du favori.", data.body);
-                            }
-                        });
-                }
-                else {
-                    fetch("favori/" + id, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            'X-CSRFToken': csrfToken
-                        }
-                    })
-                        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                        .then(data => {
-                            if (data.status === 200) {
-                                fav.className = "favori-true";
-                                etoile.className = "fa-solid fa-star fa-lg me-2";
-                                let elem = fav.parentElement.parentElement.querySelector("#file");
-                                displayFav(elem.getAttribute("data-file"), elem.getAttribute("data-name"), elem.getAttribute("data-folder"), elem.getAttribute("data-type"));
-                            }
-                            else {
-                                createErrorAlertMessage("Erreur lors de l'ajout du favori.", data.body);
-                            }
-                        });
-                }
-            });
         });
+    }
 
     // Function to display a new favorite in the side panel
     function displayFav(id, name, id_folder, extension) {
@@ -190,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <a href="#" id="${id}" class="favori-home" onclick="event.stopPropagation();">
                         <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
                     </a>
-                    <a href="#" id="${id}" class="desktop" onclick="event.stopPropagation();">
+                    <a href="#" id="${id}" class="desktop-home-${id}" onclick="event.stopPropagation();">
                         <i class="fa-regular fa-square-plus fa-lg" id="desk-home-${id}"></i>
                     </a>
                 </div>
@@ -200,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let favPanel = document.getElementById("asideFavorites");
         favPanel.appendChild(div);
         panelAfterRender();
-        desktopAfterRender();
+        desktopAfterRender(id, true);
         previewAfterRender();
     }
 
@@ -216,8 +251,10 @@ document.addEventListener('DOMContentLoaded', function () {
         accordion => {
             let accordionElement = document.getElementById(accordion);
             let accordionButton = document.getElementById(accordion + "-button");
-            accordionElement.classList.add('show');
-            accordionButton.setAttribute('aria-expanded', 'true');
+            if (accordionElement !== null && accordionButton !== null) {
+                accordionElement.classList.add('show');
+                accordionButton.setAttribute('aria-expanded', 'true');
+            }
         }
     );
 
