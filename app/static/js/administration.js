@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             text: data.error,
                             icon: 'error',
                             showConfirmButton: false,
-                            timer: 2000,
+                            timer: 2500,
                             backdrop: false
                         }
                     });
@@ -440,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             icon: 'error',
                             title: 'Veuillez attendre la fin du téléversement des fichiers avant d\'archiver un classeur.',
                             showConfirmButton: false,
-                            timer: 2000,
+                            timer: 2500,
                             backdrop: false
                         }
                     });
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Les fichiers sélectionnés ne sont pas tous dans les classeurs sélectionnés.',
                         showConfirmButton: false,
-                        timer: 2000,
+                        timer: 2500,
                         backdrop: false
                     }
                 });
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un fichier.',
                         showConfirmButton: false,
-                        timer: 2000,
+                        timer: 2500,
                         backdrop: false
                     }
                 });
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez sélectionner au moins un fichier.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de créer un classeur.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -766,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de modifier un classeur.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez attendre la fin du téléversement des fichiers avant de supprimer un classeur.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -804,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez sélectionner un classeur.',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false
                 }
             });
@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     icon: 'error',
                     title: 'Veuillez remplir tous les champs (Nom et URL).',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     backdrop: false,
                 }
             });
@@ -907,7 +907,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -940,7 +940,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -965,7 +965,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -982,7 +982,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: data.message,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -1019,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La création du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1039,7 +1039,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La modification du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1059,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `La suppression du classeur a échoué.`,
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1079,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'L\'archivage des classeurs a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1100,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Fichier(s) supprimé(s) avec succès.',
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1116,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'La suppression des fichiers a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1131,7 +1131,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Lien supprimé avec succès.',
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -1153,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'error',
                 title: 'La suppression du lien a échoué.',
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -1169,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'success',
                 title: 'Lien créé avec succès.',
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             },
             data: data
@@ -1223,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'La création du lien a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1239,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'La vérification de l\'index a échoué.',
                 text: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
@@ -1254,12 +1254,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'warning',
                 title: data.error,
                 showConfirmButton: false,
-                timer: 2000,
+                timer: 2500,
                 backdrop: false
             }
         });
         showNextDialog();
     })
+
+    socket.on('index_verification_started', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'info',
+                title: data.message,
+                showConfirmButton: false,
+                timer: 2500,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+        verifyIndexButton.disabled = true;
+        verifyIndexButton.innerHTML = 'Vérification de <br> l\'index en cours...';
+    });
+
+    socket.on('index_verification_success', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'success',
+                title: data.message,
+                showConfirmButton: false,
+                timer: 2500,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+        verifyIndexButton.disabled = false;
+        verifyIndexButton.innerHTML = 'Vérifier l\'intégrité<br>de l\'indexation';
+    });
 
     // Initialization
     checkboxes.forEach((checkbox) => {

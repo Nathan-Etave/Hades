@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
             title: message,
             text: data.error,
             showConfirmButton: false,
-            timer: 2000,
+            timer: 2500,
             backdrop: false
         });
     }

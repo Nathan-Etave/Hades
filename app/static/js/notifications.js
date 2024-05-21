@@ -108,7 +108,7 @@ async function createAlertMessage(message, type, confirm = false) {
         text: message,
         position: 'top-end',
         showConfirmButton: confirm,
-        timer: 2000,
+        timer: 2500,
         backdrop: false
     })
 

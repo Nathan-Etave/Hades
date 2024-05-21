@@ -80,3 +80,7 @@ def verify_index(current_user_dict):
             else:
                 with InterProcessLock(f"{app.root_path}/storage/index/whoosh.lock"):
                     Whoosh().delete_document(str(database_document.id_Fichier))
+                db.session.delete(database_document)
+                db.session.commit()
+        redis.publish('index_verification_success', json.dumps({'message': 'La vérification de l\'index a été effectuée avec succès.',
+                                                                'user': current_user_dict['id_Utilisateur']}))
