@@ -100,7 +100,9 @@
                                     <i class="fas fa-file"></i>
                                 </div>
                                 <div>
-                                    <p class="mb-0">{{ file.nom_Fichier }}</p>
+                                    <p class="mb-0" title="Auteur: {{ file.AUTEUR.prenom_Utilisateur }} {{ file.AUTEUR.nom_Utilisateur }}&#013;Date: {{ file.date_Fichier.strftime('%Y-%m-%d %H:%M')}}">
+                                        {{ file.nom_Fichier }}
+                                    </p>
                                 </div>
                             </div>
                             <div class="me-2 d-flex">

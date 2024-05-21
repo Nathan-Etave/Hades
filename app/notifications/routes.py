@@ -34,7 +34,7 @@ def notifications():
         all_notifications, key=lambda x: x.datetime_Notification, reverse=True
     )
     roles = ROLE.query.all()
-    processed_files = FICHIER.query.filter(FICHIER.est_Indexe_Fichier == 1).all()
+    processed_files = FICHIER.query.filter(FICHIER.est_Indexe_Fichier == 1).limit(200).all()
     processed_files = [{'file' : file.to_dict(), 'folder' : file.DOSSIER_.to_dict(), 'user' : file.AUTEUR.to_dict_secure()} for file in processed_files]
     for file in processed_files:
         date_str = file['file']['date_Fichier'].split(':')[0] + ':' + file['file']['date_Fichier'].split(':')[1]

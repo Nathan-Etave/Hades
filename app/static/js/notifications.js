@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <span style="font-weight: bold; color: #007BFF;">[${data.file.date_Fichier}] </span>
             <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;">${data.file.nom_Fichier}</span>" </span>
             <span>a été ${data.action === true ? 'réécrit' : 'ajouté'} dans le classeur "<span style="color: #ecb900;">${data.folder.nom_Dossier}</span>" par 
-            <span style="color: #dc3545;">${data.user.nom_Utilisateur} ${data.user.prenom_Utilisateur}.</span>
+            <span style="color: #dc3545;">${data.user.prenom_Utilisateur} ${data.user.nom_Utilisateur}.</span>
             </span>
         </p>
         `;
