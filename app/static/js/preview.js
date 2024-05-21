@@ -31,7 +31,7 @@ export function previewAfterRender() {
             const fileType = target.dataset.type;
             let previewModalLabel = document.querySelector('#previewModalLabel');
             if (target.className.includes('notification-preview')) {
-                previewModalLabel.innerHTML = target.querySelector('#file-name').textContent;
+                previewModalLabel.innerHTML = target.querySelector('#filename').textContent;
             }
             else {
                 previewModalLabel.innerHTML = target.querySelector('p').textContent;
