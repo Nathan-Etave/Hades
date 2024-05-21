@@ -65,7 +65,7 @@
         <div class="d-flex hover-underline file-text-notification notification-preview" id="file" data-file="{{ file['file']['id_Fichier'] }}" data-folder="{{ file['folder_id'] }}" data-type="{{ file['file']['extension_Fichier'] }}" data-name="{{ file['filename'] }}">
             <p style="font-size: 1.1rem;" class="file-text-notification">
                 <span style="font-weight: bold; color: #007BFF;">[{{ file['file']['date_Fichier'] }}] </span>
-                <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;" id="file-name">{{ file['file']['nom_Fichier'] }}</span>" </span>
+                <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;" id="filename">{{ file['file']['nom_Fichier'] }}</span>" </span>
                 <span>a été 
                     {% if file['action'] %}
                         réécrit 
