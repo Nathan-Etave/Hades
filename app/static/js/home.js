@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Handle favori in the side panel
         let favorites_btn = document.querySelectorAll(".favori-home");
         favorites_btn.forEach(function (btn) {
-            btn.addEventListener('click', function () {
+            btn.addEventListener('click', function (event) {
+                event.preventDefault();
                 let id = btn.id;
                 let url = "/favori/" + id;
                 fetch(url, {
@@ -151,6 +152,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //apply the JS the first time
     panelAfterRender();
+    let deskHomes = document.querySelectorAll(".desktop-home");
+    deskHomes.forEach(function (deskHome) {
+        console.log(deskHome);
+        desktopAfterRender(deskHome.id, true);
+    });
 
     // Function to apply the JS to the favoris
     function applyFavoriEvent(fav, etoile){
