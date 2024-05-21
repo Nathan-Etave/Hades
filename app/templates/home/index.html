@@ -143,7 +143,7 @@
         {{ form.hidden_tag() }}
         <div class="d-flex" id="search">
             {{ form.search(placeholder="Recherche", id="search-bar", value=query) }}
-            <button type="submit" id="search_btn"><i class="fa-solid fa-magnifying-glass fa-xl"></i></button>
+            <button type="submit" id="search_btn"><i class="fa-solid fa-magnifying-glass fa-xl fa-flip"></i></button>
         </div>
         <div class="d-flex mt-3">
             <button type="button" class="btn btn-light me-2" id="btn_and">ET</button>
@@ -207,7 +207,7 @@
                             <a href="#" id="{{ favori.id_Fichier }}" class="favori-home" onclick="event.stopPropagation();">
                                 <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
                             </a>
-                            <a href="#" id="{{ favori.id_Fichier }}" class="desktop-home-{{ favori.id_Fichier }}" onclick="event.stopPropagation();">
+                            <a href="#" id="{{ favori.id_Fichier }}" class="desktop-home-{{ favori.id_Fichier }} desktop-home" onclick="event.stopPropagation();">
                                 <i class="fa-regular fa-square-plus fa-lg" id="desk-home-{{ favori.id_Fichier }}"></i>
                             </a>
                         </div>
