@@ -81,7 +81,7 @@
                 {% for file in folder.files %}
                     <div class="card mt-1 mb-1 me-2 file-element" id="file-{{ file.id }}">
                         <div class="card-body">
-                            <div class="d-flex me-2 w-100 justify-content-center align-items-baseline" style="cursor: pointer;">
+                            <div class="d-flex me-2 w-100 justify-content-between align-items-baseline" style="cursor: pointer;">
                                 <div class="me-2 d-flex" style="flex-basis: -moz-available;" id="file" data-file="{{ file.id }}" data-folder="{{ folder.id }}" data-type="{{ file.extension }}" data-name="{{ file.title }}">
                                     <div class="me-2">
                                         <i class="fas fa-file"></i>
@@ -92,16 +92,9 @@
                                 </div>
                                 <!-- Display the download, favorite and desktop icons. -->
                                 <div class="me-2 d-flex">
-                                    <a href="/classeur/{{ folder.id }}/fichier/{{ file.id }}?as_attachment=true">
-                                        <i class="fa fa-download me-2" aria-hidden="true" style="cursor: pointer;" data-file="{{ file.id }}" data-folder="{{ folder.id }}"></i>
-                                    </a>
-                                    <a href="#" id="{{ file.id }}" class="favori" is-fav="{{ file.favori }}">
-                                        <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"
-                                            id="fav-{{ file.id }}"></i>
-                                    </a>
-                                    <a href="#" id="{{ file.id }}" class="desktop">
-                                        <i class="fa-regular fa-square-plus fa-lg" id="desk-{{ file.id }}"></i>
-                                    </a>
+                                    <a href="/classeur/{{ folder.id }}/fichier/{{ file.id }}?as_attachment=true" class="icon-placeholder" data-icon="fa fa-download me-2" data-file="{{ file.id }}" data-folder="{{ folder.id }}"></a>
+                                    <a href="#" id="{{ file.id }}" class="favori icon-placeholder" data-icon="fa-solid fa-star fa-lg me-2" is-fav="{{ file.favori }}"></a>
+                                    <a href="#" id="{{ file.id }}" class="desktop-{{ file.id }} icon-placeholder" data-icon="fa-regular fa-square-plus fa-lg"></a>
                                 </div>
                             </div>
                         </div>
@@ -214,7 +207,7 @@
                             <a href="#" id="{{ favori.id_Fichier }}" class="favori-home" onclick="event.stopPropagation();">
                                 <i class="fa-solid fa-star fa-lg me-2" style="color: #FFD43B;"></i>
                             </a>
-                            <a href="#" id="{{ favori.id_Fichier }}" class="desktop" onclick="event.stopPropagation();">
+                            <a href="#" id="{{ favori.id_Fichier }}" class="desktop-home-{{ favori.id_Fichier }}" onclick="event.stopPropagation();">
                                 <i class="fa-regular fa-square-plus fa-lg" id="desk-home-{{ favori.id_Fichier }}"></i>
                             </a>
                         </div>
