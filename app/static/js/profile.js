@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         icon: 'error',
                         title: 'Erreur lors de la déconnexion.',
                         showConfirmButton: false,
-                        timer: 2000,
+                        timer: 2500,
                         backdrop: false
                     })
                 }

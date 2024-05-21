@@ -10,10 +10,10 @@ x-hades-environment: &hades_environment
   DATABASE_URI: "sqlite:////app/storage/database/hades.db"
 
 services:
-  web1:
+  web:
     build: .
     image: hades:latest
-    command: gunicorn -b "0.0.0.0:8001" -k gevent --workers 1 --threads 2 'app:create_app()' --reload
+    command: gunicorn -b "0.0.0.0:8000" -k gevent --workers 1 --threads 2 'app:create_app()' --reload
     volumes:
       - .:/app
       - ./app/storage:/app/storage
@@ -22,34 +22,10 @@ services:
     restart: always
     environment:
       <<: *hades_environment
-  web2:
+  worker:
     build: .
     image: hades:latest
-    command: gunicorn -b "0.0.0.0:8002" -k gevent --workers 1 --threads 2 'app:create_app()' --reload
-    volumes:
-      - .:/app
-      - ./app/storage:/app/storage
-    depends_on:
-      - redis
-    restart: always
-    environment:
-      <<: *hades_environment
-  worker1:
-    build: .
-    image: hades:latest
-    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker1
-    volumes:
-      - .:/app
-      - ./app/storage:/app/storage
-    depends_on:
-      - redis
-    restart: always
-    environment:
-      <<: *hades_environment
-  worker2:
-    build: .
-    image: hades:latest
-    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker2
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker
     volumes:
       - .:/app
       - ./app/storage:/app/storage
@@ -72,6 +48,5 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - web1
-      - web2
+      - web
     restart: always

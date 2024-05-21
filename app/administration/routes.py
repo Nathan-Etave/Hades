@@ -310,7 +310,7 @@ def update_user_status(data):
     if not user.est_Actif_Utilisateur:
         try:
             send_deactivation_email(user.email_Utilisateur)
-        except Exception as e:
+        except Exception as _:
             socketio.emit(
                 "user_email_error",
                 {**data, "error": "Le statut de l'utilisateur à bien été désactivé, mais l'email de notification n'a pas pu être envoyé."},
@@ -383,7 +383,7 @@ def delete_user(data):
     )
     try:
         send_delete_email(user.email_Utilisateur)
-    except Exception as e:
+    except Exception as _:
         socketio.emit(
             "user_email_error",
             {**data, "error": "L'utilisateur à bien été supprimé, mais l'email de notification n'a pas pu être envoyé."},
@@ -812,14 +812,15 @@ def delete_files(data):
                 )
             )
         db.session.commit()
-        for file_path in file_paths:
-            os.remove(file_path)
     except Exception as e:
         db.session.rollback()
         socketio.emit(
             "files_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
         )
         return
+    for file_path in file_paths:
+        if os.path.exists(file_path):
+            os.remove(file_path)
     socketio.emit("files_deleted", {"fileIds": file_ids}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
 
 
@@ -944,3 +945,9 @@ def verify_index_socket():
         )
         return
     verify_index.apply_async(args=[current_user.to_dict_secure()])
+    socketio.emit(
+        "index_verification_started",
+        {"message": "La vérification de l'indexation des fichiers a commencé."},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
+    )

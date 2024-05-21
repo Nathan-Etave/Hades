@@ -76,10 +76,18 @@ def create_app(config_class = Config, is_worker=False):
                 socketio.emit('total_files', total_files, namespace='/administration')
                 socketio.emit('total_files_processed', total_files_processed, namespace='/administration')
 
+        def handle_index_verification_message(message):
+            data = json.loads(message['data'].decode('utf-8'))
+            socketio.emit('index_verification_success',
+                          {'message': data['message']},
+                          namespace='/administration',
+                          room=f'user_{data['user']}')
+
         pubsub = redis.pubsub()
         pubsub.subscribe(**{'worker_status': handle_worker_status_message})
         pubsub.subscribe(**{'process_status': handle_process_status_message})
         pubsub.subscribe(**{'file_processed': lambda message: socketio.emit('file_processed', json.loads(message['data'].decode('utf-8')), namespace='/notifications')})
+        pubsub.subscribe(**{'index_verification_success': handle_index_verification_message})
         pubsub.run_in_thread(sleep_time=0.5)
 
     @app.context_processor
