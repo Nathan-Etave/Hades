@@ -99,3 +99,7 @@ header {
     position: relative;
     bottom: 10px;
 }
+
+.fa-flip {
+    animation-duration: 4.5s !important;
+}
