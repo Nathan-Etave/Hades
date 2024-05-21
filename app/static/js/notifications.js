@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const historyContainer = document.querySelector('#historyContainer');
     socket.on('file_processed', (data) => {
         let div = document.createElement('div');
-        div.className = 'd-flex hover-underline file-text-notification';
+        div.className = 'd-flex hover-underline file-text-notification notification-preview';
         div.id = 'file';
         div.dataset.file = data.file.id_Fichier;
         div.dataset.folder = data.folder_id;
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         div.innerHTML = `
         <p style="font-size: 1.1rem;" class="file-text-notification">
             <span style="font-weight: bold; color: #007BFF;">[${data.file.date_Fichier}] </span>
-            <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;">${data.file.nom_Fichier}</span>" </span>
+            <span>Le fichier "<span class="file-notification" style="cursor: pointer; color: #0000ff;" id="filename">${data.file.nom_Fichier}</span>" </span>
             <span>a été ${data.action === true ? 'réécrit' : 'ajouté'} dans le classeur "<span style="color: #ecb900;">${data.folder.nom_Dossier}</span>" par 
             <span style="color: #dc3545;">${data.user.prenom_Utilisateur} ${data.user.nom_Utilisateur}.</span>
             </span>
