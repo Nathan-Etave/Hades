@@ -379,18 +379,19 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!document.querySelector('#actionArchive')) {
                 createArchiveAction();
             }
+            if (!document.querySelector('#actionDelete')) {
+                createDeleteAction();
+            }
         }
         else {
             let filesChecked = Array.from(filesCheckboxes).filter(cb => cb.checked);
             if (filesChecked.length === 0) {
                 actionsDropdown.classList.add('d-none');
                 actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
+                actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
             }
             else {
-                if (!document.querySelector('#actionDelete')) {
-                    createDeleteAction();
-                    actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
-                }
+                actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
             }
         }
     }
@@ -469,6 +470,21 @@ document.addEventListener('DOMContentLoaded', function () {
         actionsDropdown.querySelector('#actionDelete').addEventListener('click', async function (event) {
             let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
             let fileIds = files.map(cb => cb.dataset.file);
+            if (fileIds.length === 0) {
+                dialogQueue.push({
+                    type: DIALOG_TYPES.ALERT,
+                    dialogOptions: {
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Veuillez sélectionner au moins un fichier.',
+                        showConfirmButton: false,
+                        timer: 2500,
+                        backdrop: false
+                    }
+                });
+                showNextDialog();
+                return;
+            }
             if (fileTotal === fileUploadTotal) {
                 dialogQueue.push({
                     type: DIALOG_TYPES.DELETE_FILES_CONFIRM,
@@ -1275,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         showNextDialog();
         verifyIndexButton.disabled = true;
-        verifyIndexButton.innerHTML = 'Vérification de <br> l\'index en cours...';
+        verifyIndexButton.innerHTML = 'Vérification de <br> l\'index en cours <i class="fa-solid fa-spinner fa-spin-pulse"></i>';
     });
 
     socket.on('index_verification_success', function (data) {
