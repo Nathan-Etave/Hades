@@ -25,6 +25,12 @@
     width: 10%;
 }
 
+@media screen and (max-width:1200px) {
+    #search>button {
+        width: unset;
+    }
+}
+
 #menu-button {
     position: fixed;
     left: 0;

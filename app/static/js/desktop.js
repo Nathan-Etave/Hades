@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fileNavText.style.textOverflow = 'ellipsis';
             fileNav.appendChild(fileNavText);
 
-            fileNav.className = 'file-nav nav-item';
+            fileNav.className = 'file-nav nav-items';
             fileNav.setAttribute('file-number', deskFileNumber);
             fileNav.style.cursor = 'pointer';
             fileNav.style.width = 'auto';

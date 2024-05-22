@@ -116,7 +116,7 @@ export function previewAfterRender() {
 
         workbook.SheetNames.forEach((sheetName, index) => {
             const li = document.createElement('li');
-            li.className = 'nav-item';
+            li.className = 'nav-items';
 
             const a = document.createElement('a');
             a.className = 'nav-link' + (index === 0 ? ' active' : '');
