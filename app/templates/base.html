@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.3">
+    <meta name="viewport" content="width=device-width, initial-scale=0.6">
     <link rel="stylesheet" href="https://bootswatch.com/5/lumen/bootstrap.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <script type="module" src="{{ url_for('static', filename='js/base.js') }}"></script>
@@ -27,8 +27,9 @@
                 <h1 class="logo-text text-center align-self-center honk-title">HADÈS</h1>
             </div>
         </a>
+        <i class="fas fa-bars fa-2x"></i>
         <nav class="navbar">
-            <ul class="nav-item">
+            <ul class="nav-items">
                 {% if is_authenticated %}
                 <li>
                     <a href="{{ url_for('desktop.desktop') }}" id="desktop" class="h4 text-decoration-none d-flex">Bureau
@@ -66,6 +67,7 @@
                 <li class="d-none"></li>
                 {% endif %}
             </ul>
+            <i class="fa-solid fa-xmark fa-2x"></i>
         </nav>
     </header>
     <main>
