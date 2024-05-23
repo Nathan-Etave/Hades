@@ -4,7 +4,6 @@ from flask import Flask, current_app
 from config import Config
 from app.models.a_acces import A_ACCES
 from app.models.a_recherche import A_RECHERCHE
-from app.models.a_tag import A_TAG
 from app.models.dossier import DOSSIER
 from app.models.favoris import FAVORIS
 from app.models.fichier import FICHIER
@@ -12,7 +11,6 @@ from app.models.notification import NOTIFICATION
 from app.models.recherche import RECHERCHE
 from app.models.role import ROLE
 from app.models.sous_dossier import SOUS_DOSSIER
-from app.models.tag import TAG
 from app.models.utilisateur import UTILISATEUR
 from app.utils import check_notitications, get_total_file_count, get_total_file_count_by_id
 from app.models.lien import LIEN

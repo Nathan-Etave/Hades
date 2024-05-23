@@ -129,7 +129,7 @@ def upload():
     )
     current_user_dict = current_user.to_dict_secure()
     file_dict = file.to_dict()
-    file_dict.update({'id_Utilisateur': str(file.id_Utilisateur)})
+    file_dict.update({"id_Utilisateur": str(file.id_Utilisateur)})
     with open(file_path, "wb") as new_file:
         new_file.write(b64decode(file_data.split(",")[1]))
     process_file.apply_async(
@@ -161,9 +161,11 @@ def upload():
     )
     return jsonify(file_dict), 200
 
+
 @socketio.on("join", namespace="/administration")
 def on_join(data):
     join_room(data["room"])
+
 
 @socketio.on("connect", namespace="/administration")
 def connect():
@@ -188,12 +190,18 @@ def connect():
         namespace="/administration",
     )
 
+
 @socketio.on("search_files", namespace="/administration")
 def search_files(data):
     search_query = data.get("query")
     with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
         search_results = Whoosh().search(search_query, path=f'{data.get("folderId")}')
-    socketio.emit("search_results", search_results, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
+    socketio.emit(
+        "search_results",
+        search_results,
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
+    )
 
 
 @socketio.on("update_user_role", namespace="/administration")
@@ -201,7 +209,10 @@ def update_user_role(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "user_role_not_updated",
-            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas modifier les rôles des utilisateurs."},
+            {
+                **data,
+                "error": "Votre compte est désactivé, vous ne pouvez pas modifier les rôles des utilisateurs.",
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -258,7 +269,10 @@ def update_user_status(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "user_status_not_updated",
-            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas modifier les statuts des utilisateurs."},
+            {
+                **data,
+                "error": "Votre compte est désactivé, vous ne pouvez pas modifier les statuts des utilisateurs.",
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -313,7 +327,10 @@ def update_user_status(data):
         except Exception as _:
             socketio.emit(
                 "user_email_error",
-                {**data, "error": "Le statut de l'utilisateur à bien été désactivé, mais l'email de notification n'a pas pu être envoyé."},
+                {
+                    **data,
+                    "error": "Le statut de l'utilisateur à bien été désactivé, mais l'email de notification n'a pas pu être envoyé.",
+                },
                 namespace="/administration",
                 room=f"user_{current_user.id_Utilisateur}",
             )
@@ -324,7 +341,10 @@ def delete_user(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "user_not_deleted",
-            {**data, "error": "Votre compte est désactivé, vous ne pouvez pas supprimer d'utilisateurs."},
+            {
+                **data,
+                "error": "Votre compte est désactivé, vous ne pouvez pas supprimer d'utilisateurs.",
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -386,7 +406,10 @@ def delete_user(data):
     except Exception as _:
         socketio.emit(
             "user_email_error",
-            {**data, "error": "L'utilisateur à bien été supprimé, mais l'email de notification n'a pas pu être envoyé."},
+            {
+                **data,
+                "error": "L'utilisateur à bien été supprimé, mais l'email de notification n'a pas pu être envoyé.",
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -418,7 +441,9 @@ def create_folder(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "folder_not_created",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas créer de classeurs."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas créer de classeurs."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -433,7 +458,7 @@ def create_folder(data):
         return
     folder_name = data.get("folderName")
     parent_folder_id = data.get("parentFolderId")
-    folder_roles = data.get("folderRoles")
+    folder_roles = data.get("folderRoles", [2, 3, 4])
     folder_color = data.get("folderColor")
     folder_priority = data.get("folderPriority")
     folders_to_update = (
@@ -454,7 +479,10 @@ def create_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_created",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -471,7 +499,10 @@ def create_folder(data):
         db.session.delete(folder)
         db.session.commit()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_created",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -499,7 +530,10 @@ def create_folder(data):
         db.session.delete(folder)
         db.session.commit()
         socketio.emit(
-            "folder_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_created",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     socketio.emit(
@@ -520,7 +554,9 @@ def modify_folder(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "folder_not_modified",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas modifier de classeurs."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas modifier de classeurs."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -536,7 +572,7 @@ def modify_folder(data):
     folder_id = data.get("folderId")
     folder_name = data.get("folderName")
     parent_folder_id = data.get("parentFolderId")
-    folder_roles = data.get("folderRoles")
+    folder_roles = data.get("folderRoles", [2, 3, 4])
     folder_priority = data.get("folderPriority")
     folder_color = data.get("folderColor")
     folder = DOSSIER.query.get(folder_id)
@@ -593,7 +629,10 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_modified",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -602,7 +641,10 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_modified",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -615,7 +657,10 @@ def modify_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_modified", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_modified",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     db.session.commit()
@@ -632,7 +677,9 @@ def delete_folder(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "folder_not_deleted",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de classeurs."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas supprimer de classeurs."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -685,7 +732,10 @@ def delete_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_deleted",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     try:
@@ -696,7 +746,10 @@ def delete_folder(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folder_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folder_not_deleted",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     deleted_priority = folder.priorite_Dossier
@@ -711,7 +764,10 @@ def delete_folder(data):
         folder_to_update.priorite_Dossier -= 1
     db.session.commit()
     socketio.emit(
-        "folder_deleted", {"folderId": folder.id_Dossier}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+        "folder_deleted",
+        {"folderId": folder.id_Dossier},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
@@ -720,7 +776,9 @@ def archive_folders(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "folders_not_archived",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas archiver de classeurs."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas archiver de classeurs."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -765,11 +823,17 @@ def archive_folders(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "folders_not_archived", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "folders_not_archived",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     socketio.emit(
-        "folders_archived", {"folderIds": folder_ids}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+        "folders_archived",
+        {"folderIds": folder_ids},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
@@ -778,7 +842,17 @@ def delete_files(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "files_not_deleted",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de fichiers."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas supprimer de fichiers."
+            },
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
+    if current_user.id_Role == 4:
+        socketio.emit(
+            "files_not_deleted",
+            {"error": "Vous n'avez pas l'autorisation de supprimer des fichiers."},
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -815,13 +889,21 @@ def delete_files(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "files_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "files_not_deleted",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     for file_path in file_paths:
         if os.path.exists(file_path):
             os.remove(file_path)
-    socketio.emit("files_deleted", {"fileIds": file_ids}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}")
+    socketio.emit(
+        "files_deleted",
+        {"fileIds": file_ids},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
+    )
 
 
 def delete_file(file_id):
@@ -846,7 +928,9 @@ def delete_link(data):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "link_not_deleted",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas supprimer de liens."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas supprimer de liens."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -858,11 +942,17 @@ def delete_link(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "link_not_deleted", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "link_not_deleted",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     socketio.emit(
-        "link_deleted", {"linkId": data.get("linkId")}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+        "link_deleted",
+        {"linkId": data.get("linkId")},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
     )
 
 
@@ -892,7 +982,10 @@ def create_link(data):
     except Exception as e:
         db.session.rollback()
         socketio.emit(
-            "link_not_created", {"error": str(e)}, namespace="/administration", room=f"user_{current_user.id_Utilisateur}"
+            "link_not_created",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
         )
         return
     socketio.emit(
@@ -909,12 +1002,15 @@ def create_link(data):
         room=f"user_{current_user.id_Utilisateur}",
     )
 
+
 @socketio.on("verify_index", namespace="/administration")
 def verify_index_socket():
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "index_not_verified",
-            {"error": "Votre compte est désactivé, vous ne pouvez pas vérifier l'indexation des fichiers."},
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas vérifier l'indexation des fichiers."
+            },
             namespace="/administration",
             room=f"user_{current_user.id_Utilisateur}",
         )
@@ -948,6 +1044,80 @@ def verify_index_socket():
     socketio.emit(
         "index_verification_started",
         {"message": "La vérification de l'indexation des fichiers a commencé."},
+        namespace="/administration",
+        room=f"user_{current_user.id_Utilisateur}",
+    )
+
+
+@socketio.on("transfer_files", namespace="/administration")
+def transfer_files(data):
+    if not current_user.est_Actif_Utilisateur:
+        socketio.emit(
+            "files_not_transferred",
+            {
+                "error": "Votre compte est désactivé, vous ne pouvez pas transférer de fichiers."
+            },
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
+    if current_user.id_Role == 4:
+        socketio.emit(
+            "files_not_transferred",
+            {"error": "Vous n'avez pas l'autorisation de transférer des fichiers."},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
+    folder_id = data.get("destinationFolder")
+    file_ids = data.get("fileIds")
+    try:
+        for file_id in file_ids:
+            if not FICHIER.query.get(file_id).est_Indexe_Fichier:
+                socketio.emit(
+                    "files_not_transferred",
+                    {
+                        "error": "Un ou plusieurs fichiers sélectionnés sont en cours de traitement. Veuillez réessayer ultérieurement."
+                    },
+                    namespace="/administration",
+                    room=f"user_{current_user.id_Utilisateur}",
+                )
+                return
+        with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
+            Whoosh().transfer_documents(file_ids, folder_id)
+        for file_id in file_ids:
+            database_file = FICHIER.query.get(file_id)
+            file_path = os.path.join(
+                current_app.root_path,
+                "storage",
+                "files",
+                str(database_file.DOSSIER_.id_Dossier),
+                f"{file_id}.{database_file.extension_Fichier}",
+            )
+            new_file_path = os.path.join(
+                current_app.root_path,
+                "storage",
+                "files",
+                str(folder_id),
+                f"{file_id}.{database_file.extension_Fichier}",
+            )
+            if not os.path.exists(f"{current_app.root_path}/storage/files/{folder_id}"):
+                os.makedirs(f"{current_app.root_path}/storage/files/{folder_id}")
+            os.rename(file_path, new_file_path)
+            database_file.id_Dossier = folder_id
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        socketio.emit(
+            "files_not_transferred",
+            {"error": str(e)},
+            namespace="/administration",
+            room=f"user_{current_user.id_Utilisateur}",
+        )
+        return
+    socketio.emit(
+        "files_transferred",
+        {"fileIds": file_ids, "folderId": folder_id},
         namespace="/administration",
         room=f"user_{current_user.id_Utilisateur}",
     )
