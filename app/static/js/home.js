@@ -154,7 +154,6 @@ document.addEventListener('DOMContentLoaded', function () {
     panelAfterRender();
     let deskHomes = document.querySelectorAll(".desktop-home");
     deskHomes.forEach(function (deskHome) {
-        console.log(deskHome);
         desktopAfterRender(deskHome.id, true);
     });
 

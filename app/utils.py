@@ -71,7 +71,7 @@ class Whoosh(metaclass=SingletonMeta):
 
     def __init__(self):
         analyzer = StandardAnalyzer(stoplist=None)
-        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(analyzer=analyzer), path=ID(analyzer=KeywordAnalyzer(), stored=True), tags=KEYWORD(commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True))
+        schema = Schema(title=TEXT(stored=True, analyzer=analyzer), content=TEXT(stored=True, analyzer=analyzer), path=ID(analyzer=KeywordAnalyzer(), stored=True), tags=KEYWORD(stored=True, commas=True, scorable=True, analyzer=analyzer), id=ID(stored=True, unique=True))
         with current_app.app_context():
             if not os.path.exists(f'{current_app.root_path}/storage/index') :
                 os.mkdir(f'{current_app.root_path}/storage/index')
@@ -93,6 +93,40 @@ class Whoosh(metaclass=SingletonMeta):
         writer = self.open_index.writer()
         try:
             writer.add_document(title=title, content=content, path=path, tags=tags, id=id)
+        finally:
+            writer.commit()
+
+    def update_document(self, title, content, path, tags, id):
+        """
+        Update a document in the search index.
+
+        Args:
+            title (str): The title of the document.
+            content (str): The content of the document.
+            path (str): The path of the document.
+            tags (str): The tags associated with the document.
+            id (str): The ID of the document.
+
+        """
+        writer = self.open_index.writer()
+        try:
+            writer.update_document(title=title, content=content, path=path, tags=tags, id=id)
+        finally:
+            writer.commit()
+
+    def transfer_documents(self, files, folder):
+        """
+        Update multiple documents in the search index.
+
+        Args:
+            documents (list): A list of documents to update.
+
+        """
+        writer = self.open_index.writer()
+        try:
+            for id in files:
+                document = self.get_document(id)
+                writer.update_document(title=document['title'], content=document['content'], path=folder, tags=document['tags'], id=id)
         finally:
             writer.commit()
 
@@ -138,6 +172,20 @@ class Whoosh(metaclass=SingletonMeta):
             for doc in searcher.documents():
                 documents.append(doc)
         return documents
+    
+    def get_document(self, id):
+        """
+        Get a document from the search index.
+
+        Args:
+            id (str): The ID of the document to get.
+
+        Returns:
+            dict: The document in the search index.
+
+        """
+        with self.open_index.searcher() as searcher:
+            return searcher.document(id=id)
     
     def document_exists(self, id):
         """
