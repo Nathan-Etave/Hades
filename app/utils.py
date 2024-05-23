@@ -25,6 +25,8 @@ from whoosh.query import *
 from xlrd import open_workbook
 import fitz
 import pytesseract
+from odf import text as odf_text, teletype
+from odf.opendocument import load
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.favoris import FAVORIS
@@ -310,9 +312,9 @@ class FileReader(metaclass=SingletonMeta):
             #"doc": self.read_doc,
             "docx": self.read_docx,
             #"json": self.read_json,
-            #"html": self.read_html,
-            #"htm": self.read_html,
-            #"odt": self.read_odt,
+            "html": self.read_html,
+            "htm": self.read_html,
+            "odt": self.read_odt,
             "pdf": self.read_pdf,
             "txt": self.read_txt,
             "xlsx": self.read_xlsx,
@@ -388,6 +390,17 @@ class FileReader(metaclass=SingletonMeta):
             for shape in slide.shapes:
                 if hasattr(shape, "text"):
                     text += shape.text
+        return text
+    
+    def read_html(self, file_path):
+        with open(file_path, "r") as file:
+            return file.read()
+        
+    def read_odt(self, file_path):
+        text = ""
+        doc = load(file_path)
+        for element in doc.getElementsByType(odf_text.P):
+            text += teletype.extractText(element)
         return text
 
 class FileDownloader(metaclass=SingletonMeta):

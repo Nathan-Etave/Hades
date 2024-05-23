@@ -27,3 +27,4 @@ fr_hades_model @ https://github.com/Nathan-Etave/Hades/releases/download/fr_hade
 gunicorn==22.0.0
 gevent==24.2.1
 flask_compress==1.15
+odfpy==1.4.1
