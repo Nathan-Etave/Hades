@@ -364,6 +364,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    let tagButtons = document.querySelectorAll('.tag-button');
+    tagButtons.forEach((tagButton) => {
+        tagButton.addEventListener('click', function () {
+            let tagInput = tagButton.parentElement.querySelector('#tag-input');
+            let fileId = tagInput.getAttribute('data-file');
+            let newTag = tagInput.value;
+            socket.emit('add_tag', { fileId: fileId, tag: newTag });
+            tagInput.value = "";
+        });
+    });
+
+    socket.on('tag_added', function (data) {
+        createValidationAlertMessage("Tag ajouté", "Le tag "+data.tag+" a bien été ajouté au fichier.");
+    });
+
     // Function to create an error alert message
     function createErrorAlertMessage(message, data) {
         Swal.fire({
@@ -371,6 +386,19 @@ document.addEventListener('DOMContentLoaded', function () {
             icon: 'error',
             title: message,
             text: data.error,
+            showConfirmButton: false,
+            timer: 2500,
+            backdrop: false
+        });
+    }
+
+    // Function to create a validation alert message
+    function createValidationAlertMessage(title, message) {
+        Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: title,
+            text: message,
             showConfirmButton: false,
             timer: 2500,
             backdrop: false
