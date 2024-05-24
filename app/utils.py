@@ -237,7 +237,8 @@ class Whoosh(metaclass=SingletonMeta):
             list: A list of search results.
 
         """
-        if query.strip() == "":
+        query = query.strip()
+        if query == "":
             subquery = Every()
         else : 
             query = unidecode(query).lower()

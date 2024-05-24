@@ -25,7 +25,7 @@ services:
   worker:
     build: .
     image: hades:latest
-    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker
+    command: celery -A app.celery worker --loglevel=info --pool=solo --hostname=worker@%h
     volumes:
       - .:/app
       - ./app/storage:/app/storage
