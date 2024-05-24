@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, EmailField, StringField, PasswordField
 from wtforms.validators import DataRequired, Email
+from app.utils import PasswordComplexity
 
 
 class EditProfileForm(FlaskForm):
@@ -20,5 +21,5 @@ class EditProfileForm(FlaskForm):
     first_name = StringField("Prénom", validators=[DataRequired()])
     email = EmailField("Email", validators=[DataRequired(), Email()])
     telephone = StringField("Téléphone")
-    password = PasswordField("Mot de passe", validators=[DataRequired()])
+    password = PasswordField("Mot de passe", validators=[DataRequired(), PasswordComplexity()])
     submit = SubmitField("Modifier")
