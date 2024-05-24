@@ -2,6 +2,7 @@ import os
 import re
 import uuid
 import zipfile
+import shutil
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
@@ -26,7 +27,7 @@ from xlrd import open_workbook
 import fitz
 import pytesseract
 from odf import text as odf_text, teletype
-from odf.opendocument import load
+from odf.opendocument import load as load_odf
 from app.extensions import db
 from app.models.dossier import DOSSIER
 from app.models.favoris import FAVORIS
@@ -309,9 +310,7 @@ class FileReader(metaclass=SingletonMeta):
     def __init__(self):
         self.readers = {
             "csv": self.read_csv,
-            #"doc": self.read_doc,
             "docx": self.read_docx,
-            #"json": self.read_json,
             "html": self.read_html,
             "htm": self.read_html,
             "odt": self.read_odt,
@@ -320,13 +319,19 @@ class FileReader(metaclass=SingletonMeta):
             "xlsx": self.read_xlsx,
             "xls": self.read_xls,
             "pptx": self.read_pptx,
-            #"ppt": self.read_ppt,
-            #"gif": self.read_ocr,
             "jpg": self.read_ocr,
             "jpeg": self.read_ocr,
             "png": self.read_ocr,
             "tiff": self.read_ocr,
             "tif": self.read_ocr,
+        }
+        self.screenshots = {
+            "pdf": self.screenshot_pdf,
+            "jpg": self.screenshots_image,
+            "jpeg": self.screenshots_image,
+            "png": self.screenshots_image,
+            "tiff": self.screenshots_image,
+            "tif": self.screenshots_image,
         }
 
     def read(self, file_path, extension):
@@ -398,10 +403,27 @@ class FileReader(metaclass=SingletonMeta):
         
     def read_odt(self, file_path):
         text = ""
-        doc = load(file_path)
+        doc = load_odf(file_path)
         for element in doc.getElementsByType(odf_text.P):
             text += teletype.extractText(element)
         return text
+    
+    def screenshot(self, file_path, extension, folder_id, file_id):
+        extension = extension.lower()
+        return self.screenshots.get(extension, lambda x, y, z: '')(file_path, folder_id, file_id)
+    
+    def screenshot_pdf(self, file_path, folder_id, file_id):
+        file = fitz.open(file_path)
+        page = file.load_page(0)
+        image = page.get_pixmap()
+        if not os.path.exists(f"{current_app.root_path}/storage/screenshots/{folder_id}"):
+            os.makedirs(f"{current_app.root_path}/storage/screenshots/{folder_id}")
+        image.pil_save(f"{current_app.root_path}/storage/screenshots/{folder_id}/{file_id}.png", optimize=True)
+
+    def screenshots_image(self, file_path, folder_id, file_id):
+        if not os.path.exists(f"{current_app.root_path}/storage/screenshots/{folder_id}"):
+            os.makedirs(f"{current_app.root_path}/storage/screenshots/{folder_id}")
+        shutil.copy(file_path, f"{current_app.root_path}/storage/screenshots/{folder_id}/{file_id}.png")
 
 class FileDownloader(metaclass=SingletonMeta):
     def create_zip(self, file_ids):
