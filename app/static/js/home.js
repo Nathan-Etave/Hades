@@ -376,7 +376,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('tag_added', function (data) {
-        createValidationAlertMessage("Tag ajouté", "Le tag "+data.tag+" a bien été ajouté au fichier.");
+        let tags = data.tag.split(";");
+        if (tags.length > 1) {
+            createValidationAlertMessage("Tags ajoutés", "Les tags "+tags.join(", ")+" ont bien été ajoutés au fichier.");
+        }
+        else {
+            createValidationAlertMessage("Tag ajouté", "Le tag "+data.tag+" a bien été ajouté au fichier.");
+        }
     });
 
     // Function to create an error alert message

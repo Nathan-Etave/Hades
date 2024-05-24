@@ -127,7 +127,9 @@ class Whoosh(metaclass=SingletonMeta):
         try:
             document = self.get_document(id)
             tags = document["tags"].split(" ")
-            tags.append(tag)
+            for new_tag in tag.split(";"):
+                if new_tag not in tags:
+                    tags.append(new_tag)
             new_tags = " ".join(tags)
             writer.update_document(title=document["title"], content=document["content"], path=document["path"], tags=new_tags, id=id)
         finally:
