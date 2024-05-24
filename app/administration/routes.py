@@ -1004,7 +1004,7 @@ def create_link(data):
 
 
 @socketio.on("verify_index", namespace="/administration")
-def verify_index_socket():
+def verify_index_socket(data={}):
     if not current_user.est_Actif_Utilisateur:
         socketio.emit(
             "index_not_verified",
@@ -1025,21 +1025,23 @@ def verify_index_socket():
             room=f"user_{current_user.id_Utilisateur}",
         )
         return
+    force = data.get("force", False)
     workers = redis.keys("worker:*") if len(redis.keys("worker:*")) > 0 else []
     for file in redis.lrange("files_queue", 0, -1):
         file = json.loads(file.decode("utf-8"))
         if FICHIER.query.get(file["file_id"]).est_Indexe_Fichier or len(workers) == 0:
             redis.lrem("files_queue", 0, json.dumps(file))
     if redis.llen("files_queue") > 0:
-        socketio.emit(
-            "index_not_verified",
-            {
-                "error": "Un ou plusieurs fichiers sont en cours de traitement. Veuillez réessayer ultérieurement."
-            },
-            namespace="/administration",
-            room=f"user_{current_user.id_Utilisateur}",
-        )
-        return
+        if not force:
+            socketio.emit(
+                "index_not_verified_with_options",
+                {
+                    "error": "Un ou plusieurs fichiers sont en cours de traitement.\nVoulez-vous forcer la vérification de l'indexation ?",
+                },
+                namespace="/administration",
+                room=f"user_{current_user.id_Utilisateur}",
+            )
+            return
     verify_index.apply_async(args=[current_user.to_dict_secure()])
     socketio.emit(
         "index_verification_started",

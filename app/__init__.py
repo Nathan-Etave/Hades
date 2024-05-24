@@ -32,6 +32,8 @@ def create_app(config_class = Config, is_worker=False):
         os.makedirs(f'{root_path}/storage')
     if not os.path.exists(f'{root_path}/storage/files'):
         os.makedirs(f'{root_path}/storage/files')
+    if not os.path.exists(f'{root_path}/storage/screenshots'):
+        os.makedirs(f'{root_path}/storage/screenshots')
     if not os.path.exists(f'{root_path}/storage/database'):
         os.makedirs(f'{root_path}/storage/database')
     if not os.path.exists(f'{root_path}/storage/redis'):
