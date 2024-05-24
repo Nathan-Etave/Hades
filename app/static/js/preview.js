@@ -23,6 +23,9 @@ export function previewAfterRender() {
             if (event.target.className.includes('desktop-element')) {
                 target = event.target.parentElement;
             }
+            if (event.target.className.includes('desktop-screenshot')) {
+                target = event.target.parentElement.parentElement;
+            }
             if (event.target.className.includes('file-notification')) {
                 target = event.target.parentElement.parentElement.parentElement;
             }
@@ -58,6 +61,7 @@ export function previewAfterRender() {
                 case 'txt':
                 case 'html':
                 case 'htm':
+                case 'xml':
                     const iframe = iframeElement(fileId, folderId);
                     modalBody.appendChild(iframe);
                     break;

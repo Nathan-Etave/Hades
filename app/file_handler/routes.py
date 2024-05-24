@@ -17,18 +17,26 @@ from flask_socketio import join_room
 def file(folder_id, file_id):
     file = FICHIER.query.get(file_id)
     as_attachment = request.args.get("as_attachment", default=False, type=bool)
+    as_screenshot = request.args.get("as_screenshot", default=False, type=bool)
     if file is None:
         return abort(404)
     if file.DOSSIER_.id_Dossier != folder_id:
         return abort(404)
     if not any(current_user.id_Role == role.id_Role for role in file.DOSSIER_.ROLE):
         return abort(403)
-    return send_from_directory(
-        f"{current_app.root_path}/storage/files/{folder_id}",
-        f"{file.id_Fichier}.{file.extension_Fichier}",
-        as_attachment=as_attachment,
-        download_name=file.nom_Fichier,
-    )
+    if not as_screenshot:
+        return send_from_directory(
+            f"{current_app.root_path}/storage/files/{folder_id}",
+            f"{file.id_Fichier}.{file.extension_Fichier}",
+            as_attachment=as_attachment,
+            download_name=file.nom_Fichier,
+        )
+    else:
+        return send_from_directory(
+            f"{current_app.root_path}/storage/screenshots/{folder_id}",
+            f"{file.id_Fichier}.png",
+            as_attachment=False,
+        )
 
 @socketio.on("join", namespace="/file_handler")
 def on_join(data):

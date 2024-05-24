@@ -1342,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 text: data.error,
                 icon: 'error',
                 showCancelButton: true,
-                confirmButtonText: 'Oui (risqué)',
+                confirmButtonText: 'Oui',
                 cancelButtonText: 'Non',
                 allowOutsideClick: false,
                 allowEscapeKey: false,

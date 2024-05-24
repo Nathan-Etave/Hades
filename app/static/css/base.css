@@ -95,7 +95,9 @@ header {
     justify-content: center;
     color: #000;
     position: relative;
-    bottom: 10px
+    bottom: 10px;
+    font-size: initial;
+    align-items: center;
 }
 
 .fa-bars,.fa-xmark {

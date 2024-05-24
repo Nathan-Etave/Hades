@@ -409,5 +409,40 @@ document.addEventListener('DOMContentLoaded', function () {
             backdrop: false
         });
     }
-    
+
+    let file = document.querySelectorAll("#file");
+    file.forEach(function (file) {
+        let timeout;
+        file.addEventListener('mouseover', function () {
+            timeout = setTimeout(function () {
+                createScreenshotPreview(file.getAttribute("data-file"), file.getAttribute("data-folder"));                
+            }, 300);
+        });
+        file.addEventListener('mouseout', function () {
+            clearTimeout(timeout);
+            removeScreenshotPreview(file.getAttribute("data-file"));
+        });
+    });
+
+    function createScreenshotPreview(fileId, folder) {
+        let previewPopup = document.createElement('div');
+        previewPopup.style.position = 'absolute';
+        previewPopup.style.zIndex = '1';
+        previewPopup.style.width = '15%';
+        previewPopup.style.height = '15%';
+        fetch(`/classeur/${folder}/fichier/${fileId}?as_screenshot=true`)
+        .then(response => response.blob())
+        .then(blob => {
+            let img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.className = "img-fluid";
+            previewPopup.appendChild(img);
+            document.querySelector(`#previewPopup${fileId}`).appendChild(previewPopup);
+        });
+    }
+
+    function removeScreenshotPreview(fileId) {
+        let previewPopup = document.querySelector(`#previewPopup${fileId}`);
+        previewPopup.innerHTML = "";
+    }
 });
