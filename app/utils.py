@@ -468,10 +468,19 @@ def get_total_file_count_by_id(folder_id):
 class PasswordComplexity(object):
     def __init__(self, message=None):
         if not message:
-            message = u'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule et un chiffre, et doit avoir une longueur minimale de 6 caractères.'
+            message = u'Le mot de passe doit contenir au moins 3 caractères parmis les suivants: majuscule, minuscule, chiffre et caractère spécial. Il doit également contenir au moins 12 caractères.'
         self.message = message
 
     def __call__(self, form, field):
         password = field.data
-        if not (any(x.isupper() for x in password) and any(x.islower() for x in password) and any(x.isdigit() for x in password)) or len(password) < 6:
+        total = 0
+        if any(x.isupper() for x in password):
+            total += 1
+        if any(x.islower() for x in password):
+            total += 1
+        if any(x.isdigit() for x in password):
+            total += 1
+        if any(not x.isalnum() and not x.isspace() for x in password):
+            total += 1
+        if total < 3 or len(password) < 12:
             raise ValidationError(self.message)

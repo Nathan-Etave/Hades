@@ -79,6 +79,13 @@
                             <input type="submit" value="Valider la modification" class="btn btn-primary">
                         </div>
                     </form>
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <div class="alert alert-dismissible alert-info mt-4">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
