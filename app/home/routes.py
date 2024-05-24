@@ -271,3 +271,26 @@ def search_files(data):
         namespace="/home",
         room=f"user_{current_user.id_Utilisateur}",
     )
+
+@socketio.on("add_tag", namespace="/home")
+def add_tag(data):
+    """
+    Add a tag to a file.
+
+    Args:
+        data (dict): A dictionary containing the file ID and tag.
+
+    Returns:
+        None
+    """
+    file_id = data.get("fileId")
+    tag = data.get("tag")
+    with InterProcessLock(f"{current_app.root_path}/storage/index/whoosh.lock"):
+        Whoosh().add_tag(file_id, tag)
+    socketio.emit(
+        "tag_added",
+        {"fileId": file_id, "tag": tag},
+        namespace="/home",
+        room=f"user_{current_user.id_Utilisateur}",
+    )
+    

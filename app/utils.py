@@ -114,6 +114,27 @@ class Whoosh(metaclass=SingletonMeta):
         finally:
             writer.commit()
 
+    def add_tag(self, id, tag):
+        """
+        Add a tag to a document in the search index.
+
+        Args:
+            id (str): The ID of the document.
+            tag (str): The tag to add.
+
+        """
+        writer = self.open_index.writer()
+        try:
+            document = self.get_document(id)
+            tags = document["tags"].split(" ")
+            for new_tag in tag.split(";"):
+                if new_tag not in tags:
+                    tags.append(new_tag)
+            new_tags = " ".join(tags)
+            writer.update_document(title=document["title"], content=document["content"], path=document["path"], tags=new_tags, id=id)
+        finally:
+            writer.commit()
+
     def transfer_documents(self, files, folder):
         """
         Update multiple documents in the search index.
@@ -449,10 +470,19 @@ def get_total_file_count_by_id(folder_id):
 class PasswordComplexity(object):
     def __init__(self, message=None):
         if not message:
-            message = u'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule et un chiffre, et doit avoir une longueur minimale de 6 caractères.'
+            message = u'Le mot de passe doit contenir au moins 3 caractères parmis les suivants: majuscule, minuscule, chiffre et caractère spécial. Il doit également contenir au moins 12 caractères.'
         self.message = message
 
     def __call__(self, form, field):
         password = field.data
-        if not (any(x.isupper() for x in password) and any(x.islower() for x in password) and any(x.isdigit() for x in password)) or len(password) < 6:
+        total = 0
+        if any(x.isupper() for x in password):
+            total += 1
+        if any(x.islower() for x in password):
+            total += 1
+        if any(x.isdigit() for x in password):
+            total += 1
+        if any(not x.isalnum() and not x.isspace() for x in password):
+            total += 1
+        if total < 3 or len(password) < 12:
             raise ValidationError(self.message)
