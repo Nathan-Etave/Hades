@@ -56,6 +56,8 @@ export function previewAfterRender() {
                 case 'wav':
                 case 'aac':
                 case 'txt':
+                case 'html':
+                case 'htm':
                     const iframe = iframeElement(fileId, folderId);
                     modalBody.appendChild(iframe);
                     break;

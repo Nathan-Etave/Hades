@@ -26,6 +26,7 @@ def process_file(file_path, filename, folder_id, file_id, user_tags, current_use
         database_file = FICHIER.query.get(file_id)
         database_file.est_Indexe_Fichier = 1
         db.session.commit()
+        FileReader().screenshot(file_path, filename.split(".")[-1], folder_id, file_id)
         redis.lpop('files_queue')
         date_str = file['date_Fichier'].split(':')[0] + ':' + file['date_Fichier'].split(':')[1]
         file['date_Fichier'] = datetime.strptime(date_str, '%d/%m/%Y %H:%M').strftime('%d/%m/%Y %H:%M')

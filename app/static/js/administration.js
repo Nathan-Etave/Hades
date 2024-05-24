@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
         DELETE_FILES_CONFIRM: 'deleteFilesConfirm',
         ARCHIVE_FOLDERS_CONFIRM: 'archiveFoldersConfirm',
         UPLOAD_OVERWRITE_UNPROCESSABLE: 'uploadOverwriteUnprocessable',
-        VERIFY_INDEX: 'verifyIndex'
+        VERIFY_INDEX: 'verifyIndex',
+        VERIFY_INDEX_OPTIONS: 'verifyIndexOptions'
     };
 
     // Functions
@@ -152,6 +153,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         break;
                     case DIALOG_TYPES.VERIFY_INDEX:
                         handleVerifyIndexConfirmDialog();
+                        break;
+                    case DIALOG_TYPES.VERIFY_INDEX_OPTIONS:
+                        handleVerifyIndexOptions();
                         break;
                 }
             }
@@ -269,6 +273,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleVerifyIndexConfirmDialog() {
         socket.emit('verify_index');
+    }
+
+    function handleVerifyIndexOptions() {
+        socket.emit('verify_index', { force: true });
     }
 
     function updateFolderFileCount(folderId, minus = false, baseFileCount = null) {
@@ -1321,6 +1329,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 showConfirmButton: false,
                 timer: 2500,
                 backdrop: false
+            }
+        });
+        showNextDialog();
+    });
+
+    socket.on('index_not_verified_with_options', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.VERIFY_INDEX_OPTIONS,
+            dialogOptions: {
+                title: 'Vérification de l\'index.',
+                text: data.error,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Oui (risqué)',
+                cancelButtonText: 'Non',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
             }
         });
         showNextDialog();
