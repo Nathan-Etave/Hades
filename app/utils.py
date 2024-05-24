@@ -334,6 +334,7 @@ class FileReader(metaclass=SingletonMeta):
             "docx": self.read_docx,
             "html": self.read_html,
             "htm": self.read_html,
+            "xml": self.read_html,
             "odt": self.read_odt,
             "pdf": self.read_pdf,
             "txt": self.read_txt,
