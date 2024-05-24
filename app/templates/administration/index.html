@@ -304,20 +304,6 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Rôles autorisés</label>
-                        {% for role in roles %}
-                        {% if role.id_Role != 1 %}
-                        <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
-                                id="role{{ role.id_Role }}">
-                            <label class="form-check-label" for="role{{ role.id_Role }}">
-                                {{ role.nom_Role }}
-                            </label>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
                         <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>
                         <input type="number" class="form-control" id="folderPriority" required min="1" step="1"
                             max="2147483646">
@@ -359,20 +345,6 @@
                         <select class="form-control" id="parentFolder">
                             <option value="0">Aucun</option>
                         </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rôles autorisés</label>
-                        {% for role in roles %}
-                        {% if role.id_Role != 1 %}
-                        <div class="form-check">
-                            <input class="form-check-input role-checkbox" type="checkbox" value="{{ role.id_Role }}"
-                                id="role{{ role.id_Role }}">
-                            <label class="form-check-label" for="role{{ role.id_Role }}">
-                                {{ role.nom_Role }}
-                            </label>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
                     </div>
                     <div class="mb-3">
                         <label for="folderPriority" class="form-label">Priorité d'affichage du classeur</label>

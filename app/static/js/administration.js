@@ -347,8 +347,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let filesChecked = Array.from(files).filter(cb => cb.checked);
         if (filesChecked.length > 0) {
             actionsDropdown.classList.remove('d-none');
-            if (!document.querySelector('#actionDelete') && !isFolderChecked) {
-                createDeleteAction();
+            if (!isFolderChecked) {
+                if (!document.querySelector('#actionDelete')) {
+                    createDeleteAction();
+                }
+                if (!document.querySelector('#actionTransfer')) {
+                    createTransferAction();
+                }
             }
         }
     }
@@ -382,6 +387,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!document.querySelector('#actionDelete')) {
                 createDeleteAction();
             }
+            if (!document.querySelector('#actionTransfer')) {
+                createTransferAction();
+            }
         }
         else {
             let filesChecked = Array.from(filesCheckboxes).filter(cb => cb.checked);
@@ -389,6 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 actionsDropdown.classList.add('d-none');
                 actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
                 actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
+                actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionTransfer'));
             }
             else {
                 actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionArchive'));
@@ -398,9 +407,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createArchiveAction() {
         actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item text-dark" id="actionArchive" style="cursor: pointer;">Archiver le/les classeur(s) sélectionné(s)</li>');
-        if (document.querySelector('#actionDelete')) {
-            actionsDropdown.querySelector('ul').removeChild(document.querySelector('#actionDelete'));
-        }
         actionsDropdown.querySelector('#actionArchive').addEventListener('click', async function (event) {
             let folders = Array.from(folderCheckboxes).filter(cb => cb.checked);
             let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
@@ -516,6 +522,74 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 showNextDialog();
             }
+        });
+    }
+
+    function createTransferAction() {
+        actionsDropdown.querySelector('ul').insertAdjacentHTML('beforeend', '<li class="dropdown-item text-dark" id="actionTransfer" style="cursor: pointer;">Transférer le/les fichier(s) sélectionné(s)</li>');
+        actionsDropdown.querySelector('#actionTransfer').addEventListener('click', async function (event) {
+            if (fileTotal != fileUploadTotal) {
+                dialogQueue.push({
+                    type: DIALOG_TYPES.ALERT,
+                    dialogOptions: {
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Veuillez attendre la fin du téléversement des fichiers avant de transférer un/des fichier(s).',
+                        showConfirmButton: false,
+                        timer: 2500,
+                        backdrop: false
+                    }
+                });
+                showNextDialog();
+                return;
+            }
+            let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
+            let fileIds = files.map(cb => cb.dataset.file);
+            if (fileIds.length === 0) {
+                dialogQueue.push({
+                    type: DIALOG_TYPES.ALERT,
+                    dialogOptions: {
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Veuillez sélectionner au moins un fichier.',
+                        showConfirmButton: false,
+                        timer: 2500,
+                        backdrop: false
+                    }
+                });
+                showNextDialog();
+                return;
+            }
+            let folderOptions = Array.from(folders).filter(folder => folder.dataset.folder != '0').map(folder => {
+                return {
+                    value: folder.dataset.folder,
+                    text: folder.dataset.name
+                }
+            });
+            let result = await Swal.fire({
+                title: 'Transférer le/les fichier(s) sélectionné(s)',
+                html: `
+                <select id="destinationFolder" class="form-select" style="width: 100%;">
+                    <option value="0">Choisir un classeur</option>
+                    ${folderOptions.map(option => `<option value="${option.value}">${option.text}</option>`).join('')}
+                </select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Transférer',
+                cancelButtonText: 'Annuler',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            if (result.isConfirmed) {
+                let destinationFolder = document.querySelector('#destinationFolder').value;
+                if (destinationFolder === '0') {
+                    location.reload();
+                }
+                else {
+                    socket.emit('transfer_files', { fileIds: fileIds, destinationFolder: destinationFolder });
+                }
+            }
+            showNextDialog();
         });
     }
 
@@ -678,9 +752,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (folderId == '0') {
             modifyFolderModal.querySelector('#folderName').value = '';
             modifyFolderModal.querySelector('#parentFolder').value = '0';
-            modifyFolderModal.querySelectorAll('.role-checkbox:checked').forEach((cb) => {
-                cb.checked = false;
-            });
             modifyFolderModal.querySelector('#folderPriority').value = '';
             modifyFolderModal.querySelector('#folderColor').value = '#000000';
             return;
@@ -689,11 +760,6 @@ document.addEventListener('DOMContentLoaded', function () {
         let folder = folderArray.find(f => f.dataset.folder == folderId);
         modifyFolderModal.querySelector('#folderName').value = folder.dataset.name;
         modifyFolderModal.querySelector('#parentFolder').value = folder.dataset.parent;
-        folder.dataset.roles.split(',').forEach((role) => {
-            if (role !== '1') {
-                modifyFolderModal.querySelector(`#role${role}`).checked = true;
-            }
-        });
         modifyFolderModal.querySelector('#folderPriority').value = folder.dataset.priority;
         modifyFolderModal.querySelector('#folderColor').value = folder.dataset.color;
     });
@@ -717,11 +783,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         let folderName = createFolderModal.querySelector('#folderName').value;
         let parentFolderId = createFolderModal.querySelector('#parentFolder').value;
-        let folderRoles = Array.from(createFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
         let folderPriority = createFolderModal.querySelector('#folderPriority').value;
         let folderColor = createFolderModal.querySelector('#folderColor').value;
         if (folderName !== '' && folderPriority !== '') {
-            socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
+            socket.emit('create_folder', { folderName: folderName, parentFolderId: parentFolderId, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
             dialogQueue.push({
@@ -750,11 +815,10 @@ document.addEventListener('DOMContentLoaded', function () {
         let folderId = modifyFolderModal.querySelector('#existingFolder').value;
         let folderName = modifyFolderModal.querySelector('#folderName').value;
         let parentFolderId = modifyFolderModal.querySelector('#parentFolder').value;
-        let folderRoles = Array.from(modifyFolderModal.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value);
         let folderPriority = modifyFolderModal.querySelector('#folderPriority').value;
         let folderColor = modifyFolderModal.querySelector('#folderColor').value;
         if (folderName !== '' && folderId !== '0' && folderPriority !== '') {
-            socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderRoles: folderRoles, folderPriority: folderPriority, folderColor: folderColor });
+            socket.emit('modify_folder', { folderId: folderId, folderName: folderName, parentFolderId: parentFolderId, folderPriority: folderPriority, folderColor: folderColor });
         }
         else {
             dialogQueue.push({
@@ -1309,6 +1373,26 @@ document.addEventListener('DOMContentLoaded', function () {
         showNextDialog();
         verifyIndexButton.disabled = false;
         verifyIndexButton.innerHTML = 'Vérifier l\'intégrité<br>de l\'indexation';
+    });
+
+    socket.on('files_not_transferred', function (data) {
+        dialogQueue.push({
+            type: DIALOG_TYPES.ALERT,
+            dialogOptions: {
+                position: 'top-end',
+                icon: 'error',
+                title: 'Le transfert des fichiers a échoué.',
+                text: data.error,
+                showConfirmButton: false,
+                timer: 2500,
+                backdrop: false
+            }
+        });
+        showNextDialog();
+    });
+
+    socket.on('files_transferred', function (data) {
+        location.reload();
     });
 
     // Initialization
