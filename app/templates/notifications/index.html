@@ -8,9 +8,9 @@
         <div class="card-body">
             <p class="card-subtitle text-muted">
                 {% if notification.type_Notification|string() == "1" %}
-                    Demande d'inscription
+                    Demande d'inscription de
                 {% elif notification.type_Notification|string() == "2" %}
-                    Demande de réactivation
+                    Demande de réactivation de
                 {% endif %}
                 <span class="fw-bold">{{ notification.UTILISATEUR_.prenom_Utilisateur }} {{ notification.UTILISATEUR_.nom_Utilisateur }}</span> ({{ notification.UTILISATEUR_.email_Utilisateur }})</p>
             <p class="card-text  mb-2">Date: {{ notification.datetime_Notification.strftime('%Y-%m-%d %H:%M') }}</p>

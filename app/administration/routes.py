@@ -1036,7 +1036,7 @@ def verify_index_socket(data={}):
             socketio.emit(
                 "index_not_verified_with_options",
                 {
-                    "error": "Un ou plusieurs fichiers sont en cours de traitement.\nVoulez-vous forcer la vérification de l'indexation ?",
+                    "error": "Un ou plusieurs fichiers sont en cours de traitement.\nVoulez-vous forcer la vérification de l'indexation (attention, cette action peut générer des doublons si des fichiers sont en cours de traitement) ?",
                 },
                 namespace="/administration",
                 room=f"user_{current_user.id_Utilisateur}",

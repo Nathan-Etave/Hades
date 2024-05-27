@@ -124,7 +124,7 @@ def fill_db():
         db.session.add(DOSSIER(nom_Dossier="Mémoire", priorite_Dossier=6, couleur_Dossier="#cc99ff"))
         db.session.add(DOSSIER(nom_Dossier="Thèse", priorite_Dossier=7, couleur_Dossier="#ccccff"))
         db.session.add(DOSSIER(nom_Dossier="À trier", priorite_Dossier=8, couleur_Dossier="#ccffff"))
-        db.session.add(DOSSIER(nom_Dossier="Archive", priorite_Dossier=2147483647, couleur_Dossier="#d3d7d8"))
+        db.session.add(DOSSIER(nom_Dossier="Archives", priorite_Dossier=2147483647, couleur_Dossier="#d3d7d8"))
         db.session.commit()
 
     if not db.session.query(A_ACCES).all():
