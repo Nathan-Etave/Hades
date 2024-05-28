@@ -1175,11 +1175,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('files_deleted', function (data) {
-        let files = Array.from(filesCheckboxes).filter(cb => cb.checked);
-        files.forEach((file) => {
-            let deletedFile = document.querySelector(`#file-${file.dataset.file}`);
+        data.fileIds.forEach((fileId) => {
+            let deletedFile = document.querySelector(`#file-${fileId}`);
             deletedFile.remove();
-            updateFolderFileCount(file.dataset.folder, true);
+            updateFolderFileCount(deletedFile.dataset.folder, true);
+            filesCheckboxes.splice(filesCheckboxes.indexOf(deletedFile.querySelector('.file-checkbox')), 1);
         });
         dialogQueue.push({
             type: DIALOG_TYPES.ALERT,
