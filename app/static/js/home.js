@@ -363,14 +363,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handle the adition of a new tag
     let tagButtons = document.querySelectorAll('.tag-button');
     tagButtons.forEach((tagButton) => {
         tagButton.addEventListener('click', function () {
             let tagInput = tagButton.parentElement.querySelector('#tag-input');
             let fileId = tagInput.getAttribute('data-file');
             let newTag = tagInput.value;
-            socket.emit('add_tag', { fileId: fileId, tag: newTag });
-            tagInput.value = "";
+            if (newTag !== "") {
+                socket.emit('add_tag', { fileId: fileId, tag: newTag });
+                tagInput.value = "";
+            }
         });
     });
 
