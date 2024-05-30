@@ -6,6 +6,14 @@
     width: 34vw;
 }
 
+#add-tag {
+    border: 0.12rem solid #000000;
+    border-radius: 10rem;
+    color: #004F8A;
+    align-items: center;
+    width: 12rem;
+}
+
 #search>input {
     border-radius: 10rem;
     border: none;
@@ -14,11 +22,30 @@
     padding: 0.5rem 1rem;
 }
 
+#tag-input {
+    border-radius: 10rem;
+    border: none;
+    font-size: 1rem;
+    width: 85%;
+    padding: 0.5rem 1rem;
+}
+
 #search>input:focus {
     outline: none;
 }
 
+#add-tag > input {
+    box-shadow: unset !important;
+}
+
 #search>button {
+    background-color: white;
+    border: none;
+    border-radius: 10rem;
+    width: 10%;
+}
+
+#add-tag>button {
     background-color: white;
     border: none;
     border-radius: 10rem;
