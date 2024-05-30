@@ -28,14 +28,20 @@ def process_file(file_path, filename, folder_id, file_id, user_tags, current_use
             database_file.est_Indexe_Fichier = 1
             db.session.commit()
             FileReader().screenshot(file_path, filename.split(".")[-1], folder_id, file_id)
-            redis.lpop('files_queue')
             date_str = file['date_Fichier'].split(':')[0] + ':' + file['date_Fichier'].split(':')[1]
             file['date_Fichier'] = datetime.strptime(date_str, '%d/%m/%Y %H:%M').strftime('%d/%m/%Y %H:%M')
             redis.publish('file_processed', json.dumps({'filename': filename, 'folder_id': folder_id, 'file_id': file_id, 'user': current_user, 'file': file, 'folder': folder, 'action': action}))
+        except Exception as _:
+            with InterProcessLock(f'{app.root_path}/storage/index/whoosh.lock'):
+                Whoosh().delete_document(file_id)
+            database_file = FICHIER.query.get(file_id)
+            db.session.delete(database_file)
+            db.session.commit()
+            os.remove(file_path)
+        finally:
+            redis.lpop('files_queue')
             redis.publish('worker_status', json.dumps({'worker': worker_name, 'status': 'idle', 'file': None, 'next_file': None}))
             redis.publish('process_status', json.dumps({}))
-            redis.delete(f'worker:{worker_name}')
-        except Exception as _:
             redis.delete(f'worker:{worker_name}')
 
 @celery.task(name='app.tasks.verify_index')
